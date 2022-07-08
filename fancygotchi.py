@@ -29,6 +29,7 @@ FILES_TO_MODIFY = [
     ['/ui/hw/', 'waveshare144lcd.py'],
     ['/ui/web/', '__init__.py'],
     ['/ui/web/static/css/', 'style.css'],
+    ['/ui/web/templates/', 'base.html'],
 ]
 
 COMPATIBLE_PLUGINS = [
