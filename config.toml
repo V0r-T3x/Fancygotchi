@@ -1,0 +1,8 @@
+main.plugins.fancygotchi.enabled = false
+main.plugins.fancygotchi.themes_path = ""
+main.plugins.fancygotchi.theme = ""
+main.plugins.fancygotchi.filter_color = "lime"
+main.plugins.fancygotchi.darkmode = true
+main.plugins.fancygotchi.bg = true
+main.plugins.fancygotchi.bg_image = "ui-bg-w.png"
+main.plugins.fancygotchi.hi-res = true
