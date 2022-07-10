@@ -29,7 +29,9 @@ FILES_TO_MODIFY = [
     ['/ui/hw/', 'waveshare144lcd.py'],
     ['/ui/web/', '__init__.py'],
     ['/ui/web/static/css/', 'style.css'],
-    ['/ui/web/templates/', 'base.html'],
+    ['/ui/web/templates/','base.html'],
+    ['/ui/web/templates/','plugins.html'],
+    ['/plugins/default/','logtail.py'],
 ]
 
 COMPATIBLE_PLUGINS = [
@@ -84,8 +86,12 @@ INDEX = """
 {% endblock %}
 
 {% block content %}
+    <span><input id="textDevBackup" type="text" placeholder="Backup folder name..."></input></span>
+    <span><button id="btnDevBackup" type="button" onclick="dev_backup()">dev_backup fancygotchi</button></span>
+
+    
     <button id="btnSave" type="button" onclick="saveConfig()">Save theme and restart</button>
-    <button id="btnSave" type="button" onclick="uninstall()">Uninstall fancygotchi</button>
+    <button id="btnUninstall" type="button" onclick="uninstall()">Uninstall fancygotchi</button>
     <div id="divTop">
         <input type="text" id="searchText" placeholder="Search for options ..." title="Type an option name">
     </div>
@@ -132,6 +138,31 @@ INDEX = """
                 alert("uninstall was canceled");
             }
         }
+
+        // Function to backup all dev files into the specified folder
+        function dev_backup() {
+            var folder = document.getElementById("textDevBackup").value;
+            if (folder == "") {
+                folder = "last_backup";
+            }
+            alert(folder);
+            if (confirm("Do you want backup Fancygotchi dev files?")){
+                var json = {"response": folder};
+                sendJSON("fancygotchi/devbackup", json, function(response) {
+                    if (response) {
+                        if (response.status == "200") {
+                            alert("dev fancygotchi is backed up");
+                            window.location.href = '/';
+                        } else {
+                            alert("Error while dev backed up the fancygotchi (err-code: " + response.status + ")");
+                        }
+                    }
+                });
+            } else {
+                alert("dev backup was canceled");
+            }
+        }
+
 
         var searchInput = document.getElementById("searchText");
         searchInput.onkeyup = function() {
@@ -339,6 +370,7 @@ INDEX = """
             }
             return unFlattenJson(json);
         }
+
         // Call to generate the page
         loadJSON("fancygotchi/get-theme", function(response) {
             var flat_json = flattenJson(response);
@@ -365,6 +397,7 @@ INDEX = """
 
             divContent.innerHTML = "";
             divContent.appendChild(table);
+
             
         });
 {% endblock %}
@@ -397,6 +430,13 @@ def replace(file_path, pattern, subst):
     remove(file_path)
     move(abs_path, file_path)
 
+# function to backup all actual modified files to make a new install update
+def dev_backup(file_paths, dest_fold):
+    for file in file_paths:
+        src = '%s%s%s' % (ROOT_PATH, file[0], file[1])
+        dest = '%s%s' % (dest_fold, file[1])
+        shutil.copyfile(src, dest)
+
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
@@ -420,6 +460,8 @@ class Fancygotchi(plugins.Plugin):
 
     def on_loaded(self):
         """
+        dev_backup(FILES_TO_MODIFY, "/home/pi/plugins/fancygotchi/mod/2022-07-10/")
+        
         subst = [
             'main.ui = false', 
             '    hell', 
@@ -499,6 +541,7 @@ class Fancygotchi(plugins.Plugin):
         """
         Serves the current theme configuration
         """
+        custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
         if not self.ready:
             return "Plugin not ready"
 
@@ -556,6 +599,19 @@ class Fancygotchi(plugins.Plugin):
                     # starting new thread to restart pwnagotchi
                     _thread.start_new_thread(restart, (self.mode,))
                     logging.info(str(request.get_json()))
+                    return "success"
+                except Exception as ex:
+                    logging.error(ex)
+                    return "config error", 500
+            if path == "devbackup":
+                try:
+                    jreq = request.get_json()
+                    folder = json.loads(json.dumps(jreq))
+                    #logging.info('%s/fancygotchi/mod/%s/' % (custom_plugins_path, folder["response"]))
+                    dest = '%s/fancygotchi/mod/%s/' % (custom_plugins_path, str(folder["response"]))
+                    if not os.path.exists(dest):
+                        os.system('mkdir %s' % (dest))
+                    dev_backup(FILES_TO_MODIFY, dest);
                     return "success"
                 except Exception as ex:
                     logging.error(ex)
