@@ -31,6 +31,7 @@ FILES_TO_MODIFY = [
     ['/ui/web/static/css/', 'style.css'],
     ['/ui/web/templates/','base.html'],
     ['/ui/web/templates/','plugins.html'],
+    ['/ui/web/templates/','profile.html'],
     ['/plugins/default/','logtail.py'],
 ]
 
