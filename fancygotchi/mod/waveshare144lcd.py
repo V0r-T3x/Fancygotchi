@@ -27,10 +27,10 @@ class Waveshare144lcd(DisplayImpl):
             self._layout['shakes'] = (26, 117)
             self._layout['mode'] = (0, 117)
             self._layout['status'] = {
-            'pos': (65, 26),
-            'font': fonts.status_font(fonts.Small),
-            'max': 12
-        }
+                'pos': (65, 26),
+                'font': fonts.status_font(fonts.Small),
+                'max': 12
+            }
         else:
             fonts.setup(10, 8, 10, 18, 25, 9)
             self._layout['width'] = 128
@@ -47,10 +47,10 @@ class Waveshare144lcd(DisplayImpl):
             self._layout['shakes'] = (26, 117)
             self._layout['mode'] = (0, 117)
             self._layout['status'] = {
-            'pos': (65, 26),
-            'font': fonts.status_font(fonts.Small),
-            'max': 12
-        }
+                'pos': (65, 26),
+                'font': fonts.status_font(fonts.Small),
+                'max': 12
+            }
         return self._layout
 
     def initialize(self):
