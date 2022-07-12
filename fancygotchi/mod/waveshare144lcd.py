@@ -11,21 +11,42 @@ class Waveshare144lcd(DisplayImpl):
         self._display = None
 
     def layout(self):
-        fonts.setup(10, 8, 10, 18, 25, 9)
-        self._layout['width'] = 128
-        self._layout['height'] = 128
-        self._layout['face'] = (0, 43)
-        self._layout['name'] = (0, 14)
-        self._layout['channel'] = (0, 0)
-        self._layout['aps'] = (0, 71)
-        self._layout['uptime'] = (0, 25)
-        self._layout['line1'] = [0, 12, 127, 12]
-        self._layout['line2'] = [0, 116, 127, 116]
-        self._layout['friend_face'] = (12, 88)
-        self._layout['friend_name'] = (1, 103)
-        self._layout['shakes'] = (26, 117)
-        self._layout['mode'] = (0, 117)
-        self._layout['status'] = {
+        if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
+            fonts.setup(10, 8, 10, 18, 25, 9)
+            self._layout['width'] = 128
+            self._layout['height'] = 128
+            self._layout['face'] = (0, 43)
+            self._layout['name'] = (0, 14)
+            self._layout['channel'] = (0, 0)
+            self._layout['aps'] = (0, 71)
+            self._layout['uptime'] = (0, 25)
+            self._layout['line1'] = [0, 12, 127, 12]
+            self._layout['line2'] = [0, 116, 127, 116]
+            self._layout['friend_face'] = (12, 88)
+            self._layout['friend_name'] = (1, 103)
+            self._layout['shakes'] = (26, 117)
+            self._layout['mode'] = (0, 117)
+            self._layout['status'] = {
+            'pos': (65, 26),
+            'font': fonts.status_font(fonts.Small),
+            'max': 12
+        }
+        else:
+            fonts.setup(10, 8, 10, 18, 25, 9)
+            self._layout['width'] = 128
+            self._layout['height'] = 128
+            self._layout['face'] = (0, 43)
+            self._layout['name'] = (0, 14)
+            self._layout['channel'] = (0, 0)
+            self._layout['aps'] = (0, 71)
+            self._layout['uptime'] = (0, 25)
+            self._layout['line1'] = [0, 12, 127, 12]
+            self._layout['line2'] = [0, 116, 127, 116]
+            self._layout['friend_face'] = (12, 88)
+            self._layout['friend_name'] = (1, 103)
+            self._layout['shakes'] = (26, 117)
+            self._layout['mode'] = (0, 117)
+            self._layout['status'] = {
             'pos': (65, 26),
             'font': fonts.status_font(fonts.Small),
             'max': 12
@@ -40,11 +61,15 @@ class Waveshare144lcd(DisplayImpl):
         self._display.clear()
 
     def render(self, canvas):
-        filter_color = pwnagotchi.config['ui']['display']['filter_color']
-        if pwnagotchi.config['ui']['display']['darkmode']:
-            rgb_im = ImageOps.colorize(canvas.convert("L"), black = filter_color, white = "black")
+        filter_color = pwnagotchi.config['main']['plugins']['fancygotchi']['filter_color']
+        if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
+            if pwnagotchi.config['main']['plugins']['fancygotchi']['darkmode']:
+                rgb_im = ImageOps.colorize(canvas.convert("L"), black = filter_color, white = "black")
+            else:
+                rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = filter_color)
         else:
-            rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = filter_color)
+            rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = "white")
+
         self._display.display(rgb_im)
 
     def clear(self):
