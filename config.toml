@@ -1,8 +1,13 @@
-main.plugins.fancygotchi.enabled = false
+main.plugins.fancygotchi.enabled = true
 main.plugins.fancygotchi.themes_path = ""
 main.plugins.fancygotchi.theme = ""
 main.plugins.fancygotchi.filter_color = "lime"
 main.plugins.fancygotchi.darkmode = true
 main.plugins.fancygotchi.bg = true
-main.plugins.fancygotchi.bg_image = "ui-bg-w.png"
+main.plugins.fancygotchi.bg_image = "ui-bg-w.png" # <-- this one for "lcdhat", and "ui-bg-w-s.png" for the "waveshare144lcd"
 main.plugins.fancygotchi.hi-res = true
+
+ui.display.enabled = true
+ui.display.type = "lcdhat"  # or "waveshare144lcd"
+ui.display.color = "black"
+ui.display.rotation = 0
