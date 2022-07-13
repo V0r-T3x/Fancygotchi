@@ -16,6 +16,8 @@ from pwnagotchi import restart, plugins
 from pwnagotchi.utils import save_config
 from flask import abort, render_template_string
 
+import requests
+
 ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
 
 FILES_TO_MODIFY = [
@@ -27,6 +29,7 @@ FILES_TO_MODIFY = [
     ['/ui/hw/', 'waveshare2.py'],
     ['/ui/hw/', 'waveshare27inch.py'],
     ['/ui/hw/', 'waveshare144lcd.py'],
+    ['/ui/hw/libs/waveshare/lcdhat144/', 'epd.py'],
     ['/ui/web/', '__init__.py'],
     ['/ui/web/static/css/', 'style.css'],
     ['/ui/web/templates/','base.html'],
@@ -63,7 +66,7 @@ INDEX = """
     #wrap_img{
         position:relative;
         //padding:50px;
-        border:1px solid black;
+        border:1px solid lime;
     }
     #bg_img{
         top:50px;
@@ -87,13 +90,11 @@ INDEX = """
 {% endblock %}
 
 {% block content %}
-    <span><input id="textDevBackup" type="text" placeholder="Backup folder name..."></input></span>
-    <span><button id="btnDevBackup" type="button" onclick="dev_backup()">dev_backup fancygotchi</button></span>
-
-    
-    <button id="btnSave" type="button" onclick="saveConfig()">Save theme and restart</button>
-    <button id="btnUninstall" type="button" onclick="uninstall()">Uninstall fancygotchi</button>
     <div id="divTop">
+        <span><input id="textDevBackup" type="text" placeholder="Backup folder name..."></input></span>
+        <span><button id="btnDevBackup" type="button" onclick="dev_backup()">dev_backup fancygotchi</button></span>
+        <button id="btnSave" type="button" onclick="saveConfig()">Save theme and restart</button>
+        <button id="btnUninstall" type="button" onclick="uninstall()">Uninstall fancygotchi</button>
         <input type="text" id="searchText" placeholder="Search for options ..." title="Type an option name">
     </div>
     <div>THEME MANAGER</div>
@@ -153,7 +154,7 @@ INDEX = """
                     if (response) {
                         if (response.status == "200") {
                             alert("dev fancygotchi is backed up");
-                            window.location.href = '/';
+                            //window.location.href = '/';
                         } else {
                             alert("Error while dev backed up the fancygotchi (err-code: " + response.status + ")");
                         }
@@ -438,10 +439,22 @@ def dev_backup(file_paths, dest_fold):
         dest = '%s%s' % (dest_fold, file[1])
         shutil.copyfile(src, dest)
 
+# function to verify if a new version is available
+def check_update(vers):
+    URL = "https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/version"
+    response = requests.get(URL)
+    online_version = str(response.content)[2:-3]
+    logging.info(vers)
+    logging.info(float(online_version))
+    if float(online_version) > vers:
+        logging.info('new version')
+    else: 
+        logging.info('up-to-date')
+
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '1.0.0'
+    __version__ = 0.01
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi'
 
@@ -460,6 +473,7 @@ class Fancygotchi(plugins.Plugin):
         self.mode = 'MANU' if agent.mode == 'manual' else 'AUTO'
 
     def on_loaded(self):
+        check_update(self.__version__)
         """
         dev_backup(FILES_TO_MODIFY, "/home/pi/plugins/fancygotchi/mod/2022-07-10/")
         
