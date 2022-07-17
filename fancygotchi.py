@@ -454,7 +454,7 @@ def check_update(vers):
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = 0.01
+    __version__ = '2022.07.2'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi'
 
