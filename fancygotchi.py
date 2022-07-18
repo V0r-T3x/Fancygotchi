@@ -473,7 +473,7 @@ class Fancygotchi(plugins.Plugin):
         self.mode = 'MANU' if agent.mode == 'manual' else 'AUTO'
 
     def on_loaded(self):
-        check_update(self.__version__)
+        #check_update(self.__version__)
         """
         dev_backup(FILES_TO_MODIFY, "/home/pi/plugins/fancygotchi/mod/2022-07-10/")
         
