@@ -576,7 +576,7 @@ def update():
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2022.07.3'
+    __version__ = '2022.07.4'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi'
 
