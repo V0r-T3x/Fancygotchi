@@ -564,7 +564,7 @@ def update():
         for name in files:
             if not name == "README.md":
                 path_update = root
-                path_target = '%s%s/%s' % (custom_plugins, root.split('fancygotchi-main/')[-1])
+                path_target = '%s%s' % (custom_plugins, root.split('fancygotchi-main/')[-1])
                 logging.info('%s ---->%s' % (path_update, path_target))
                 replace_file([name], [path_target, path_update], False, False, False)
     os.system('rm -R %s' % (path_tmp))
@@ -576,7 +576,7 @@ def update():
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2022.07.3'
+    __version__ = '2022.07.2'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi'
 
