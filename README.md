@@ -9,11 +9,11 @@ THIS CAN STUCK YOUR PWNAGOTCHI
 ```
 
 A complete theme manager for the Pwnagotchi [In development]  
-this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)
+this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
 
-v.2022.07.3
--installer/Uninstaller
--Check update/Update
-
--lcdhat
--waveshare144.lcd
+v.2022.07.3  
+-installer/Uninstaller  
+-Check update/Update  
+  
+-lcdhat  
+-waveshare144.lcd  
