@@ -559,11 +559,11 @@ def update():
         output_file.write(response.content)
     shutil.unpack_archive(filename, path_tmp)
     path_unzip = '%sfancygotchi-main/' % (path_tmp)
-    #replace_file(['fancygotchi.py'], [path_unzip, custom_plugins], False, False, False)
+    replace_file(['fancygotchi.py'], [path_unzip, custom_plugins], False, False, False)
     for root, dirs, files in os.walk('%sfancygotchi/' % (path_unzip)):
         for name in files:
             if not name == "README.md":
-                path_update = '%s/%s' % (root, name)
+                path_update = root
                 path_target = '%s%s/%s' % (custom_plugins, root.split('fancygotchi-main/')[-1], name)
                 logging.info('%s ---->%s' % (path_update, path_target))
                 replace_file([name], [path_target, path_update], False, False, False)
@@ -576,7 +576,7 @@ def update():
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2022.07.4'
+    __version__ = '2022.07.3'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi'
 
