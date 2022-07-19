@@ -563,8 +563,8 @@ def update():
     for root, dirs, files in os.walk('%sfancygotchi/' % (path_unzip)):
         for name in files:
             if not name == "README.md":
-                path_update = root
-                path_target = '%s%s' % (custom_plugins, root.split('fancygotchi-main/')[-1])
+                path_update = '%s/' % (root)
+                path_target = '%s%s/' % (custom_plugins, root.split('fancygotchi-main/')[-1])
                 logging.info('%s ---->%s' % (path_update, path_target))
                 replace_file([name], [path_target, path_update], False, False, False)
     os.system('rm -R %s' % (path_tmp))
