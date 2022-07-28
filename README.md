@@ -3,6 +3,10 @@
 
 !!!DON'T TRY THE PLUGIN RIGHT NOW!!!
 -----------------------
+
+I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop).  
+I will need to but a lot of compatible screen to make the plugin compatible with my theme manager plugin and it take a lot of my free time.  
+
 ```
 I SHARE IT AS BACKUP AND TO SHOW THE PROGRESS
 THIS CAN STUCK YOUR PWNAGOTCHI
