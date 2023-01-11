@@ -4,7 +4,7 @@ import random
 import time
 from threading import Lock
 
-from PIL import ImageDraw
+from PIL import ImageDraw, Image
 
 import pwnagotchi
 import pwnagotchi.plugins as plugins
@@ -39,41 +39,43 @@ class View(object):
         self._width = self._layout['width']
         self._height = self._layout['height']
         self._state = State(state={
-            'channel': LabeledValue(color=BLACK, label='CH', value='00', position=self._layout['channel'],
+            'channel': LabeledValue(color='lime', label='CH', value='00', position=self._layout['channel'],
                                     label_font=fonts.Bold,
                                     text_font=fonts.Medium),
-            'aps': LabeledValue(color=BLACK, label='APS', value='0 (00)', position=self._layout['aps'],
+            'aps': LabeledValue(color='lime', label='APS', value='0 (00)', position=self._layout['aps'],
                                 label_font=fonts.Bold,
                                 text_font=fonts.Medium),
 
-            'uptime': LabeledValue(color=BLACK, label='UP', value='00:00:00', position=self._layout['uptime'],
+            'uptime': LabeledValue(color='lime', label='UP', value='00:00:00', position=self._layout['uptime'],
                                    label_font=fonts.Bold,
                                    text_font=fonts.Medium),
 
-            'line1': Line(self._layout['line1'], color=BLACK),
-            'line2': Line(self._layout['line2'], color=BLACK),
+            'line1': Line(self._layout['line1'], color='lime'),
+            'line2': Line(self._layout['line2'], color='lime'),
 
-            'face': Text(value=faces.SLEEP, position=self._layout['face'], color=BLACK, font=fonts.Huge),
+            'face': Text(value=faces.SLEEP, position=self._layout['face'], color='lime', font=fonts.Huge),
 
-            'friend_face': Text(value=None, position=self._layout['friend_face'], font=fonts.Bold, color=BLACK),
+            'friend_face': Text(value=None, position=self._layout['friend_face'], font=fonts.Bold, color='lime'),
             'friend_name': Text(value=None, position=self._layout['friend_name'], font=fonts.BoldSmall,
-                                color=BLACK),
+                                color='lime'),
 
-            'name': Text(value='%s>' % 'pwnagotchi', position=self._layout['name'], color=BLACK, font=fonts.Bold),
+            'name': Text(value='%s>' % 'pwnagotchi', position=self._layout['name'], color='red', font=fonts.Bold),
+            #'name': Text(value='/home/pi/plugins/fancygotchi/img/icons/name.png', position=self._layout['name'], color='lime', font=fonts.Bold, icon=True),
+
 
             'status': Text(value=self._voice.default(),
                            position=self._layout['status']['pos'],
-                           color=BLACK,
+                           color='magenta',
                            font=self._layout['status']['font'],
                            wrap=True,
                            # the current maximum number of characters per line, assuming each character is 6 pixels wide
                            max_length=self._layout['status']['max']),
 
-            'shakes': LabeledValue(label='PWND ', value='0 (00)', color=BLACK,
+            'shakes': LabeledValue(label='PWND ', value='0 (00)', color='lime',
                                    position=self._layout['shakes'], label_font=fonts.Bold,
                                    text_font=fonts.Medium),
             'mode': Text(value='AUTO', position=self._layout['mode'],
-                         font=fonts.Bold, color=BLACK),
+                         font=fonts.Bold, color='#FF0000'),
         })
 
         if state:
@@ -121,11 +123,11 @@ class View(object):
         while True:
             try:
                 name = self._state.get('name')
-                self.set('name', name.rstrip('█').strip() if '█' in name else (name + ' █'))
+                #?self.set('name', name.rstrip('â–ˆ').strip() if 'â–ˆ' in name else (name + ' â–ˆ'))
+                self.set('name', name.rstrip('â¤').strip() if 'â¤' in name else (name + ' â¤'))
                 self.update()
             except Exception as e:
                 logging.warning("non fatal error while updating view: %s" % e)
-
             time.sleep(delay)
 
     def set(self, key, value):
@@ -196,8 +198,8 @@ class View(object):
             else:
                 num_bars = 1
 
-            name = '▌' * num_bars
-            name += '│' * (4 - num_bars)
+            name = 'â–Œ' * num_bars
+            name += 'â”‚' * (4 - num_bars)
             name += ' %s %d (%d)' % (peer.name(), peer.pwnd_run(), peer.pwnd_total())
 
             if num_total > 1:
@@ -360,10 +362,9 @@ class View(object):
         self.update()
 
     def update(self, force=False, new_data={}):
-        global BG
-        global BG_PATH
 
         for key, val in new_data.items():
+            logging.info('key: %s; val: %s' % (str(key), str(val)))
             self.set(key, val)
 
         with self._lock:
@@ -373,26 +374,35 @@ class View(object):
             state = self._state
             changes = state.changes(ignore=self._ignore_changes)
             if force or len(changes):
-#               Option to activate and change the background image
                 if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
-                    if pwnagotchi.config['main']['plugins']['fancygotchi']['bg']:
-#                        logging.info(pwnagotchi.config['main']['plugins']['fancygotchi']['bg_path'])
-                        self._canvas = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], pwnagotchi.config['main']['plugins']['fancygotchi']['bg_image']))
-                        if pwnagotchi.config['main']['plugins']['fancygotchi']['hi-res']:
-                            self._canvas = self._canvas.convert('P')
-                        else:
-                            self._canvas = self._canvas.convert('1')
+                    self._canvas = Image.new('RGB', (self._width, self._height), 'white')
                 else:
                     self._canvas = Image.new('1', (self._width, self._height), WHITE)
                 
-
                 drawer = ImageDraw.Draw(self._canvas)
 
                 plugins.on('ui_update', self)
 
                 for key, lv in state.items():
                     lv.draw(self._canvas, drawer)
-                
+
+                # switching the white to transparent
+                datas = self._canvas.getdata()
+                newData = []
+                for item in datas:
+                    if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                        newData.append((255, 255, 255, 0))
+                    else:
+                        newData.append(item) #version for color mode
+                        #newData.append((0, 0, 0, 255)) #version for mono or 3-colors
+
+                bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], pwnagotchi.config['main']['plugins']['fancygotchi']['bg_image']))
+                bga = bg.convert('RGBA')
+                rgba_im = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
+                rgba_im_ = rgba_im.putdata(newData)
+                bga.paste(rgba_im, (0,0), rgba_im)
+                self._canvas = bga.convert('RGB')
+
                 web.update_frame(self._canvas)
 
                 for cb in self._render_cbs:
