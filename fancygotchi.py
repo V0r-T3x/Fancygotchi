@@ -7,7 +7,7 @@ from os import fdopen, remove
 import shutil
 from shutil import move, copymode
 from tempfile import mkstemp
-from PIL import Image
+from PIL import Image, ImageDraw, ImageOps
 
 import json
 import toml
@@ -15,6 +15,9 @@ import _thread
 from pwnagotchi import restart, plugins
 from pwnagotchi.utils import save_config
 from flask import abort, render_template_string
+
+#for tests
+import pwnagotchi.ui.fonts as fonts
 
 import requests
 
@@ -45,6 +48,7 @@ COMPATIBLE_PLUGINS = [
     'display-password',
     'crack_house',
     'pisugar2',
+    'pisugar3',
 ]
 
 INDEX = """
@@ -576,9 +580,9 @@ def update():
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2022.07.3'
+    __version__ = '2022.07.2'
     __license__ = 'GPL3'
-    __description__ = 'A theme manager for the Pwnagotchi'
+    __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
     def __init__(self):
         self.ready = False
@@ -595,6 +599,21 @@ class Fancygotchi(plugins.Plugin):
         self.mode = 'MANU' if agent.mode == 'manual' else 'AUTO'
 
     def on_loaded(self):
+        custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
+        if not custom_plugins_path[-1] == '/': custom_plugins_path += '/'
+        ui = pwnagotchi.config['ui']['display']['type']
+        theme = self.config['main']['plugins']['fancygotchi']['theme']
+        display = [self.config['ui']['display']['enabled'], self.config['ui']['display']['type']]
+        if theme == "":
+            logging.info("no theme, default theme will be loaded")
+            if display[0] == True:
+                theme_config_path = '%sfancygotchi/themes/.default/%s/config.toml' % (custom_plugins_path, display[1])
+            else:
+                theme_config_path = '%sfancygotchi/themes/.default/headless/config.toml' % (custom_plugins_path)
+        else:
+            theme_config_path = '%sfancygotchi/themes/%s/config.toml' % (custom_plugins_path, theme)
+        logging.info(theme_config_path)
+        logging.info('[FANCYGOTCHI] %s' % (toml.load(theme_config_path)))
         """
         check_update(self.__version__)
         update()
@@ -612,9 +631,6 @@ class Fancygotchi(plugins.Plugin):
         ]
         replace('/home/pi/test.txt', 'main.ui', subst)
         """
-        custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
-        ui = pwnagotchi.config['ui']['display']['type']
-
         # Linking bg image to the web ui
         dir_path = os.path.dirname(os.path.realpath(__file__))
         src = '%s/fancygotchi/img/' % (dir_path)
@@ -668,8 +684,6 @@ class Fancygotchi(plugins.Plugin):
                             if x.endswith(".py") and x == '%s.py' % (plugin):  
                                 logging.info('[FANCYGOTCHI] %s/plugins/default/%s' % (ROOT_PATH, x))
                                 #logging.info('[FANCYGOTCHI] %s' % (pwnagotchi.config['ui']['display']['face']))                              
-                        
- 
                         #logging.info(plugin)
 
     def on_webhook(self, path, request):
