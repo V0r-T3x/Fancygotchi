@@ -18,6 +18,16 @@ THIS CAN STUCK YOUR PWNAGOTCHI
 A complete theme manager for the Pwnagotchi [In development]  
 this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
 
+v.2023.02.0
+-remove darkmode trace
+-new image genetating process added
+--text in 1bit with multiple colors
+--full resolution background
+
+-lcdhat
+-waveshare144.lcd
+-displayhatmini
+
 v.2022.07.3  
 -installer/Uninstaller  
 -Check update/Update  
@@ -59,3 +69,31 @@ note for the new image generation process:
         canvas__.save('/home/pi/plugins/imgtest-bw.png', 'PNG')
 # ##############################################################################################
 ```
+
+
+
+### Quick install steps:
+- setting up your pi and the display correctly activate the web UI too
+- downloading files inside the custom plugins folder on your pwnagotchi
+- I keep the fancygotchi disabled when I restart the pwnagotchi
+```
+ui.display.enabled = true
+ui.display.type = "displayhatmini"
+ui.display.color = "black"
+ui.display.rotation = 180
+
+main.plugins.fancygotchi.enabled = false
+main.plugins.fancygotchi.themes_path = ""
+main.plugins.fancygotchi.theme = ""
+main.plugins.fancygotchi.bg = true
+main.plugins.fancygotchi.bg_image = "320x240e.png"
+   # lcdhat = ui-bg-w.png
+   # waveshare144lcd = ui-bg-w-s.png
+   # displayhatmini = 320x240e.png, 320x240e-i.png, 320x240e-f.png
+main.plugins.fancygotchi.hi-res = true
+```
+- restart the pwnagotchi
+- goto inside the web ui plugin page
+- Enable the Fancygotchi plugin
+- restart the pwnagotchi
+- the mod should be installed
