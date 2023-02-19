@@ -74,7 +74,7 @@ note for the new image generation process:
 
 ### Quick install steps:
 - setting up your pi and the display correctly activate the web UI too
-- downloading files inside the custom plugins folder on your pwnagotchi
+- downloading files inside the custom plugins folder on your pwnagotchi (fancygotchi.py and the fancygotchi folder)
 - I keep the fancygotchi disabled when I restart the pwnagotchi
 ```
 ui.display.enabled = true
