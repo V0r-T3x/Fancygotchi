@@ -12,50 +12,28 @@ class LcdHat(DisplayImpl):
         self._display = None
 
     def layout(self):
-        if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
-            logging.info('custom lcdhat position')
-            logging.info(str(pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']))
-            #font order: bold, bold_small, medium, huge, bold_big, small
-            #fonts.setup(10, 8, 10, 28, 25, 9)
-            fonts.setup(14, 12, 14, 32, 29, 13)
-            self._layout['width'] = 240
-            self._layout['height'] = 240
-            self._layout['face'] = (60, 40)
-            self._layout['name'] = (0, 78)
-            self._layout['channel'] = (0, 18)
-            self._layout['aps'] = (35, 18)
-            self._layout['uptime'] = (153, 18)
-            self._layout['line1'] = [0, 33, 240, 33]
-            self._layout['line2'] = [0, 150, 240, 150]
-            self._layout['friend_face'] = (10, 223)
-            self._layout['friend_name'] = (60, 226)
-            self._layout['shakes'] = (0, 152)
-            self._layout['mode'] = (100, 36)
-            self._layout['status'] = {
-                'pos': (10, 98),
-                'font': fonts.status_font(fonts.Medium),
-                'max': 20
-            }
-        else:
-            fonts.setup(10, 9, 10, 35, 25, 9)
-            self._layout['width'] = 240
-            self._layout['height'] = 240
-            self._layout['face'] = (0, 40)
-            self._layout['name'] = (5, 20)
-            self._layout['channel'] = (0, 0)
-            self._layout['aps'] = (28, 0)
-            self._layout['uptime'] = (175, 0)
-            self._layout['line1'] = [0, 14, 240, 14]
-            self._layout['line2'] = [0, 108, 240, 108]
-            self._layout['friend_face'] = (0, 92)
-            self._layout['friend_name'] = (40, 94)
-            self._layout['shakes'] = (0, 109)
-            self._layout['mode'] = (215, 109)
-            self._layout['status'] = {
-                'pos': (125, 20),
-                'font': fonts.status_font(fonts.Medium),
-                'max': 20
-            }
+        logging.info('custom lcdhat position')
+        #font order: bold, bold_small, medium, huge, bold_big, small
+        #fonts.setup(10, 8, 10, 28, 25, 9)
+        fonts.setup(14, 12, 14, 32, 29, 13)
+        self._layout['width'] = 240
+        self._layout['height'] = 240
+        self._layout['face'] = (60, 40)
+        self._layout['name'] = (0, 78)
+        self._layout['channel'] = (0, 18)
+        self._layout['aps'] = (35, 18)
+        self._layout['uptime'] = (153, 18)
+        self._layout['line1'] = [0, 33, 240, 33]
+        self._layout['line2'] = [0, 150, 240, 150]
+        self._layout['friend_face'] = (10, 223)
+        self._layout['friend_name'] = (60, 226)
+        self._layout['shakes'] = (0, 152)
+        self._layout['mode'] = (100, 36)
+        self._layout['status'] = {
+            'pos': (10, 98),
+            'font': fonts.status_font(fonts.Medium),
+            'max': 20
+        }
 
         return self._layout
 

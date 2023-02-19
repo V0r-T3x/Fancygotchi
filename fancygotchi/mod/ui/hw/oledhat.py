@@ -41,9 +41,6 @@ class OledHat(DisplayImpl):
         self._display.Clear()
 
     def render(self, canvas):
-        if pwnagotchi.config['ui']['display']['darkmode'] == False:
-            im = ImageOps.colorize(canvas.convert("L"), black = "white", white = "black")
-            canvas = im.convert("1")
         self._display.display(canvas)
 
     def clear(self):
