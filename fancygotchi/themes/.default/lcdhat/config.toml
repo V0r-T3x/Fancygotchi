@@ -4,8 +4,6 @@
 is_display = true
 display_time = "lcdhat"
 resolution = [240, 240]
-darkmode = true
-filter_color = "lime"
 hi-res = true
 bg = true
 bg_image = "ui-bg-w.png"
