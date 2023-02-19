@@ -26,13 +26,6 @@ ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
 FILES_TO_MODIFY = [
     ['/ui/', 'view.py'],
     ['/ui/', 'components.py'],
-    ['/ui/hw/', 'base.py'],
-    ['/ui/hw/', 'lcdhat.py'],
-    ['/ui/hw/', 'oledhat.py'],
-    ['/ui/hw/', 'waveshare2.py'],
-    ['/ui/hw/', 'waveshare27inch.py'],
-    ['/ui/hw/', 'waveshare144lcd.py'],
-    ['/ui/hw/libs/waveshare/lcdhat144/', 'epd.py'],
     ['/ui/web/', '__init__.py'],
     ['/ui/web/static/css/', 'style.css'],
     ['/ui/web/templates/','base.html'],
@@ -85,11 +78,12 @@ INDEX = """
     #filter_color{
         top:50px;
         margin-left:50px;
-        background-color: rgba(0, 255, 0, 0.5);
+        //background-color: rgba(0, 255, 0, 0.5);
         position:absolute;
         //width:100%;
         //height:100%;
         z-index:100;
+        border:1px solid lime;
     }
 </style>
 {% endblock %}
@@ -444,19 +438,13 @@ INDEX = """
             var bg_img = document.getElementById('bg_img');
             var wrap_img = document.getElementById('wrap_img');
             var is_up = document.getElementById('btnUpdate');
-            bg_img.style.backgroundImage = "url('/img/" + theme_array[8][1] + "')";
+            bg_img.style.backgroundImage = "url('/img/" + theme_array[6][1] + "')";
             wrap_img.style.width = (theme_array[2][1] + 100) + 'px';
             wrap_img.style.height = (theme_array[3][1] + 100) + 'px';
             bg_img.style.width = theme_array[2][1] + 'px';
             bg_img.style.height = theme_array[3][1] + 'px';
             filter_color.style.width = theme_array[2][1] + 'px';
             filter_color.style.height = theme_array[3][1] + 'px';
-            if (theme_array[4][1] == true) {
-                bg_img.style.filter = 'invert(1)'
-            }
-            else {
-                bg_img.style.filter = 'invert(0)'
-            }
                 
             //alert(theme_array[3][1] + 'px');
             //bg_img.style.background = theme_array[3][1];
@@ -589,7 +577,7 @@ def update():
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2023.02.0'
+    __version__ = '2022.07.2'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -608,12 +596,17 @@ class Fancygotchi(plugins.Plugin):
         self.mode = 'MANU' if agent.mode == 'manual' else 'AUTO'
 
     def on_loaded(self):
+#<        logging.info("[FANCYGOTCHI] Beginning Fancygotchi load")
         custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
         if not custom_plugins_path[-1] == '/': custom_plugins_path += '/'
         ui = pwnagotchi.config['ui']['display']['type']
-        theme = self.config['main']['plugins']['fancygotchi']['theme']
-        display = [self.config['ui']['display']['enabled'], self.config['ui']['display']['type']]
-        if theme == "":
+#<        logging.info("[FANCYGOTCHI] %s" % (ui))
+        theme = pwnagotchi.config['main']['plugins']['fancygotchi']['theme']
+        
+        display = [pwnagotchi.config['ui']['display']['enabled'], pwnagotchi.config['ui']['display']['type']]
+        logging.info('[FANCYGOTCHI] %s' % display)
+
+        if not theme:
             logging.info("no theme, default theme will be loaded")
             if display[0] == True:
                 theme_config_path = '%sfancygotchi/themes/.default/%s/config.toml' % (custom_plugins_path, display[1])
@@ -639,43 +632,56 @@ class Fancygotchi(plugins.Plugin):
             'HELL YEAH!!!'
         ]
         replace('/home/pi/test.txt', 'main.ui', subst)
-        """
-        # Linking bg image to the web ui
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        src = '%s/fancygotchi/img/' % (dir_path)
-        dest = '%s/ui/web/static' % (ROOT_PATH)
-        #logging.info('[FANCYGOTCHI] ln -s %s %s' % (src, dest))
-        if not os.path.exists('%s/img/' % (dest)):
-            #logging.info('[FANCYGOTCHI] link for img don\'t exist')
-            os.system('ln -s %s %s' % (src, dest))
-            #logging.info('[FANCYGOTCHI] link for img created')
-        
-        # Loop to verify if the backup is here, and if not it backup original files
-        # and replace them all with link from plugin folder
-        for file in FILES_TO_MODIFY:
-            #logging.info('[FANCYGOTCHI] %s%s' % (file[0], file[1]))
-            # Loop to verify backup
-            #logging.info('[FANCYGOTCHI] %s%s.%s.original' % (ROOT_PATH, file[0], file[1]))
-            logging.info('%s/fancygotchi/mod/%s%s' % (dir_path, file[0][1:], file[1]))
-
-            if not os.path.exists('%s%s.%s.original' % (ROOT_PATH, file[0], file[1])):
-                replace_file([file[1]], ['%s%s' % (ROOT_PATH, file[0]), '%s/fancygotchi/mod/%s' % (dir_path, file[0][1:])], True, False, True, 'original')
-
+        """ 
         # Verification to the enabled display
+        compatible = 0
         if ui == 'lcdhat':
+            compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 1.33" LCD screen')
         elif ui == 'waveshare_v2':
+            compatible = 1
             logging.info('[FANCYGOTCHI] waveshare v.2 E-paper screen')
         elif ui == 'oledhat':
+            compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 1.3" OLED screen')
         elif ui == 'waveshare27inch':
+            compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 2.7" E-paper screen')
         elif ui == 'waveshare144lcd':
+            compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 1.44" LCD screen')
+        elif ui == 'displayhatmini':
+            compatible = 1
+            logging.info('[FANCYGOTCHI] pimoroni 2" LCD Display Hat Mini screen')
+
         elif not pwnagotchi.config['ui']['display']['enabled']:
+            compatible = 1
             logging.info('[FANCYGOTCHI] Pwnagotchi headless mode')
         else:
-            logging.info('[FANCYGOTCHI] The screen is not compatible with the plugin')
+            logging.warning('[FANCYGOTCHI] The screen is not compatible with the plugin')
+
+        # If the initial screen isn't compatible the mod will not install
+        if compatible:
+            # Linking bg image to the web ui
+            dir_path = os.path.dirname(os.path.realpath(__file__))
+            src = '%s/fancygotchi/img/' % (dir_path)
+            dest = '%s/ui/web/static' % (ROOT_PATH)
+            #logging.info('[FANCYGOTCHI] ln -s %s %s' % (src, dest))
+            if not os.path.exists('%s/img/' % (dest)):
+                #logging.info('[FANCYGOTCHI] link for img don\'t exist')
+                os.system('ln -s %s %s' % (src, dest))
+                #logging.info('[FANCYGOTCHI] link for img created')
+        
+            # Loop to verify if the backup is here, and if not it backup original files
+            # and replace them all with link from plugin folder
+            for file in FILES_TO_MODIFY:
+                #logging.info('[FANCYGOTCHI] %s%s' % (file[0], file[1]))
+                # Loop to verify backup
+                #logging.info('[FANCYGOTCHI] %s%s.%s.original' % (ROOT_PATH, file[0], file[1]))
+                #logging.info('%s/fancygotchi/mod/%s%s' % (dir_path, file[0][1:], file[1]))
+
+                if not os.path.exists('%s%s.%s.original' % (ROOT_PATH, file[0], file[1])):
+                    replace_file([file[1]], ['%s%s' % (ROOT_PATH, file[0]), '%s/fancygotchi/mod/%s' % (dir_path, file[0][1:])], True, False, True, 'original')
         logging.info('[FANCYGOTCHI] Theme manager loaded')
 
         # Verification to enabled and compatible plugins
@@ -720,8 +726,6 @@ class Fancygotchi(plugins.Plugin):
                     'is_display': self.config['ui']['display']['enabled'],
                     'display': self.config['ui']['display']['type'],
                     'resolution': [width, height],
-                    'darkmode': self.config['main']['plugins']['fancygotchi']['darkmode'],
-                    'filter_color': self.config['main']['plugins']['fancygotchi']['filter_color'],
                     'hi-res': self.config['main']['plugins']['fancygotchi']['hi-res'],
                     'bg': self.config['main']['plugins']['fancygotchi']['bg'],
                     'bg_image': self.config['main']['plugins']['fancygotchi']['bg_image'],
