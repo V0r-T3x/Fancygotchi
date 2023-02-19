@@ -53,7 +53,7 @@ class View(object):
             'line1': Line(self._layout['line1'], color='lime'),
             'line2': Line(self._layout['line2'], color='lime'),
 
-            'face': Text(value=faces.SLEEP, position=self._layout['face'], color='lime', font=fonts.Huge),
+            'face': Text(value=faces.SLEEP, position=self._layout['face'], color='magenta', font=fonts.Huge),
 
             'friend_face': Text(value=None, position=self._layout['friend_face'], font=fonts.Bold, color='lime'),
             'friend_name': Text(value=None, position=self._layout['friend_name'], font=fonts.BoldSmall,
@@ -65,7 +65,7 @@ class View(object):
 
             'status': Text(value=self._voice.default(),
                            position=self._layout['status']['pos'],
-                           color='magenta',
+                           color='purple',
                            font=self._layout['status']['font'],
                            wrap=True,
                            # the current maximum number of characters per line, assuming each character is 6 pixels wide
@@ -123,8 +123,8 @@ class View(object):
         while True:
             try:
                 name = self._state.get('name')
-                #?self.set('name', name.rstrip('â–ˆ').strip() if 'â–ˆ' in name else (name + ' â–ˆ'))
-                self.set('name', name.rstrip('â¤').strip() if 'â¤' in name else (name + ' â¤'))
+                #?self.set('name', name.rstrip('█').strip() if '█' in name else (name + ' █'))
+                self.set('name', name.rstrip('❤').strip() if '❤' in name else (name + ' ❤'))
                 self.update()
             except Exception as e:
                 logging.warning("non fatal error while updating view: %s" % e)
@@ -198,8 +198,8 @@ class View(object):
             else:
                 num_bars = 1
 
-            name = 'â–Œ' * num_bars
-            name += 'â”‚' * (4 - num_bars)
+            name = '▌' * num_bars
+            name += '│' * (4 - num_bars)
             name += ' %s %d (%d)' % (peer.name(), peer.pwnd_run(), peer.pwnd_total())
 
             if num_total > 1:

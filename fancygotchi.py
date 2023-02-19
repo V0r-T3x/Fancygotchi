@@ -39,6 +39,7 @@ FILES_TO_MODIFY = [
     ['/ui/web/templates/','plugins.html'],
     ['/ui/web/templates/','profile.html'],
     ['/plugins/default/','logtail.py'],
+    ['/plugins/','__init__.py'],
 ]
 
 COMPATIBLE_PLUGINS = [
@@ -498,7 +499,15 @@ def replace_line(file_path, pattern, subst):
 # function to backup all actual modified files to make a new install update
 def dev_backup(file_paths, dest_fold):
     for file in file_paths:
-        replace_file([file[1], ], [dest_fold, '%s%s' % (ROOT_PATH, file[0])], False, False, False)
+        # verify if the backup folder exist for the backup file
+        path = dest_fold + file[0][1:]
+        #logging.info(path)
+        folders = os.path.split(path)[0]
+        if not os.path.exists(folders):
+            os.makedirs(folders)
+        #logging.info("%s/%s" % (folders, file[1]))
+        #logging.info("file0: %s; file1: %s; folders: %s;" % (file[0], file[1], folders))
+        replace_file([file[1], ], [folders+"/", '%s%s' % (ROOT_PATH, file[0])], False, False, False)
 
 # function to replace a file
 # name = [target name, source name]
@@ -580,7 +589,7 @@ def update():
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2022.07.2'
+    __version__ = '2023.02.0'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -647,9 +656,10 @@ class Fancygotchi(plugins.Plugin):
             #logging.info('[FANCYGOTCHI] %s%s' % (file[0], file[1]))
             # Loop to verify backup
             #logging.info('[FANCYGOTCHI] %s%s.%s.original' % (ROOT_PATH, file[0], file[1]))
+            logging.info('%s/fancygotchi/mod/%s%s' % (dir_path, file[0][1:], file[1]))
 
             if not os.path.exists('%s%s.%s.original' % (ROOT_PATH, file[0], file[1])):
-                replace_file([file[1]], ['%s%s' % (ROOT_PATH, file[0]), '%s/fancygotchi/mod/' % (dir_path)], True, False, True, 'original')
+                replace_file([file[1]], ['%s%s' % (ROOT_PATH, file[0]), '%s/fancygotchi/mod/%s' % (dir_path, file[0][1:])], True, False, True, 'original')
 
         # Verification to the enabled display
         if ui == 'lcdhat':

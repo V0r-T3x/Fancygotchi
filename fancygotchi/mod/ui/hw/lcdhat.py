@@ -2,7 +2,7 @@ import logging
 
 import pwnagotchi.ui.fonts as fonts
 from pwnagotchi.ui.hw.base import DisplayImpl
-from PIL import ImageOps
+from PIL import ImageOps, Image
 import pwnagotchi
 
 
@@ -73,7 +73,18 @@ class LcdHat(DisplayImpl):
             if pwnagotchi.config['main']['plugins']['fancygotchi']['darkmode']:
                 rgb_im = ImageOps.colorize(canvas.convert("L"), black = filter_color, white = "black")
             else:
-                rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = filter_color)
+                #canvas = canvas.convert('RGBA')
+                #datas = canvas.getdata()
+                #newData = []
+                #for item in datas:
+                #    if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                #        newData.append((255, 255, 255, 0))
+                #    else:
+                #        newData.append(item)
+                #bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], pwnagotchi.config['main']['plugins']['fancygotchi']['bg_image']))
+                #rgb_im.putdata(newData)
+                #rgb_im = bg
+                rgb_im = canvas
         else:
             rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = "white")
 
