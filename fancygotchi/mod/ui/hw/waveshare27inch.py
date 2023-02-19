@@ -40,9 +40,6 @@ class Waveshare27inch(DisplayImpl):
         self._display.Clear(0xFF)
 
     def render(self, canvas):
-        if pwnagotchi.config['ui']['display']['darkmode']:
-            im = ImageOps.colorize(canvas.convert("L"), black = "white", white = "black")
-            canvas = im.convert("1")
         buf = self._display.getbuffer(canvas)
         self._display.display(buf)
 

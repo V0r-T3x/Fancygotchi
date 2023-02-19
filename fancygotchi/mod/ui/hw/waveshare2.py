@@ -64,9 +64,6 @@ class WaveshareV2(DisplayImpl):
         self._display.init(self._display.PART_UPDATE)
 
     def render(self, canvas):
-        if pwnagotchi.config['ui']['display']['darkmode']:
-            im = ImageOps.colorize(canvas.convert("L"), black = "white", white = "black")
-            canvas = im.convert("1")
         buf = self._display.getbuffer(canvas)
         self._display.displayPartial(buf)
 
