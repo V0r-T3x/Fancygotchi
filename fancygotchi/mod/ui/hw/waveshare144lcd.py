@@ -61,15 +61,6 @@ class Waveshare144lcd(DisplayImpl):
         self._display.clear()
 
     def render(self, canvas):
-        filter_color = pwnagotchi.config['main']['plugins']['fancygotchi']['filter_color']
-        if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
-            if pwnagotchi.config['main']['plugins']['fancygotchi']['darkmode']:
-                rgb_im = ImageOps.colorize(canvas.convert("L"), black = filter_color, white = "black")
-            else:
-                rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = filter_color)
-        else:
-            rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = "white")
-
         self._display.display(rgb_im)
 
     def clear(self):

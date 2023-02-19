@@ -374,10 +374,7 @@ class View(object):
             state = self._state
             changes = state.changes(ignore=self._ignore_changes)
             if force or len(changes):
-                if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
-                    self._canvas = Image.new('RGB', (self._width, self._height), 'white')
-                else:
-                    self._canvas = Image.new('1', (self._width, self._height), WHITE)
+                self._canvas = Image.new('RGB', (self._width, self._height), 'white')
                 
                 drawer = ImageDraw.Draw(self._canvas)
 

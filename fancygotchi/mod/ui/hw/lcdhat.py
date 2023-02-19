@@ -68,27 +68,7 @@ class LcdHat(DisplayImpl):
         self._display.clear()
 
     def render(self, canvas):
-        filter_color = pwnagotchi.config['main']['plugins']['fancygotchi']['filter_color']
-        if pwnagotchi.config['main']['plugins']['fancygotchi']['enabled']:
-            if pwnagotchi.config['main']['plugins']['fancygotchi']['darkmode']:
-                rgb_im = ImageOps.colorize(canvas.convert("L"), black = filter_color, white = "black")
-            else:
-                #canvas = canvas.convert('RGBA')
-                #datas = canvas.getdata()
-                #newData = []
-                #for item in datas:
-                #    if item[0] == 255 and item[1] == 255 and item[2] == 255:
-                #        newData.append((255, 255, 255, 0))
-                #    else:
-                #        newData.append(item)
-                #bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], pwnagotchi.config['main']['plugins']['fancygotchi']['bg_image']))
-                #rgb_im.putdata(newData)
-                #rgb_im = bg
-                rgb_im = canvas
-        else:
-            rgb_im = ImageOps.colorize(canvas.convert("L"), black = "black", white = "white")
-
-        self._display.display(rgb_im)
+        self._display.display(canvas)
 
 
     def clear(self):
