@@ -128,7 +128,6 @@ def load_from_path(path, enabled=()):
 
 
 def load(config):
-    #logging.info(config['main']['plugins']['fancygotchi']['enabled'])
     if not config['main']['plugins']['fancygotchi']['enabled']:
         logging.info('Fancygotchi auto enabled, you have to uninstall it inside the plugins page if you want get rid of it')
         config['main']['plugins']['fancygotchi']['enabled'] = True
