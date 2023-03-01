@@ -121,7 +121,14 @@ class Text(Widget):
                     text = self.value
                 width, height = canvas.size
                 imgtext = text_to_rgb(text, self.font, self.color, width, height)
-                canvas.paste(imgtext, self.xy)
+                #logging.info("canvas: %s" % canvas.mode)
+                #logging.info("self.xy: %s" % self.xy)
+                if len(self.xy) >= 3:
+                    x = self.xy[0]
+                    y = self.xy[1]
+                else:
+                    x, y = self.xy
+                canvas.paste(imgtext, (x, y))
                 #drawer.text(self.xy, text, self.font, font=self.font, fill=self.color)
             else:
                 canvas.paste(self.image, self.xy, self.image)

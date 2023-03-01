@@ -1,6 +1,8 @@
 import _thread
 import logging
+import traceback
 import random
+import toml
 import time
 from threading import Lock
 
@@ -27,6 +29,20 @@ class View(object):
         # setup faces from the configuration in case the user customized them
         faces.load_from_config(config['ui']['faces'])
         
+        with open('/boot/plugins/fancygotchi/themes/.default/displayhatmini/config.toml', 'r') as f:
+            self._theme = toml.load(f)
+        #logging.info(self._theme)
+        th_ch = self._theme['theme']['main_elements']['channel']
+        th_aps = self._theme['theme']['main_elements']['aps']
+        th_up = self._theme['theme']['main_elements']['uptime']
+        th_face = self._theme['theme']['main_elements']['face']
+        th_name = self._theme['theme']['main_elements']['name']
+        th_status = self._theme['theme']['main_elements']['status']
+        th_fface = self._theme['theme']['main_elements']['friend_face']
+        th_fname = self._theme['theme']['main_elements']['friend_name']
+        th_sh = self._theme['theme']['main_elements']['shakes']
+        th_mode = self._theme['theme']['main_elements']['mode']
+
         self._agent = None
         self._render_cbs = []
         self._config = config
@@ -39,43 +55,45 @@ class View(object):
         self._width = self._layout['width']
         self._height = self._layout['height']
         self._state = State(state={
-            'channel': LabeledValue(color='lime', label='CH', value='00', position=self._layout['channel'],
-                                    label_font=fonts.Bold,
-                                    text_font=fonts.Medium),
-            'aps': LabeledValue(color='lime', label='APS', value='0 (00)', position=self._layout['aps'],
-                                label_font=fonts.Bold,
-                                text_font=fonts.Medium),
+            'channel': LabeledValue(color=th_ch['color'], label=th_ch['label'], value=th_ch['value'], position=th_ch['position'],
+                                    label_font=getattr(fonts, th_ch['label_font']),
+                                    text_font=getattr(fonts, th_ch['text_font'])),
 
-            'uptime': LabeledValue(color='lime', label='UP', value='00:00:00', position=self._layout['uptime'],
-                                   label_font=fonts.Bold,
-                                   text_font=fonts.Medium),
+            'aps': LabeledValue(color=th_aps['color'], label=th_aps['label'], value=th_aps['value'], position=th_aps['position'],
+                                label_font=getattr(fonts, th_aps['label_font']),
+                                text_font=getattr(fonts, th_aps['text_font'])),
+
+            'uptime': LabeledValue(color=th_up['color'], label=th_up['label'], value=th_up['value'], position=th_up['position'],
+                                   label_font=getattr(fonts, th_up['label_font']),
+                                   text_font=getattr(fonts, th_up['text_font'])),
 
             'line1': Line(self._layout['line1'], color='lime'),
             'line2': Line(self._layout['line2'], color='lime'),
 
-            'face': Text(value=faces.SLEEP, position=self._layout['face'], color='magenta', font=fonts.Huge),
+            'face': Text(value=faces.SLEEP, position=th_face['position'], color=th_face['color'], font=getattr(fonts, th_face['font'])),
 
-            'friend_face': Text(value=None, position=self._layout['friend_face'], font=fonts.Bold, color='lime'),
-            'friend_name': Text(value=None, position=self._layout['friend_name'], font=fonts.BoldSmall,
-                                color='lime'),
+            'friend_face': Text(value=None, position=th_fface['position'], font=getattr(fonts, th_fface['font']), color=th_fface['color']),
+            'friend_name': Text(value=None, position=th_fname['position'], font=getattr(fonts, th_fname['font']),
+                                color=th_fname['color']),
 
-            'name': Text(value='%s>' % 'pwnagotchi', position=self._layout['name'], color='red', font=fonts.Bold),
+            'name': Text(value='%s>' % 'pwnagotchi', position=th_name['position'], color=th_name['color'], font=getattr(fonts, th_name['font'])),
             #'name': Text(value='/home/pi/plugins/fancygotchi/img/icons/name.png', position=self._layout['name'], color='lime', font=fonts.Bold, icon=True),
 
 
             'status': Text(value=self._voice.default(),
-                           position=self._layout['status']['pos'],
-                           color='purple',
-                           font=self._layout['status']['font'],
-                           wrap=True,
+                           position=th_status['position'],
+                           color=th_status['color'],
+                           font=getattr(fonts, th_status['font']),
+                           wrap=th_status['wrap'],
                            # the current maximum number of characters per line, assuming each character is 6 pixels wide
-                           max_length=self._layout['status']['max']),
+                           max_length=th_status['max']),
 
-            'shakes': LabeledValue(label='PWND ', value='0 (00)', color='lime',
-                                   position=self._layout['shakes'], label_font=fonts.Bold,
-                                   text_font=fonts.Medium),
-            'mode': Text(value='AUTO', position=self._layout['mode'],
-                         font=fonts.Bold, color='#FF0000'),
+            'shakes': LabeledValue(label=th_sh['label'], value=th_sh['value'], color=th_sh['color'],
+                                   position=th_sh['position'], label_font=getattr(fonts, th_sh['label_font']),
+                                   text_font=getattr(fonts, th_sh['text_font'])),
+
+            'mode': Text(value='AUTO', position=th_mode['position'],
+                         font=getattr(fonts, th_mode['font']), color=th_mode['color']),
         })
 
         if state:
@@ -128,6 +146,7 @@ class View(object):
                 self.update()
             except Exception as e:
                 logging.warning("non fatal error while updating view: %s" % e)
+                logging.warning(traceback.format_exc())
             time.sleep(delay)
 
     def set(self, key, value):
@@ -362,9 +381,7 @@ class View(object):
         self.update()
 
     def update(self, force=False, new_data={}):
-
         for key, val in new_data.items():
-            logging.info('key: %s; val: %s' % (str(key), str(val)))
             self.set(key, val)
 
         with self._lock:
@@ -379,8 +396,9 @@ class View(object):
                 drawer = ImageDraw.Draw(self._canvas)
 
                 plugins.on('ui_update', self)
-
-                for key, lv in state.items():
+                
+                copy_state = list(state.items())#way to avoid [WARNING] non fatal error while updating view: dictionary changed size during iteration
+                for key, lv in copy_state:
                     lv.draw(self._canvas, drawer)
 
                 # switching the white to transparent
