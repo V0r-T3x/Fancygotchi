@@ -1,7 +1,7 @@
 # fancygotchi
 
 There's a preview of dev.    
-Waveshare LCD 1.33" ST7789V 240x240  
+Pimoroni Display Hat Mini 320x240 
 ![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/pwnagotchi.png)  
 
 !!!DON'T TRY THE PLUGIN RIGHT NOW!!!
