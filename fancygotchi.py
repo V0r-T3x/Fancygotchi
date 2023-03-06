@@ -541,7 +541,7 @@ def check_update(vers, online):
         for line in lines:
             if '__version__ =' in line:
                 count += 1
-                if count == 2:
+                if count == 3:
                     online_version = line.split('= ')[-1]
                     online_version = online_version[2:-2]
     elif not online:
@@ -551,11 +551,15 @@ def check_update(vers, online):
         lines = lines.splitlines()
         count = 0
         for line in lines:
+            #logging.warning(line)
             if '__version__ =' in line:
+                logging.warning(line)
                 count += 1
-                if count == 2:
+                if count == 3:
                     online_version = line.split('= ')[-1]
+                    #logging.warning(online_version)
                     online_version = online_version[1:-1]
+                    #logging.warning(online_version)
 
     online_v = online_version.split('.')
     local_v = vers.split('.')
