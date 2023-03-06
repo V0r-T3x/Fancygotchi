@@ -522,8 +522,10 @@ def replace_file(name, path, backup, force, hidden, extension = "bak"):
     path_target = '%s%s' % (path[0], name[0])
     if backup:
         if ((force) or (not force and not os.path.exists(path_backup))):
+            logging.warning('%s ----> %s' % (path_target, path_backup))
             shutil.copyfile(path_target, path_backup)
     if len(path) == 2:
+        logging.warning('%s ----> %s' % (path_source, path_target))
         shutil.copyfile(path_source, path_target)
 
 # function to verify if a new version is available
@@ -731,12 +733,18 @@ class Fancygotchi(plugins.Plugin):
         for index, value in FILES_TO_MOD.iterrows():
             path = value[0]
             file = value[1]
-            if path[0] != '/':
-                path = '%s/%s' % (ROOT_PATH, path)
+            #logging.warning(path)
+            #logging.warning(file)
+            if not path[0] == '/':
+                #logging.warning(path[0])
+                dest_path = '%s/%s' % (ROOT_PATH, path)
+                #src_path = '%s/fancygotchi/mod%s' % (FANCY_ROOT, path)
+            else: 
+                dest_path = path
             #logging.info('%s.%s.original' % (path, file))
             if not os.path.exists('%s.%s.original' % (path, file)):
-                logging.info('%s.%s.original' % (path, file))
-                replace_file([file], [path, '%s/fancygotchi/mod/%s' % (FANCY_ROOT, path)], True, False, True, 'original')
+                #logging.warning('%s.%s.original' % (path, file))
+                replace_file([file], [dest_path, '%s/fancygotchi/mod/%s' % (FANCY_ROOT, path)], True, False, True, 'original')
             
             #logging.info('%s%s' % (path, file))
 
