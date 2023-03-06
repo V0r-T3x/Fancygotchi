@@ -29,19 +29,18 @@ class View(object):
         # setup faces from the configuration in case the user customized them
         faces.load_from_config(config['ui']['faces'])
         
-        with open('/boot/plugins/fancygotchi/themes/.default/displayhatmini/config.toml', 'r') as f:
-            self._theme = toml.load(f)
         #logging.info(self._theme)
-        th_ch = self._theme['theme']['main_elements']['channel']
-        th_aps = self._theme['theme']['main_elements']['aps']
-        th_up = self._theme['theme']['main_elements']['uptime']
-        th_face = self._theme['theme']['main_elements']['face']
-        th_name = self._theme['theme']['main_elements']['name']
-        th_status = self._theme['theme']['main_elements']['status']
-        th_fface = self._theme['theme']['main_elements']['friend_face']
-        th_fname = self._theme['theme']['main_elements']['friend_name']
-        th_sh = self._theme['theme']['main_elements']['shakes']
-        th_mode = self._theme['theme']['main_elements']['mode']
+        th = pwnagotchi._theme['theme']['main_elements']
+        th_ch = th['channel']
+        th_aps = th['aps']
+        th_up = th['uptime']
+        th_face = th['face']
+        th_name = th['name']
+        th_status = th['status']
+        th_fface = th['friend_face']
+        th_fname = th['friend_name']
+        th_sh = th['shakes']
+        th_mode = th['mode']
 
         self._agent = None
         self._render_cbs = []
@@ -110,6 +109,7 @@ class View(object):
             self._ignore_changes = ('uptime', 'name')
 
         ROOT = self
+        #logging.info(ROOT)
 
     def set_agent(self, agent):
         self._agent = agent
@@ -156,6 +156,7 @@ class View(object):
         return self._state.get(key)
 
     def on_starting(self):
+        self.theme = "lime"
         self.set('status', self._voice.on_starting() + ("\n(v%s)" % pwnagotchi.__version__))
         self.set('face', faces.AWAKE)
         self.update()
@@ -381,7 +382,9 @@ class View(object):
         self.update()
 
     def update(self, force=False, new_data={}):
+        th_opt = pwnagotchi._theme['theme']['options']
         for key, val in new_data.items():
+            #logging.info('key: %s; val: %s' % (str(key), str(val)))
             self.set(key, val)
 
         with self._lock:
@@ -405,13 +408,14 @@ class View(object):
                 datas = self._canvas.getdata()
                 newData = []
                 for item in datas:
+                    #logging.info(item)
                     if item[0] == 255 and item[1] == 255 and item[2] == 255:
                         newData.append((255, 255, 255, 0))
                     else:
                         newData.append(item) #version for color mode
                         #newData.append((0, 0, 0, 255)) #version for mono or 3-colors
 
-                bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], pwnagotchi.config['main']['plugins']['fancygotchi']['bg_image']))
+                bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], th_opt['bg_image']))
                 bga = bg.convert('RGBA')
                 rgba_im = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
                 rgba_im_ = rgba_im.putdata(newData)
@@ -421,6 +425,7 @@ class View(object):
                 web.update_frame(self._canvas)
 
                 for cb in self._render_cbs:
+                    #logging.info(cb)
                     cb(self._canvas)
 
                 self._state.reset()

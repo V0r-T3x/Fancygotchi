@@ -2,6 +2,7 @@ from pwnagotchi.ui.view import View
 import pwnagotchi
 import pwnagotchi.plugins as plugins
 import logging
+import traceback
 import os
 from os import fdopen, remove
 import shutil
@@ -11,6 +12,7 @@ from PIL import Image, ImageDraw, ImageOps
 
 import json
 import toml
+import pandas as pd
 import _thread
 from pwnagotchi import restart, plugins
 from pwnagotchi.utils import save_config
@@ -22,18 +24,11 @@ import pwnagotchi.ui.fonts as fonts
 import requests
 
 ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
+FANCY_ROOT = os.path.dirname(os.path.realpath(__file__))
 
-FILES_TO_MODIFY = [
-    ['/ui/', 'view.py'],
-    ['/ui/', 'components.py'],
-    ['/ui/web/', '__init__.py'],
-    ['/ui/web/static/css/', 'style.css'],
-    ['/ui/web/templates/','base.html'],
-    ['/ui/web/templates/','plugins.html'],
-    ['/ui/web/templates/','profile.html'],
-    ['/plugins/default/','logtail.py'],
-    ['/plugins/','__init__.py'],
-]
+FILES_TO_MOD = pd.read_csv('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT))
+#for index, value in FILES_TO_MOD.iterrows():
+#    logging.warning('%s ---> %s' % (value[0], value[1]))
 
 COMPATIBLE_PLUGINS = [
     'bt-tether',
@@ -94,6 +89,7 @@ INDEX = """
         <span><button id="btnDevBackup" type="button" onclick="dev_backup()">dev_backup fancygotchi</button></span>
         <button id="btnSave" type="button" onclick="saveConfig()">Save theme and restart</button>
         <button id="btnUninstall" type="button" onclick="uninstall()">Uninstall fancygotchi</button>
+        Online update<input type=checkbox id="upd_on"></input>
         <button id="btnUpdate" type="button" onclick="check_update()">Check fancygotchi update</button>
         <input type="text" id="searchText" placeholder="Search for options ..." title="Type an option name">
     </div>
@@ -141,9 +137,18 @@ INDEX = """
             }
         }
         function check_update(){
+            var online = document.getElementById("upd_on").checked;
+            if (online == true){
+                var ck_upd = "fancygotchi/check_online_update";
+                var upd = "fancygotchi/online_update";}
+            else {
+                var ck_upd = "fancygotchi/check_local_update";
+                var upd = "fancygotchi/local_update";}
+            alert(ck_upd + " " + upd);
+   
             if (confirm("Do you want check for Fancygotchi update?")){
                 var json = {"response":"1"};
-                sendJSON("fancygotchi/check_update", json, function(response) {
+                sendJSON(ck_upd, json, function(response){
                     if (response) {
                         if (response.status == "200") {
                             is_version = response.responseText.split(',')
@@ -151,9 +156,9 @@ INDEX = """
                                 //alert('New fancygotchi update v.' + is_version[1]);
                                 if (confirm("Do you want update Fancygotchi to v." + is_version[1] + "?")){
                                     var json = {"response":"1"};
-                                    sendJSON("fancygotchi/update", json, function(response) {
+                                    sendJSON(upd, json, function(response){
                                         if (response) {
-                                            if (response.status == "200") {
+                                            if (response.status == "200"){
                                                 alert("fancygotchi is updated");
                                                 //window.location.href = '/';
                                             } else {
@@ -438,7 +443,7 @@ INDEX = """
             var bg_img = document.getElementById('bg_img');
             var wrap_img = document.getElementById('wrap_img');
             var is_up = document.getElementById('btnUpdate');
-            bg_img.style.backgroundImage = "url('/img/" + theme_array[6][1] + "')";
+            bg_img.style.backgroundImage = "url('/img/" + theme_array[5][1] + "')";
             wrap_img.style.width = (theme_array[2][1] + 100) + 'px';
             wrap_img.style.height = (theme_array[3][1] + 100) + 'px';
             bg_img.style.width = theme_array[2][1] + 'px';
@@ -473,7 +478,7 @@ def replace_line(file_path, pattern, subst):
                 #logging.info(len(subst))
                 if pattern in line:
                     line_skip = len(subst) - 1
-                    logging.info(line_skip)
+                    #logging.info(line_skip)
                     for su in subst:
                         new_file.write('%s\n' % (su))
                 elif line_skip == 0:
@@ -486,16 +491,19 @@ def replace_line(file_path, pattern, subst):
 
 # function to backup all actual modified files to make a new install update
 def dev_backup(file_paths, dest_fold):
-    for file in file_paths:
-        # verify if the backup folder exist for the backup file
-        path = dest_fold + file[0][1:]
-        #logging.info(path)
-        folders = os.path.split(path)[0]
+    for index, value in file_paths.iterrows():
+        path = value[0]
+        file = value[1]
+        if path[0] != '/':
+            back_path = '%s%s' % (dest_fold, path)
+            path = '%s/%s' % (ROOT_PATH, path)
+        else:
+            back_path = '%s%s' % (dest_fold, path)
+        #logging.warning('%s%s' % (path, file))
+        folders = os.path.split(back_path)[0]
         if not os.path.exists(folders):
             os.makedirs(folders)
-        #logging.info("%s/%s" % (folders, file[1]))
-        #logging.info("file0: %s; file1: %s; folders: %s;" % (file[0], file[1], folders))
-        replace_file([file[1], ], [folders+"/", '%s%s' % (ROOT_PATH, file[0])], False, False, False)
+        replace_file([file, ], [back_path, path], False, False, False)
 
 # function to replace a file
 # name = [target name, source name]
@@ -519,17 +527,34 @@ def replace_file(name, path, backup, force, hidden, extension = "bak"):
         shutil.copyfile(path_source, path_target)
 
 # function to verify if a new version is available
-def check_update(vers):
-    URL = "https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/fancygotchi.py"
-    response = requests.get(URL)
-    lines = str(response.content)
-    lines = lines.split('\\n')
-    #logging.info(str(response.content))
-    for line in lines:
-        if '__version__ =' in line:
-            online_version = line.split('= ')[-1]
-            online_version = online_version[2:-2]
-            logging.info(online_version)
+def check_update(vers, online):
+    #logging.warning(("check update, online: %s") % (online))
+    #logging.warning(FANCY_ROOT)
+    if online:
+        URL = "https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/fancygotchi.py"
+        response = requests.get(URL)
+        lines = str(response.content)
+        lines = lines.split('\\n')
+        count = 0
+        for line in lines:
+            if '__version__ =' in line:
+                count += 1
+                if count == 2:
+                    online_version = line.split('= ')[-1]
+                    online_version = online_version[2:-2]
+    elif not online:
+        URL = '%s/fancygotchi/update/fancygotchi.py' % (FANCY_ROOT)
+        with open(URL, 'r') as f:
+            lines = f.read()
+        lines = lines.splitlines()
+        count = 0
+        for line in lines:
+            if '__version__ =' in line:
+                count += 1
+                if count == 2:
+                    online_version = line.split('= ')[-1]
+                    online_version = online_version[1:-1]
+
     online_v = online_version.split('.')
     local_v = vers.split('.')
     if online_v[0] > local_v[0]:
@@ -543,41 +568,81 @@ def check_update(vers):
             else: upd = False
         else: upd = False
     else: upd = False
-    logging.info('%s - %s' % (str(upd), online_version))
+    #logging.info('%s - %s' % (str(upd), online_version))
     return [upd, online_version]
 
+def update(online):
+    logging.warning('The updater is starting, online: %s' % (online))
+    if online:#<-- Download from the Git & define the update path
+        URL = "https://github.com/V0r-T3x/fancygotchi/archive/refs/heads/main.zip"
+        response = requests.get(URL)
+        path_upd_src = '%s/fancygotchi/tmp' % (FANCY_ROOT)
+        filename = '%s/%s' % (path_upd_src, URL.split('/')[-1])
+        os.system('mkdir %s' % (path_upd_src))
+        with open(filename,'wb') as output_file:
+            output_file.write(response.content)
+        shutil.unpack_archive(filename, path_upd_src)
+        path_upd = '%s/fancygotchi-main' % (path_upd_src)
+    if not online:#<-- Define the update local path
+        path_upd = '%s/fancygotchi/update' % (FANCY_ROOT)
+        
+    logging.warning('%s/fancygotchi.py ----> %s/fancygotchi.py' % (path_upd, FANCY_ROOT))
+    replace_file(['fancygotchi.py'], [path_upd, FANCY_ROOT], False, False, False)
+ 
+    uninstall(True)
 
-def update():
-    #download from github
-    custom_plugins = pwnagotchi.config['main']['custom_plugins']
-    URL = "https://github.com/V0r-T3x/fancygotchi/archive/refs/heads/main.zip"
-    response = requests.get(URL)
-    if not custom_plugins[-1] == '/': custom_plugins += '/'
-    path_tmp = '%sfancygotchi/tmp/' % (custom_plugins)
-    filename = '%s%s' % (path_tmp, URL.split('/')[-1])
-    os.system('mkdir %s' % (path_tmp))
-    with open(filename,'wb') as output_file:
-        output_file.write(response.content)
-    shutil.unpack_archive(filename, path_tmp)
-    path_unzip = '%sfancygotchi-main/' % (path_tmp)
-    replace_file(['fancygotchi.py'], [path_unzip, custom_plugins], False, False, False)
-    for root, dirs, files in os.walk('%sfancygotchi/' % (path_unzip)):
+    mod_path = '%s/fancygotchi/mod' % (FANCY_ROOT)
+    logging.warning('removing mod folder: %s' % (mod_path))
+    os.system('rm -R %s' % (mod_path))
+    deftheme_path = '%s/fancygotchi/theme/.default' % (FANCY_ROOT)
+    logging.warning('removing mod folder: %s' % (deftheme_path))
+    os.system('rm -R %s' % (deftheme_path))
+
+    path_upd = '%s/fancygotchi' % (path_upd)
+    logging.warning(path_upd)
+    for root, dirs, files in os.walk(path_upd):
+        #logging.warning('%s %s %s' % (root, dirs, files))
         for name in files:
-            if not name == "README.md":
-                path_update = '%s/' % (root)
-                path_target = '%s%s/' % (custom_plugins, root.split('fancygotchi-main/')[-1])
-                logging.info('%s ---->%s' % (path_update, path_target))
-                replace_file([name], [path_target, path_update], False, False, False)
-    os.system('rm -R %s' % (path_tmp))
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    for file in FILES_TO_MODIFY:
-        logging.info('replace: %s' % (file[1]))
-        replace_file([file[1]], ['%s%s' % (ROOT_PATH, file[0]), '%s/fancygotchi/mod/' % (dir_path)], False, False, False, )
+            #logging.warning(name)
+            if not name == "README.md" or name == "readme.md":
+                src_file = os.path.join(root, name)
+                #logging.warning(src_file)
+                dst_file = os.path.join(FANCY_ROOT, root.split('fancygotchi-main/')[-1], name)
+                #logging.warning(dst_file)
+                logging.warning('%s ---->%s' % (src_file, dst_file))
+                replace_file([name], [dst_file, src_file], False, False, False)
+    if online:
+        logging.warning('removing the update temporary folder: %s' % (path_upd_src))
+        os.system('rm -R %s' % (path_upd_src))
+
+def uninstall(soft=False):
+    # deleting the sym link for the img file
+    dest = '%s/ui/web/static/img/' % (ROOT_PATH)
+    logging.warning(dest)
+    os.system('rm %s' % (dest))
+    
+    for index, value in FILES_TO_MOD.iterrows():
+        path = value[0]
+        file = value[1]
+        if path[0] != '/':
+            path = '%s/%s' % (ROOT_PATH, path)
+        #logging.warning(path)
+        #logging.warning('%s.%s.original' % (path, file))
+        logging.warning('%s%s' % (path, file))
+        shutil.copyfile('%s.%s.original' % (path, file), '%s%s' % (path, file))
+        os.system('rm %s' % ('%s.%s.original' % (path, file)))
+        # disable the fancygotchi inside the config.toml
+    if not soft:
+        logging.warning('config.toml disable')
+        replace_line('/etc/pwnagotchi/config.toml', 'fancygotchi.enabled',['main.plugins.fancygotchi.enabled = false'])
+    else:
+        logging.warning('config.toml enable')
+        replace_line('/etc/pwnagotchi/config.toml', 'fancygotchi.enabled',['main.plugins.fancygotchi.enabled = true'])
 
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2022.07.2'
+    __version__ = '2023.03.1'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -604,21 +669,11 @@ class Fancygotchi(plugins.Plugin):
         theme = pwnagotchi.config['main']['plugins']['fancygotchi']['theme']
         
         display = [pwnagotchi.config['ui']['display']['enabled'], pwnagotchi.config['ui']['display']['type']]
-        logging.info('[FANCYGOTCHI] %s' % display)
+        #logging.info('[FANCYGOTCHI] %s' % display)
 
-        if not theme:
-            logging.info("no theme, default theme will be loaded")
-            if display[0] == True:
-                theme_config_path = '%sfancygotchi/themes/.default/%s/config.toml' % (custom_plugins_path, display[1])
-            else:
-                theme_config_path = '%sfancygotchi/themes/.default/headless/config.toml' % (custom_plugins_path)
-        else:
-            theme_config_path = '%sfancygotchi/themes/%s/config.toml' % (custom_plugins_path, theme)
-        logging.info(theme_config_path)
-        logging.info('[FANCYGOTCHI] %s' % (toml.load(theme_config_path)))
         """
         check_update(self.__version__)
-        update()
+        update(True)
         replace_file(['target.txt', 'test.txt'], ['/home/pi/', '/home/pi/'], True, False, False)
         check_update(self.__version__)
         
@@ -661,27 +716,30 @@ class Fancygotchi(plugins.Plugin):
             logging.warning('[FANCYGOTCHI] The screen is not compatible with the plugin')
 
         # If the initial screen isn't compatible the mod will not install
+        logging.info('[FANCYGOTCHI] compatible: %s' % (compatible))
         if compatible:
             # Linking bg image to the web ui
-            dir_path = os.path.dirname(os.path.realpath(__file__))
-            src = '%s/fancygotchi/img/' % (dir_path)
+            src = '%s/fancygotchi/img/' % (FANCY_ROOT)
             dest = '%s/ui/web/static' % (ROOT_PATH)
             #logging.info('[FANCYGOTCHI] ln -s %s %s' % (src, dest))
             if not os.path.exists('%s/img/' % (dest)):
                 #logging.info('[FANCYGOTCHI] link for img don\'t exist')
                 os.system('ln -s %s %s' % (src, dest))
                 #logging.info('[FANCYGOTCHI] link for img created')
-        
             # Loop to verify if the backup is here, and if not it backup original files
             # and replace them all with link from plugin folder
-            for file in FILES_TO_MODIFY:
-                #logging.info('[FANCYGOTCHI] %s%s' % (file[0], file[1]))
-                # Loop to verify backup
-                #logging.info('[FANCYGOTCHI] %s%s.%s.original' % (ROOT_PATH, file[0], file[1]))
-                #logging.info('%s/fancygotchi/mod/%s%s' % (dir_path, file[0][1:], file[1]))
+        for index, value in FILES_TO_MOD.iterrows():
+            path = value[0]
+            file = value[1]
+            if path[0] != '/':
+                path = '%s/%s' % (ROOT_PATH, path)
+            #logging.info('%s.%s.original' % (path, file))
+            if not os.path.exists('%s.%s.original' % (path, file)):
+                logging.info('%s.%s.original' % (path, file))
+                replace_file([file], [path, '%s/fancygotchi/mod/%s' % (FANCY_ROOT, path)], True, False, True, 'original')
+            
+            #logging.info('%s%s' % (path, file))
 
-                if not os.path.exists('%s%s.%s.original' % (ROOT_PATH, file[0], file[1])):
-                    replace_file([file[1]], ['%s%s' % (ROOT_PATH, file[0]), '%s/fancygotchi/mod/%s' % (dir_path, file[0][1:])], True, False, True, 'original')
         logging.info('[FANCYGOTCHI] Theme manager loaded')
 
         # Verification to enabled and compatible plugins
@@ -726,16 +784,14 @@ class Fancygotchi(plugins.Plugin):
                     'is_display': self.config['ui']['display']['enabled'],
                     'display': self.config['ui']['display']['type'],
                     'resolution': [width, height],
-                    'hi-res': self.config['main']['plugins']['fancygotchi']['hi-res'],
-                    'bg': self.config['main']['plugins']['fancygotchi']['bg'],
-                    'bg_image': self.config['main']['plugins']['fancygotchi']['bg_image'],
-                    'themes_path': self.config['main']['plugins']['fancygotchi']['themes_path'],
                     'theme': self.config['main']['plugins']['fancygotchi']['theme'],
+                    'bg_image': pwnagotchi._theme['theme']['options']['bg_image']
                 }
                 # adding all the main and the plugins position
                 return json.dumps(theme, default=serializer)
             else:
                 abort(404)
+
         elif request.method == "POST":
             if path == "save-config":
                 try:
@@ -746,42 +802,37 @@ class Fancygotchi(plugins.Plugin):
                 except Exception as ex:
                     logging.error(ex)
                     return "config error", 500
+
             elif path == "uninstall":
                 try:
-                    # deleting the sym link for the img file
-                    dest = '%s/ui/web/static' % (ROOT_PATH)
-                    os.system('rm %s' % (dest))
-
-                    #deleting all modified files and place original files in place
-                    for file in FILES_TO_MODIFY:
-                        shutil.copyfile('%s%s.%s.original' % (ROOT_PATH, file[0], file[1]), '%s%s%s' % (ROOT_PATH, file[0], file[1]))
-                        os.system('rm %s' % ('%s%s.%s.original' % (ROOT_PATH, file[0], file[1])))
-                    
-                    # disable the fancygotchi inside the config.toml 
-                    replace_line('/etc/pwnagotchi/config.toml', 'fancygotchi.enabled',['main.plugins.fancygotchi.enabled = false'])
-                    # starting new thread to restart pwnagotchi
+                    uninstall()
                     _thread.start_new_thread(restart, (self.mode,))
                     logging.info(str(request.get_json()))
                     return "success"
                 except Exception as ex:
                     logging.error(ex)
                     return "uninstall error", 500
+
             elif path == "devbackup":
                 try:
                     jreq = request.get_json()
                     folder = json.loads(json.dumps(jreq))
-                    #logging.info('%s/fancygotchi/mod/%s/' % (custom_plugins_path, folder["response"]))
-                    dest = '%s/fancygotchi/mod/%s/' % (custom_plugins_path, str(folder["response"]))
+                    fancybu = '%s/fancybackup/' % (FANCY_ROOT)
+                    dest = '%s%s/' % (fancybu, str(folder["response"]))
+                    if not os.path.exists(fancybu):
+                        os.system('mkdir %s' % (dest))
                     if not os.path.exists(dest):
                         os.system('mkdir %s' % (dest))
-                    dev_backup(FILES_TO_MODIFY, dest);
+                    dev_backup(FILES_TO_MOD, dest);
                     return "success"
                 except Exception as ex:
                     logging.error(ex)
+                    logging.error(traceback.format_exc())
                     return "dev backup error", 500
-            elif path == "check_update":
+
+            elif path == "check_online_update":
                 try:
-                    is_update = check_update(self.__version__)
+                    is_update = check_update(self.__version__, True)
                     logging.info(is_update[1])
                     upd = '%s,%s' % (is_update[0], is_update[1])
                     return upd
@@ -789,12 +840,31 @@ class Fancygotchi(plugins.Plugin):
                     logging.error(ex)
                     return "update check error, check internet connection", 500
 
-            elif path == "update":
+            elif path == "online_update":
                 try:
-                    update()
+                    update(True)
                     return "success"
                 except Exception as ex:
                     logging.error(ex)
                     return "update error", 500
+                    
+            elif path == "check_local_update":
+                try:
+                    is_update = check_update(self.__version__, False)
+                    logging.info(is_update[1])
+                    upd = '%s,%s' % (is_update[0], is_update[1])
+                    return upd
+                except Exception as ex:
+                    logging.error(ex)
+                    return "update check error, check internet connection", 500
+
+            elif path == "local_update":
+                try:
+                    update(False)
+                    return "success"
+                except Exception as ex:
+                    logging.error(ex)
+                    return "update error", 500
+
 
         abort(404)

@@ -6,8 +6,8 @@ display_time = "displayhatmini"
 resolution = [320, 240]
 hi-res = true
 bg = true
-bg_image = "320x240e.png"
-font_sizes = [14, 12, 14, 32, 29, 13]
+bg_image = "320x240e-f.png"
+font_sizes = [10, 8, 10, 25, 25, 9]
 label_spacing = 9
 fps = 10
 
