@@ -18,19 +18,19 @@ THIS CAN STUCK YOUR PWNAGOTCHI
 A complete theme manager for the Pwnagotchi [In development]  
 this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
 
-v.2023.02.0
--review of the auto-installer, uninstaller and updater
--basic display components options are linked into a single file (one file to control them all!!)
+v.2023.02.0  
+-review of the auto-installer, uninstaller and updater  
+-basic display components options are linked into a single file (one file to control them all!!)  
 
-v.2023.02.0
--remove darkmode trace
--new image genetating process added
---text in 1bit with multiple colors
---full resolution background
+v.2023.02.0  
+-remove darkmode trace  
+-new image genetating process added  
+--text in 1bit with multiple colors  
+--full resolution background  
 
--lcdhat
--waveshare144.lcd
--displayhatmini
+-lcdhat  
+-waveshare144.lcd  
+-displayhatmini  
 
 v.2022.07.3  
 -installer/Uninstaller  
