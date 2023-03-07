@@ -592,8 +592,9 @@ def update(online):
     if not online:#<-- Define the update local path
         path_upd = '%s/fancygotchi/update' % (FANCY_ROOT)
         
-    logging.warning('%s/fancygotchi.py ----> %s/fancygotchi.py' % (path_upd, FANCY_ROOT))
-    replace_file(['fancygotchi.py'], [path_upd, FANCY_ROOT], False, False, False)
+    logging.warning('%s/fancygotchi.py ====> %s/fancygotchi.py' % (path_upd, FANCY_ROOT))
+    #replace_file(['/fancygotchi.py'], [path_upd, FANCY_ROOT], False, False, False)
+    shutil.copyfile('%s/fancygotchi.py' % (path_upd), '%s/fancygotchi.py' % (FANCY_ROOT))
  
     uninstall(True)
 
@@ -610,13 +611,25 @@ def update(online):
         #logging.warning('%s %s %s' % (root, dirs, files))
         for name in files:
             #logging.warning(name)
-            if not name == "README.md" or name == "readme.md":
+            if not name in ['README.md', 'readme.md']:
                 src_file = os.path.join(root, name)
-                #logging.warning(src_file)
-                dst_file = os.path.join(FANCY_ROOT, root.split('fancygotchi-main/')[-1], name)
-                #logging.warning(dst_file)
-                logging.warning('%s ---->%s' % (src_file, dst_file))
-                replace_file([name], [dst_file, src_file], False, False, False)
+                logging.warning(src_file)
+                dst_path = '%s/%s' % (FANCY_ROOT, root.split('fancygotchi-main/')[-1])
+                dst_file = '%s/%s' % (dst_path, name)
+                logging.warning(dst_file)
+                logging.warning('%s ~~~~>%s' % (src_file, dst_file))
+                logging.warning(dst_path)
+                if not os.path.exists(dst_path):
+                    os.makedirs(dst_path)
+                shutil.copyfile(src_file, dst_file)
+
+            
+            # Check if the destination path exists and create it if it doesn't
+            if not os.path.exists(dst_path):
+                os.makedirs(dst_path)
+
+            # Copy the file to the destination path
+            shutil.copyfile(src_file, dst_file)
     if online:
         logging.warning('removing the update temporary folder: %s' % (path_upd_src))
         os.system('rm -R %s' % (path_upd_src))
@@ -648,7 +661,7 @@ def uninstall(soft=False):
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2023.03.1'
+    __version__ = '2023.03.2'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -745,7 +758,7 @@ class Fancygotchi(plugins.Plugin):
                 #src_path = '%s/fancygotchi/mod%s' % (FANCY_ROOT, path)
             else: 
                 dest_path = path
-            #logging.info('%s.%s.original' % (path, file))
+            logging.info('%s.%s.original' % (path, file))
             if not os.path.exists('%s.%s.original' % (path, file)):
                 #logging.warning('%s.%s.original' % (path, file))
                 replace_file([file], [dest_path, '%s/fancygotchi/mod/%s' % (FANCY_ROOT, path)], True, False, True, 'original')
@@ -855,6 +868,8 @@ class Fancygotchi(plugins.Plugin):
             elif path == "online_update":
                 try:
                     update(True)
+                    _thread.start_new_thread(restart, (self.mode,))
+                    logging.info(str(request.get_json()))
                     return "success"
                 except Exception as ex:
                     logging.error(ex)
@@ -873,6 +888,8 @@ class Fancygotchi(plugins.Plugin):
             elif path == "local_update":
                 try:
                     update(False)
+                    _thread.start_new_thread(restart, (self.mode,))
+                    logging.info(str(request.get_json()))
                     return "success"
                 except Exception as ex:
                     logging.error(ex)
