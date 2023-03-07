@@ -87,14 +87,13 @@ ui.display.color = "black"
 ui.display.rotation = 180
 
 main.plugins.fancygotchi.enabled = false
-main.plugins.fancygotchi.themes_path = ""
 main.plugins.fancygotchi.theme = ""
 main.plugins.fancygotchi.bg = true
 main.plugins.fancygotchi.bg_image = "320x240e.png"
    # lcdhat = ui-bg-w.png
    # waveshare144lcd = ui-bg-w-s.png
    # displayhatmini = 320x240e.png, 320x240e-i.png, 320x240e-f.png
-main.plugins.fancygotchi.hi-res = true
+
 ```
 - restart the pwnagotchi
 - goto inside the web ui plugin page
