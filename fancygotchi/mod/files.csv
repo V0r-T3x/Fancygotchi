@@ -2,6 +2,7 @@ path,file
 ui/,components.py
 ui/,fonts.py
 ui/,view.py
+ui/hw/libs/waveshare/lcdhat144,epd.py
 ui/web/,__init__.py
 ui/web/static/css/,style.css
 ui/web/templates/,base.html
