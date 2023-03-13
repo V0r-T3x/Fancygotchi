@@ -7,9 +7,12 @@ resolution = [128, 128]
 hi-res = true
 bg = true
 bg_image = "ui-bg-w-s.png"
+#Bold, BoldSmall, Medium, Huge, BoldBig, Small
 font_sizes = [10, 8, 10, 25, 25, 9]
 label_spacing = 9
 fps = 10
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
 
 [theme.main_elements]
 
@@ -91,7 +94,7 @@ font = "Bold"
 color = "lime"
 
 [theme.main_elements.status]
-position = [26, 124]
+position = [65, 26]
 value = "AUTO"
 font = "Bold"
 color = "lime"

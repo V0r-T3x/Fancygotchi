@@ -1,6 +1,8 @@
-from pwnagotchi.ui.view import View
 import pwnagotchi
+
+
 import pwnagotchi.plugins as plugins
+
 import logging
 import traceback
 import os
@@ -8,25 +10,52 @@ from os import fdopen, remove
 import shutil
 from shutil import move, copymode
 from tempfile import mkstemp
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image
 
 import json
 import toml
-import pandas as pd
+#import pandas as pd <----faulty one
+import csv
 import _thread
-from pwnagotchi import restart, plugins
+from pwnagotchi import restart
 from pwnagotchi.utils import save_config
 from flask import abort, render_template_string
 
-#for tests
-import pwnagotchi.ui.fonts as fonts
 
 import requests
 
 ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
 FANCY_ROOT = os.path.dirname(os.path.realpath(__file__))
 
-FILES_TO_MOD = pd.read_csv('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT))
+with open('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT), newline='') as csvfile:
+    reader = csv.DictReader(csvfile)
+    data_dict = {}
+    for row in reader:
+        for key, value in row.items():
+            if key in data_dict:
+                data_dict[key].append(value)
+            else:
+                data_dict[key] = [value]
+    FILES_TO_MOD = data_dict
+
+
+
+#logging.warning(FILES_TO_MOD['path'][0])
+#logging.warning(FILES_TO_MOD['file'][0])
+
+
+for i in range(len(FILES_TO_MOD['path'])):
+    path = data_dict['path'][i]
+    file = data_dict['file'][i]
+
+
+        #logging.warning(FILES_TO_MOD[key][value])
+    logging.warning(path)
+    logging.warning(file)
+
+
+
+#FILES_TO_MOD = pd.read_csv('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT))
 #for index, value in FILES_TO_MOD.iterrows():
 #    logging.warning('%s ---> %s' % (value[0], value[1]))
 
@@ -74,9 +103,9 @@ def replace_line(file_path, pattern, subst):
 
 # function to backup all actual modified files to make a new install update
 def dev_backup(file_paths, dest_fold):
-    for index, value in file_paths.iterrows():
-        path = value[0]
-        file = value[1]
+    for i in range(len(file_paths['path'])):
+        path = data_dict['path'][i]
+        file = data_dict['file'][i]
         if path[0] != '/':
             back_path = '%s%s' % (dest_fold, path)
             path = '%s/%s' % (ROOT_PATH, path)
@@ -105,10 +134,10 @@ def replace_file(name, path, backup, force, hidden, extension = "bak"):
     path_target = '%s%s' % (path[0], name[0])
     if backup:
         if ((force) or (not force and not os.path.exists(path_backup))):
-            logging.warning('%s ----> %s' % (path_target, path_backup))
+            logging.warning('%s ~~bak~~> %s' % (path_target, path_backup))
             shutil.copyfile(path_target, path_backup)
     if len(path) == 2:
-        logging.warning('%s ----> %s' % (path_source, path_target))
+        logging.warning('%s --mod--> %s' % (path_source, path_target))
         shutil.copyfile(path_source, path_target)
 
 # function to verify if a new version is available
@@ -232,9 +261,9 @@ def uninstall(soft=False):
     logging.warning(dest)
     os.system('rm %s' % (dest))
     
-    for index, value in FILES_TO_MOD.iterrows():
-        path = value[0]
-        file = value[1]
+    for i in range(len(FILES_TO_MOD['path'])):
+        path = data_dict['path'][i]
+        file = data_dict['file'][i]
         if path[0] != '/':
             path = '%s/%s' % (ROOT_PATH, path)
         #logging.warning(path)
@@ -249,6 +278,8 @@ def uninstall(soft=False):
     else:
         logging.warning('config.toml enable')
         replace_line('/etc/pwnagotchi/config.toml', 'fancygotchi.enabled',['main.plugins.fancygotchi.enabled = true'])
+
+
 
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
@@ -272,7 +303,8 @@ class Fancygotchi(plugins.Plugin):
         self.mode = 'MANU' if agent.mode == 'manual' else 'AUTO'
 
     def on_loaded(self):
-#<        logging.info("[FANCYGOTCHI] Beginning Fancygotchi load")
+        logging.info("[FANCYGOTCHI] Beginning Fancygotchi load")
+
         custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
         if not custom_plugins_path[-1] == '/': custom_plugins_path += '/'
         ui = pwnagotchi.config['ui']['display']['type']
@@ -298,7 +330,8 @@ class Fancygotchi(plugins.Plugin):
             'HELL YEAH!!!'
         ]
         replace('/home/pi/test.txt', 'main.ui', subst)
-        """ 
+        """
+
         # Verification to the enabled display
         compatible = 0
         if ui == 'lcdhat':
@@ -342,21 +375,28 @@ class Fancygotchi(plugins.Plugin):
                 #logging.info('[FANCYGOTCHI] link for img created')
             # Loop to verify if the backup is here, and if not it backup original files
             # and replace them all with link from plugin folder
-        for index, value in FILES_TO_MOD.iterrows():
-            path = value[0]
-            file = value[1]
-            #logging.warning(path)
-            #logging.warning(file)
+        for i in range(len(FILES_TO_MOD['path'])):
+            path = data_dict['path'][i]
+            file = data_dict['file'][i]
+            logging.warning(path)
+            logging.warning(file)
+            slash = ''
             if not path[0] == '/':
                 #logging.warning(path[0])
                 dest_path = '%s/%s' % (ROOT_PATH, path)
+                slash = '/'
                 #src_path = '%s/fancygotchi/mod%s' % (FANCY_ROOT, path)
             else: 
                 dest_path = path
-            logging.info('%s.%s.original' % (path, file))
-            if not os.path.exists('%s.%s.original' % (path, file)):
-                #logging.warning('%s.%s.original' % (path, file))
-                replace_file([file], [dest_path, '%s/fancygotchi/mod/%s' % (FANCY_ROOT, path)], True, False, True, 'original')
+                slash = ''
+            ori_bak = '%s/%s.%s.original' % (ROOT_PATH, path, file)
+            logging.warning(ori_bak)
+            src_path = '%s/fancygotchi/mod%s%s' % (FANCY_ROOT, slash, path)
+            logging.warning(src_path)
+            logging.warning(dest_path)
+            if not os.path.exists(ori_bak):
+
+                replace_file([file], [dest_path, src_path], True, False, True, 'original')
             
             #logging.info('%s%s' % (path, file))
 
@@ -381,9 +421,6 @@ class Fancygotchi(plugins.Plugin):
                         #logging.info(plugin)
 
     def on_webhook(self, path, request):
-        """
-        Serves the current theme configuration
-        """
         custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
         if not self.ready:
             return "Plugin not ready"

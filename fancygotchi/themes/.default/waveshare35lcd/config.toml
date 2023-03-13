@@ -10,6 +10,9 @@ bg_image = "480x320e-i.png"
 font_sizes = [10, 8, 10, 25, 25, 9]
 label_spacing = 9
 fps = 10
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+
 
 [theme.main_elements]
 

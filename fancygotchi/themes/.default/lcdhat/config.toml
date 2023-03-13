@@ -10,6 +10,8 @@ bg_image = "ui-bg-w.png"
 font_sizes = [14, 12, 14, 32, 29, 13]
 label_spacing = 9
 fps = 10
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
 
 [theme.main_elements]
 
