@@ -378,8 +378,8 @@ class Fancygotchi(plugins.Plugin):
         for i in range(len(FILES_TO_MOD['path'])):
             path = data_dict['path'][i]
             file = data_dict['file'][i]
-            logging.warning(path)
-            logging.warning(file)
+            #logging.warning(path)
+            #logging.warning(file)
             slash = ''
             if not path[0] == '/':
                 #logging.warning(path[0])
@@ -389,12 +389,15 @@ class Fancygotchi(plugins.Plugin):
             else: 
                 dest_path = path
                 slash = ''
-            ori_bak = '%s/%s.%s.original' % (ROOT_PATH, path, file)
-            logging.warning(ori_bak)
+            ori_bak = '%s.%s.original' % (dest_path, file)
+            #logging.warning(ori_bak)
             src_path = '%s/fancygotchi/mod%s%s' % (FANCY_ROOT, slash, path)
-            logging.warning(src_path)
-            logging.warning(dest_path)
+            #logging.warning(src_path)
+            #logging.warning(dest_path)
             if not os.path.exists(ori_bak):
+                logging.warning(ori_bak)
+                logging.warning(src_path)
+                logging.warning(dest_path)
 
                 replace_file([file], [dest_path, src_path], True, False, True, 'original')
             
