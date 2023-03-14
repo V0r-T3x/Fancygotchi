@@ -414,7 +414,7 @@ class View(object):
                         newData.append(item) #version for color mode
                         #newData.append((0, 0, 0, 255)) #version for mono or 3-colors
 
-                bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.config['main']['custom_plugins'], th_opt['bg_image']))
+                bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.fancy_root, th_opt['bg_image']))
                 bga = bg.convert('RGBA')
                 rgba_im = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
                 rgba_im_ = rgba_im.putdata(newData)

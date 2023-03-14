@@ -25,6 +25,7 @@ import requests
 
 ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
 FANCY_ROOT = os.path.dirname(os.path.realpath(__file__))
+setattr(pwnagotchi, 'fancy_root', FANCY_ROOT)
 
 with open('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT), newline='') as csvfile:
     reader = csv.DictReader(csvfile)
@@ -344,7 +345,7 @@ class Fancygotchi(plugins.Plugin):
             logging.warning('[FANCYGOTCHI] The screen is not compatible with the plugin')
 
         # If the initial screen isn't compatible the mod will not install
-        logging.info('[FANCYGOTCHI] compatible: %s' % (compatible))
+        #logging.info('[FANCYGOTCHI] compatible: %s' % (compatible))
         if compatible:
             # Linking bg image to the web ui
             src = '%s/fancygotchi/img/' % (FANCY_ROOT)
@@ -376,10 +377,9 @@ class Fancygotchi(plugins.Plugin):
             #logging.warning(src_path)
             #logging.warning(dest_path)
             if not os.path.exists(ori_bak):
-                logging.warning(ori_bak)
-                logging.warning(src_path)
-                logging.warning(dest_path)
-
+                #logging.warning(ori_bak)
+                #logging.warning(src_path)
+                #logging.warning(dest_path)
                 replace_file([file], [dest_path, src_path], True, False, True, 'original')
             
             #logging.info('%s%s' % (path, file))
