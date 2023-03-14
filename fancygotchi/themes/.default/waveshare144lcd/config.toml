@@ -96,7 +96,7 @@ color = "lime"
 [theme.main_elements.status]
 position = [65, 26]
 value = "AUTO"
-font = "Bold"
+font = "Medium"
 color = "lime"
 wrap = true
 max = 20
