@@ -82,7 +82,7 @@ class View(object):
             'status': Text(value=self._voice.default(),
                            position=th_status['position'],
                            color=th_status['color'],
-                           font=getattr(fonts, th_status['font']),
+                           font=fonts.status_font(getattr(fonts, th_status['font'])),
                            wrap=th_status['wrap'],
                            # the current maximum number of characters per line, assuming each character is 6 pixels wide
                            max_length=th_status['max']),
@@ -156,7 +156,6 @@ class View(object):
         return self._state.get(key)
 
     def on_starting(self):
-        self.theme = "lime"
         self.set('status', self._voice.on_starting() + ("\n(v%s)" % pwnagotchi.__version__))
         self.set('face', faces.AWAKE)
         self.update()
