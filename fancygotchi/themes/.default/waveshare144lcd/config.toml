@@ -6,9 +6,9 @@ display_time = "waveshare144lcd"
 resolution = [128, 128]
 hi-res = true
 bg = true
-bg_image = "ui-bg-w-s.png"
+bg_image = "128x128-b.png"
 #Bold, BoldSmall, Medium, Huge, BoldBig, Small
-font_sizes = [10, 8, 10, 25, 25, 9]
+font_sizes = [10, 8, 10, 18, 25, 9]
 label_spacing = 9
 fps = 10
 font = 'DejaVuSansMono'
@@ -17,12 +17,12 @@ status_font = 'DejaVuSansMono'
 [theme.main_elements]
 
 [theme.main_elements.face]
-position = [14, 28]
+position = [0, 43]
 font = "Huge"
 color = "magenta"
 
 [theme.main_elements.name]
-position = [20,20]
+position = [0,14]
 font = "Bold"
 color = "lime"
 
@@ -38,7 +38,7 @@ color = "lime"
 #color = "BLACK"
 
 [theme.main_elements.channel]
-position = [278, 96]
+position = [0, 0]
 label = "CH"
 value = "00"
 label_font = "Bold"
@@ -46,7 +46,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.aps]
-position = [224, 96]
+position = [0, 71]
 label = "APS"
 value = "0 (00)"
 label_font = "Bold"
@@ -54,7 +54,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.uptime]
-position = [134, 3]
+position = [0, 25]
 label = "UP"
 value = "00:00:00"
 label_font = "Bold"
@@ -62,25 +62,25 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.line1]
-position = [0, 33, 240, 33]
+position = [0, 12, 127, 12]
 color = "lime"
 
 [theme.main_elements.line2]
-position = [0, 150, 240, 150]
+position = [0, 116, 127, 116]
 color = "lime"
 
 [theme.main_elements.friend_face]
-position = [0, 130]
+position = [12, 88]
 font = "Bold"
 color = "lime"
 
 [theme.main_elements.friend_name]
-position = [40, 135]
+position = [1, 103]
 font = "BoldSmall"
 color = "lime"
 
 [theme.main_elements.shakes]
-position = [34, 193]
+position = [26, 117]
 label = "PWND "
 value = "0 (00)"
 label_font = "Bold"
@@ -88,7 +88,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.mode]
-position = [22, 3]
+position = [0, 117]
 value = "AUTO"
 font = "Bold"
 color = "lime"

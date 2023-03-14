@@ -14,7 +14,6 @@ from PIL import Image
 
 import json
 import toml
-#import pandas as pd <----faulty one
 import csv
 import _thread
 from pwnagotchi import restart
@@ -38,26 +37,9 @@ with open('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT), newline='') as csvfile:
                 data_dict[key] = [value]
     FILES_TO_MOD = data_dict
 
-
-
-#logging.warning(FILES_TO_MOD['path'][0])
-#logging.warning(FILES_TO_MOD['file'][0])
-
-
 for i in range(len(FILES_TO_MOD['path'])):
     path = data_dict['path'][i]
     file = data_dict['file'][i]
-
-
-        #logging.warning(FILES_TO_MOD[key][value])
-    logging.warning(path)
-    logging.warning(file)
-
-
-
-#FILES_TO_MOD = pd.read_csv('%s/fancygotchi/mod/files.csv' % (FANCY_ROOT))
-#for index, value in FILES_TO_MOD.iterrows():
-#    logging.warning('%s ---> %s' % (value[0], value[1]))
 
 COMPATIBLE_PLUGINS = [
     'bt-tether',
@@ -71,7 +53,6 @@ COMPATIBLE_PLUGINS = [
 
 with open('%s/fancygotchi/mod/index.html' % (FANCY_ROOT), 'r') as file:
     html_contents = file.read()
-
 INDEX = html_contents
 
 def serializer(obj):
@@ -337,15 +318,15 @@ class Fancygotchi(plugins.Plugin):
         if ui == 'lcdhat':
             compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 1.33" LCD screen')
-        elif ui == 'waveshare_v2':
-            compatible = 1
-            logging.info('[FANCYGOTCHI] waveshare v.2 E-paper screen')
-        elif ui == 'oledhat':
-            compatible = 1
-            logging.info('[FANCYGOTCHI] waveshare 1.3" OLED screen')
-        elif ui == 'waveshare27inch':
-            compatible = 1
-            logging.info('[FANCYGOTCHI] waveshare 2.7" E-paper screen')
+        #elif ui == 'waveshare_v2':
+        #    compatible = 1
+        #    logging.info('[FANCYGOTCHI] waveshare v.2 E-paper screen')
+        #elif ui == 'oledhat':
+        #    compatible = 1
+        #    logging.info('[FANCYGOTCHI] waveshare 1.3" OLED screen')
+        #elif ui == 'waveshare27inch':
+        #    compatible = 1
+        #    logging.info('[FANCYGOTCHI] waveshare 2.7" E-paper screen')
         elif ui == 'waveshare144lcd':
             compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 1.44" LCD screen')

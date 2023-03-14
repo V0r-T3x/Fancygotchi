@@ -6,8 +6,8 @@ display_time = "lcdhat"
 resolution = [240, 240]
 hi-res = true
 bg = true
-bg_image = "240x240-b.png"
-font_sizes = [10, 9, 10, 35, 25, 9]
+bg_image = "ui-bg-w.png"
+font_sizes = [14, 12, 14, 32, 29, 13]
 label_spacing = 9
 fps = 10
 font = 'DejaVuSansMono'
@@ -16,14 +16,14 @@ status_font = 'DejaVuSansMono'
 [theme.main_elements]
 
 [theme.main_elements.face]
-position = [0, 40]
+position = [60, 40]
 font = "Huge"
-color = "magenta"
+color = "lime"
 
 [theme.main_elements.name]
-position = [5, 20]
-font = "Bold"
-color = "lime"
+position = [0, 78]
+font = "BoldSmall"
+color = "red"
 
 # Exemple test to add icons to an element label/value
 #[theme.main_elements.test_icon]
@@ -37,7 +37,7 @@ color = "lime"
 #color = "BLACK"
 
 [theme.main_elements.channel]
-position = [0, 0]
+position = [0, 18]
 label = "CH"
 value = "00"
 label_font = "Bold"
@@ -45,7 +45,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.aps]
-position = [28, 0]
+position = [35, 18]
 label = "APS"
 value = "0 (00)"
 label_font = "Bold"
@@ -53,7 +53,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.uptime]
-position = [175, 0]
+position = [153, 18]
 label = "UP"
 value = "00:00:00"
 label_font = "Bold"
@@ -61,46 +61,52 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.line1]
-position = [0, 14, 240, 14]
+position = [0, 33, 240, 33]
 color = "lime"
 
 [theme.main_elements.line2]
-position = [0, 108, 240, 108]
+position = [0, 150, 240, 150]
 color = "lime"
 
 [theme.main_elements.friend_face]
-position = [0, 92]
+position = [10, 223]
 font = "Bold"
 color = "lime"
 
 [theme.main_elements.friend_name]
-position = [40, 94]
+position = [60, 226]
 font = "BoldSmall"
 color = "lime"
 
 [theme.main_elements.shakes]
-position = [0, 109]
-label = "PWND "
+position = [0, 152]
+label = "PWND"
 value = "0 (00)"
 label_font = "Bold"
 text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.mode]
-position = [215, 109]
+position = [100, 36]
 value = "AUTO"
 font = "Bold"
 color = "lime"
 
 [theme.main_elements.status]
-position = [125, 20]
+position = [10, 98]
 value = "AUTO"
-font = "Medium"
+label_font = "Bold"
+text_font = "Medium"
 color = "lime"
-wrap = true
 max = 20
 
 [theme.plugin_elements]
+
+[theme.plugin_elements.memtemp_mem]
+position = [-10, 185]
+label_font = "Bold"
+text_font = "Small"
+color = "BLACK"
 
 [theme.plugin_elements.crack_house]
 

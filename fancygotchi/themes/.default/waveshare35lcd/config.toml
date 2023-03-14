@@ -6,8 +6,8 @@ display_time = "inky"
 resolution = [480, 320]
 hi-res = true
 bg = true
-bg_image = "480x320e-i.png"
-font_sizes = [10, 8, 10, 25, 25, 9]
+bg_image = "480x320-b.png"
+font_sizes = [12, 10, 12, 70, 25, 9]
 label_spacing = 9
 fps = 10
 font = 'DejaVuSansMono'
@@ -17,12 +17,12 @@ status_font = 'DejaVuSansMono'
 [theme.main_elements]
 
 [theme.main_elements.face]
-position = [14, 28]
+position = [110, 60]
 font = "Huge"
 color = "magenta"
 
 [theme.main_elements.name]
-position = [20,20]
+position = [10, 30]
 font = "Bold"
 color = "lime"
 
@@ -38,7 +38,7 @@ color = "lime"
 #color = "BLACK"
 
 [theme.main_elements.channel]
-position = [278, 96]
+position = [0, 0]
 label = "CH"
 value = "00"
 label_font = "Bold"
@@ -46,7 +46,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.aps]
-position = [224, 96]
+position = [80, 0]
 label = "APS"
 value = "0 (00)"
 label_font = "Bold"
@@ -54,7 +54,7 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.uptime]
-position = [134, 3]
+position = [400, 0]
 label = "UP"
 value = "00:00:00"
 label_font = "Bold"
@@ -62,25 +62,25 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.line1]
-position = [0, 33, 240, 33]
+position = [0, 14, 480, 14]
 color = "lime"
 
 [theme.main_elements.line2]
-position = [0, 150, 240, 150]
+position = [0,300, 480, 300]
 color = "lime"
 
 [theme.main_elements.friend_face]
-position = [0, 130]
+position = [0, 220]
 font = "Bold"
 color = "lime"
 
 [theme.main_elements.friend_name]
-position = [40, 135]
+position = [50, 225]
 font = "BoldSmall"
 color = "lime"
 
 [theme.main_elements.shakes]
-position = [34, 193]
+position = [10, 300]
 label = "PWND "
 value = "0 (00)"
 label_font = "Bold"
@@ -88,18 +88,18 @@ text_font = "Medium"
 color = "lime"
 
 [theme.main_elements.mode]
-position = [22, 3]
+position = [440, 300]
 value = "AUTO"
 font = "Bold"
 color = "lime"
 
 [theme.main_elements.status]
-position = [26, 124]
+position = [80, 180]
 value = "AUTO"
-font = "Bold"
+font = "Medium"
 color = "lime"
 wrap = true
-max = 20
+max = 100
 
 [theme.plugin_elements]
 
