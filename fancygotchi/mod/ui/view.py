@@ -68,8 +68,8 @@ class View(object):
                                    label_font=getattr(fonts, th_up['label_font']),
                                    text_font=getattr(fonts, th_up['text_font'])),
 
-            'line1': Line(th['line1'], color='lime'),
-            'line2': Line(th['line2'], color='lime'),
+            'line1': Line(th_line1['position'], color='lime'),
+            'line2': Line(th_line2['position'], color='lime'),
 
             'face': Text(value=faces.SLEEP, position=th_face['position'], color=th_face['color'], font=getattr(fonts, th_face['font'])),
 

@@ -93,7 +93,7 @@ font = "Bold"
 color = "lime"
 
 [theme.main_elements.status]
-position = [125, 20]
+position = [10,98]
 value = "AUTO"
 font = "Medium"
 color = "lime"
