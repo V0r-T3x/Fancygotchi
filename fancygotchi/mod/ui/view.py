@@ -37,6 +37,8 @@ class View(object):
         th_face = th['face']
         th_name = th['name']
         th_status = th['status']
+        th_line1 = th['line1']
+        th_line2 = th['line2']
         th_fface = th['friend_face']
         th_fname = th['friend_name']
         th_sh = th['shakes']
@@ -66,8 +68,8 @@ class View(object):
                                    label_font=getattr(fonts, th_up['label_font']),
                                    text_font=getattr(fonts, th_up['text_font'])),
 
-            'line1': Line(self._layout['line1'], color='lime'),
-            'line2': Line(self._layout['line2'], color='lime'),
+            'line1': Line(th['line1'], color='lime'),
+            'line2': Line(th['line2'], color='lime'),
 
             'face': Text(value=faces.SLEEP, position=th_face['position'], color=th_face['color'], font=getattr(fonts, th_face['font'])),
 

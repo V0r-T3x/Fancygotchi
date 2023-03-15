@@ -93,6 +93,24 @@ def do_auto_mode(agent):
             else:
                 logging.exception("main loop exception (%s)", e)
 
+def load_theme(config):
+    custom_path = config['main']['custom_plugins']
+    if custom_path[-1] == '/':
+        custom_path = custom_path[:-1]
+    if os.path.exists('%s/fancygotchi.py' % (custom_path)):
+        fancy_path = custom_path
+    else:
+        fancy_path = '/usr/local/lib/python3.7/dist-packages/pwnagotchi/plugins/default'
+    if not config['main']['plugins']['fancygotchi']['theme'] == '':
+        th_select = str(config['main']['plugins']['fancygotchi']['theme'])
+    else:
+        th_select = '.default'
+    logging.info('%s/fancygotchi/themes/%s/%s/config.toml' % (fancy_path, th_select, config['ui']['display']['type']))
+    with open('%s/fancygotchi/themes/%s/%s/config.toml' % (fancy_path, th_select, config['ui']['display']['type']), 'r') as f:
+        setattr(pwnagotchi, '_theme', toml.load(f))
+        #pwnagotchi._theme = toml.load(f)
+        logging.info(pwnagotchi._theme)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser = plugins_cmd.add_parsers(parser)
@@ -144,34 +162,20 @@ if __name__ == '__main__':
     from pwnagotchi import plugins
 
     pwnagotchi.config = config
-    """"""
-    custom_path = config['main']['custom_plugins']
-    if custom_path[-1] == '/':
-        custom_path = custom_path[:-1]
+
     
-    if os.path.exists('%s/fancygotchi.py' % (custom_path)):
-        fancy_path = custom_path
-    else:
-        fancy_path = '/usr/local/lib/python3.7/dist-packages/pwnagotchi/plugins/default'
-    
-    if not config['main']['plugins']['fancygotchi']['theme'] == '':
-        th_select = config['main']['plugins']['fancygotchi']['theme']
-    else:
-        th_select = '.default'
-    
-    with open('%s/fancygotchi/themes/%s/%s/config.toml' % (fancy_path, th_select, config['ui']['display']['type']), 'r') as f:
-        pwnagotchi._theme = toml.load(f)
 
     fs.setup_mounts(config)
     log.setup_logging(args, config)
+    load_theme(config)
     fonts.init(config)
-
+    
     pwnagotchi.set_name(config['main']['name'])
 
     plugins.load(config)
 
     display = Display(config=config, state={'name': '%s>' % pwnagotchi.name()})
-
+    
     if args.do_clear:
         do_clear(display)
         sys.exit(0)
