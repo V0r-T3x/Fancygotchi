@@ -11,8 +11,8 @@
 
 bg_image = "ui-bg-b.png"#"240x240-b.png"
 font_sizes = [14, 12, 14, 32, 29, 13]
-label_spacing = 9 # not linked yet
-fps = 10 # not linked yet
+label_spacing = 9
+fps = 3 
 font = 'DejaVuSansMono'
 status_font = 'DejaVuSansMono'
 
@@ -23,7 +23,7 @@ cursor = '❤'
 # '2' = 2 colors mode (1bit)
 # '3' = 3 colors mode (grayscale)
 color_web = 'full'
-color_display = '2'
+color_display = 'full'
 
 # what will be the text color for a low color display
 # 'black'
@@ -41,7 +41,7 @@ color = "lime"
 [theme.main_elements.name]
 position = [0, 78]
 font = "Bold"
-color = "lime"
+color = "white"
 
 # Exemple test to add icons to an element label/value
 #[theme.main_elements.test_icon]

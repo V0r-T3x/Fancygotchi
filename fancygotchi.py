@@ -319,9 +319,9 @@ class Fancygotchi(plugins.Plugin):
         if ui == 'lcdhat':
             compatible = 1
             logging.info('[FANCYGOTCHI] waveshare 1.33" LCD screen')
-        #elif ui == 'waveshare_v2':
-        #    compatible = 1
-        #    logging.info('[FANCYGOTCHI] waveshare v.2 E-paper screen')
+        elif ui == 'waveshare_v2':
+            compatible = 1
+            logging.info('[FANCYGOTCHI] waveshare v.2 E-paper screen')
         #elif ui == 'oledhat':
         #    compatible = 1
         #    logging.info('[FANCYGOTCHI] waveshare 1.3" OLED screen')
