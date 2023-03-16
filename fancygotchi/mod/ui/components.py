@@ -3,6 +3,8 @@ from PIL import Image, ImageDraw, ImageOps
 from textwrap import TextWrapper
 
 def text_to_rgb(text, tfont, color, width, height):
+    if color == 'white' : color = (254, 254, 254, 255)
+    logging.warning(color)
     #logging.info('text length: %s; text font: %s; text: %s' % (len(text), tfont, text))
     #logging.info(str(tfont.getbbox(text)))
     w,h = tfont.getsize(text)
