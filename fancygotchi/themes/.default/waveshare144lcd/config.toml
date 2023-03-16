@@ -14,6 +14,22 @@ fps = 10
 font = 'DejaVuSansMono'
 status_font = 'DejaVuSansMono'
 
+cursor = '?'
+
+# color mode for the web UI and the display
+# 'full' = full color mode
+# '2' = 2 colors mode (1bit)
+# '3' = 3 colors mode (grayscale)
+color_web = 'full'
+color_display = 'full'
+
+# what will be the text color for a low color display
+# 'black'
+# 'white'
+# 'auto' = pale color will be 'white' and dark color will be 'black'
+color_text = 'white'
+
+
 [theme.main_elements]
 
 [theme.main_elements.face]

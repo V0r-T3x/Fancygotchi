@@ -48,6 +48,7 @@ class View(object):
         self._render_cbs = []
         self._config = config
         self._canvas = None
+        self._canvas_l = None
         self._frozen = False
         self._lock = Lock()
         self._voice = Voice(lang=config['main']['lang'])
@@ -139,12 +140,14 @@ class View(object):
             self._render_cbs.append(cb)
 
     def _refresh_handler(self):
+        th_opt = pwnagotchi._theme['theme']['options']
         delay = 1.0 / self._config['ui']['fps']
         while True:
             try:
                 name = self._state.get('name')
-                #?self.set('name', name.rstrip('█').strip() if '█' in name else (name + ' █'))
-                self.set('name', name.rstrip('❤').strip() if '❤' in name else (name + ' ❤'))
+                #self.set('name', name.rstrip('█').strip() if '█' in name else (name + ' █'))
+                #self.set('name', name.rstrip('❤').strip() if '❤' in name else (name + ' ❤'))
+                self.set('name', name.rstrip(th_opt['cursor']).strip() if th_opt['cursor'] in name else (name + ' ' + th_opt['cursor']))
                 self.update()
             except Exception as e:
                 logging.warning("non fatal error while updating view: %s" % e)
@@ -405,28 +408,87 @@ class View(object):
                 for key, lv in copy_state:
                     lv.draw(self._canvas, drawer)
 
-                # switching the white to transparent
-                datas = self._canvas.getdata()
-                newData = []
-                for item in datas:
-                    #logging.info(item)
-                    if item[0] == 255 and item[1] == 255 and item[2] == 255:
-                        newData.append((255, 255, 255, 0))
-                    else:
-                        newData.append(item) #version for color mode
-                        #newData.append((0, 0, 0, 255)) #version for mono or 3-colors
-
+                #-------------------------------------------------------------------------
                 bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.fancy_root, th_opt['bg_image']))
                 bga = bg.convert('RGBA')
-                rgba_im = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
-                rgba_im_ = rgba_im.putdata(newData)
-                bga.paste(rgba_im, (0,0), rgba_im)
-                self._canvas = bga.convert('RGB')
 
-                web.update_frame(self._canvas)
+                datas = self._canvas.getdata()
+                newData = []
+                newData_l = []
+                if th_opt['color_web']  == 'full' or th_opt['color_display'] == 'full':
+                    #logging.warning('A full color image is created')
+                    for item in datas:
+                        #logging.info(item)
+                        if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                            newData.append((255, 255, 255, 0))
+                        else:
+                            newData.append(item) #version for color mode
+                    #RGBA image for the full color 
+                    rgba_im = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
+                    rgba_im.putdata(newData)
+                    bga.paste(rgba_im, (0,0), rgba_im)
+                    self._canvas = bga.convert('RGB')
 
-                for cb in self._render_cbs:
-                    #logging.info(cb)
-                    cb(self._canvas)
+                if th_opt['color_web'] != 'full' or th_opt['color_display'] != 'full':
+                    # convert white to transparent & switch text if not into full color
+                    for item in datas:
+                        #logging.info(item)
+                        if item[0] == 255 and item[1] == 255 and item[2] == 255:
+                            # white to transparent
+                            newData_l.append((255, 255, 255, 0))
+                        else:
+                            if th_opt['color_text'] == 'black':
+                                #logging.warning('text is black')
+                                newData.append((0, 0, 0, 255))
+                            if th_opt['color_text'] == 'white':
+                                #logging.warning('text is white')
+                                newData_l.append((255, 255, 255, 255))
+                            if th_opt['color_text'] == 'auto':
+                                #logging.warning('pale text is white and dark text is black')
+                                color_sum = item[0] + item[1] + item[2]
+                                if color_sum < 500:
+                                    # color is dark
+                                    newData.append((0, 0, 0, 255))
+                                else:
+                                    # color is pale
+                                    newData_l.append((255, 255, 255, 255))
+                    #RGBA image for the low color 
+                    
+                    if th_opt['color_web'] == '2' or th_opt['color_display'] == '2':
+                        #logging.warning('A 1bit image is created')
+                        rgba_im_2 = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
+                        rgba_im_2.putdata(newData_l)
+                        bga.paste(rgba_im_2, (0,0), rgba_im_2)
+                        self._canvas_2 = bga.convert('1')
+                        
+                    if th_opt['color_web'] == '3' or th_opt['color_display'] == '3':
+                        #logging.warning('A grayscale image is created')
+                        rgba_im_3 = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
+                        rgba_im_3.putdata(newData_l)
+                        bga.paste(rgba_im_3, (0,0), rgba_im_3)
+                        self._canvas_3 = bga.convert('L')
+
+                if th_opt['color_web'] == 'full':
+                    #logging.warning('The web UI is full color')
+                    web.update_frame(self._canvas)
+                elif th_opt['color_web'] == '2':
+                    #logging.warning('The web UI is 1bit')
+                    web.update_frame(self._canvas_2)
+                elif th_opt['color_web'] == '3':
+                    #logging.warning('The web UI is grayscale')
+                    web.update_frame(self._canvas_3)
+
+                if th_opt['color_display'] == 'full':
+                    #logging.warning('The display is full color')
+                    for cb in self._render_cbs:
+                        cb(self._canvas)
+                elif th_opt['color_display'] == '2':
+                    #logging.warning('The display is 1bit')
+                    for cb in self._render_cbs:
+                        cb(self._canvas_2)
+                elif th_opt['color_display'] == '3':
+                    #logging.warning('The display is grayscale')
+                    for cb in self._render_cbs:
+                        cb(self._canvas_3)
 
                 self._state.reset()
