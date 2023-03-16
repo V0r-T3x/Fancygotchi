@@ -411,12 +411,12 @@ class View(object):
 
                 #-------------------------------------------------------------------------
                 bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.fancy_root, th_opt['bg_image']))
-                bga = bg.convert('RGBA')
 
                 datas = self._canvas.getdata()
                 newData = []
                 newData_l = []
                 if th_opt['color_web']  == 'full' or th_opt['color_display'] == 'full':
+                    bga = bg.convert('RGBA')
                     #logging.warning('A full color image is created')
                     for item in datas:
                         #logging.info(item)
@@ -440,7 +440,7 @@ class View(object):
                         else:
                             if th_opt['color_text'] == 'black':
                                 #logging.warning('text is black')
-                                newData.append((0, 0, 0, 255))
+                                newData_l.append((0, 0, 0, 255))
                             if th_opt['color_text'] == 'white':
                                 #logging.warning('text is white')
                                 newData_l.append((255, 255, 255, 255))
@@ -456,6 +456,7 @@ class View(object):
                     #RGBA image for the low color 
                     
                     if th_opt['color_web'] == '2' or th_opt['color_display'] == '2':
+                        bga = bg.convert('RGBA')
                         #logging.warning('A 1bit image is created')
                         rgba_im_2 = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
                         rgba_im_2.putdata(newData_l)
@@ -463,6 +464,7 @@ class View(object):
                         self._canvas_2 = bga.convert('1')
                         
                     if th_opt['color_web'] == '3' or th_opt['color_display'] == '3':
+                        bga = bg.convert('RGBA')
                         #logging.warning('A grayscale image is created')
                         rgba_im_3 = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
                         rgba_im_3.putdata(newData_l)
