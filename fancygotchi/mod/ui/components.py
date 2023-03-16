@@ -1,4 +1,5 @@
 import logging
+import pwnagotchi
 from PIL import Image, ImageDraw, ImageOps
 from textwrap import TextWrapper
 
@@ -137,6 +138,8 @@ class Text(Widget):
 
 class LabeledValue(Widget):
     def __init__(self, label, value="", position=(0, 0), label_font=None, text_font=None, color=0, label_spacing=9):
+        th_opt = pwnagotchi._theme['theme']['options']
+        label_spacing = th_opt['label_spacing']
         super().__init__(position, color)
         self.label = label
         self.value = value

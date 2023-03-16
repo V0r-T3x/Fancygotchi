@@ -141,7 +141,8 @@ class View(object):
 
     def _refresh_handler(self):
         th_opt = pwnagotchi._theme['theme']['options']
-        delay = 1.0 / self._config['ui']['fps']
+        #delay = 1.0 / self._config['ui']['fps']
+        delay = 1.0 / th_opt['fps']
         while True:
             try:
                 name = self._state.get('name')
