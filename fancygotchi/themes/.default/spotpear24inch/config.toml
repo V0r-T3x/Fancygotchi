@@ -1,0 +1,131 @@
+[theme]
+
+[theme.options]
+is_display = true
+display_time = "inky"
+resolution = [480, 320]
+hi-res = true
+bg = true
+bg_image = "480x320-b.png"
+font_sizes = [12, 10, 12, 70, 25, 9]
+label_spacing = 9
+fps = 10
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+
+cursor = '❤'
+
+# 'full' = full color mode
+# '2' = 2 colors mode (1bit)
+# '3' = 3 colors mode (grayscale)
+color_web = 'full'
+color_display = 'full'
+
+# what will be the text color for a low color display
+# 'black'
+# 'white'
+# 'auto' = pale color will be 'white' and dark color will be 'black'
+color_text = 'auto'
+
+[theme.main_elements]
+
+[theme.main_elements.face]
+position = [110, 60]
+font = "Huge"
+color = "magenta"
+
+[theme.main_elements.name]
+position = [10, 30]
+font = "Bold"
+color = "lime"
+
+# Exemple test to add icons to an element label/value
+#[theme.main_elements.test_icon]
+#position = [0, 18]
+#label_icon = true
+#label = ["/.../.../.../icon.png"]
+#value_icon = true
+#value = ["/.../.../.../icon2.png", "/.../.../.../icon3.png"]
+#label_font = "Bold"
+#text_font = "Medium"
+#color = "BLACK"
+
+[theme.main_elements.channel]
+position = [0, 0]
+label = "CH"
+value = "00"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.aps]
+position = [80, 0]
+label = "APS"
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.uptime]
+position = [400, 0]
+label = "UP"
+value = "00:00:00"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.line1]
+position = [0, 14, 480, 14]
+color = "lime"
+
+[theme.main_elements.line2]
+position = [0,300, 480, 300]
+color = "lime"
+
+[theme.main_elements.friend_face]
+position = [0, 220]
+font = "Bold"
+color = "lime"
+
+[theme.main_elements.friend_name]
+position = [50, 225]
+font = "BoldSmall"
+color = "lime"
+
+[theme.main_elements.shakes]
+position = [10, 300]
+label = "PWND "
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.mode]
+position = [440, 300]
+value = "AUTO"
+font = "Bold"
+color = "lime"
+
+[theme.main_elements.status]
+position = [80, 180]
+value = "AUTO"
+font = "Medium"
+color = "lime"
+wrap = true
+max = 100
+
+[theme.plugin_elements]
+
+[theme.plugin_elements.crack_house]
+
+[theme.plugin_elements.crack_house.crack_house]
+position = [-10, 185]
+label_font = "Bold"
+text_font = "Small"
+color = "BLACK"
+
+[theme.plugin_elements.crack_house.crack_house_stats]
+position = [-10, 170]
+label_font = "Bold"
+text_font = "Small"
+color = "BLACK"

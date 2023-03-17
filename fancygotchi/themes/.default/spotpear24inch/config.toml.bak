@@ -1,0 +1,118 @@
+[theme]
+
+[theme.options]
+is_display = true
+display_time = "inky"
+resolution = [480, 320]
+hi-res = true
+bg = true
+bg_image = "480x320e-i.png"
+font_sizes = [10, 8, 10, 25, 25, 9]
+label_spacing = 9
+fps = 10
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+
+
+[theme.main_elements]
+
+[theme.main_elements.face]
+position = [14, 28]
+font = "Huge"
+color = "magenta"
+
+[theme.main_elements.name]
+position = [20,20]
+font = "Bold"
+color = "lime"
+
+# Exemple test to add icons to an element label/value
+#[theme.main_elements.test_icon]
+#position = [0, 18]
+#label_icon = true
+#label = ["/.../.../.../icon.png"]
+#value_icon = true
+#value = ["/.../.../.../icon2.png", "/.../.../.../icon3.png"]
+#label_font = "Bold"
+#text_font = "Medium"
+#color = "BLACK"
+
+[theme.main_elements.channel]
+position = [278, 96]
+label = "CH"
+value = "00"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.aps]
+position = [224, 96]
+label = "APS"
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.uptime]
+position = [134, 3]
+label = "UP"
+value = "00:00:00"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.line1]
+position = [0, 33, 240, 33]
+color = "lime"
+
+[theme.main_elements.line2]
+position = [0, 150, 240, 150]
+color = "lime"
+
+[theme.main_elements.friend_face]
+position = [0, 130]
+font = "Bold"
+color = "lime"
+
+[theme.main_elements.friend_name]
+position = [40, 135]
+font = "BoldSmall"
+color = "lime"
+
+[theme.main_elements.shakes]
+position = [34, 193]
+label = "PWND "
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+color = "lime"
+
+[theme.main_elements.mode]
+position = [22, 3]
+value = "AUTO"
+font = "Bold"
+color = "lime"
+
+[theme.main_elements.status]
+position = [26, 124]
+value = "AUTO"
+font = "Bold"
+color = "lime"
+wrap = true
+max = 20
+
+[theme.plugin_elements]
+
+[theme.plugin_elements.crack_house]
+
+[theme.plugin_elements.crack_house.crack_house]
+position = [-10, 185]
+label_font = "Bold"
+text_font = "Small"
+color = "BLACK"
+
+[theme.plugin_elements.crack_house.crack_house_stats]
+position = [-10, 170]
+label_font = "Bold"
+text_font = "Small"
+color = "BLACK"
