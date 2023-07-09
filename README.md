@@ -9,6 +9,10 @@ Pimoroni Display Hat Mini 320x240
 
 I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop).  
 
+This mod can be a bit slow with some features enabled on a raspberry pi zero.
+(I'll add a note about the best light config to your with a rpi0w soon)  
+
+
 ```
 I SHARE IT AS BACKUP AND TO SHARE THE PROGRESS  
 BACKUP YOUR PWNAGOTCHI BEFORE INSTALL 
