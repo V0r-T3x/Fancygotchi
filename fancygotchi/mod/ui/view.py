@@ -4,9 +4,13 @@ import traceback
 import random
 import toml
 import time
+import os
+from shutil import copy
+
 from threading import Lock
 
-from PIL import ImageDraw, Image
+from PIL import ImageDraw, Image, ImageSequence, ImageFont
+from PIL import ImageOps
 
 import pwnagotchi
 import pwnagotchi.plugins as plugins
@@ -29,8 +33,8 @@ class View(object):
         # setup faces from the configuration in case the user customized them
         faces.load_from_config(config['ui']['faces'])
         
-        #logging.info(self._theme)
         th = pwnagotchi._theme['theme']['main_elements']
+        th_opt = pwnagotchi._theme['theme']['options']
         th_ch = th['channel']
         th_aps = th['aps']
         th_up = th['uptime']
@@ -43,19 +47,43 @@ class View(object):
         th_fname = th['friend_name']
         th_sh = th['shakes']
         th_mode = th['mode']
+        self._layout = impl.layout()
+        self._width = self._layout['width']
+        self._height = self._layout['height']
+        size = [self._width, self._height]
+        if th_opt['bg_anim_image'] != '':
+            gif = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['bg_anim_image']))
+            self._frames = []
+            for frame in ImageSequence.Iterator(gif):
+                self._frames.append(frame.convert("RGBA"))
+        if th_opt['bg_image'] != '':
+            self._bg = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['bg_image']))
+            self._bg = self._bg.convert('RGBA')
 
+        # verify if the foreground is animated or not (gif or png)
+        # 
+        if th_opt['fg_image'] != '':
+            self._fg = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['fg_image']))
+            self._fg = self._fg.convert('RGBA')
+
+        self._boot = 1
+        self._i = 0
+        self._i2 = 0
         self._agent = None
         self._render_cbs = []
         self._config = config
         self._canvas = None
-        self._canvas_l = None
+        self._canvas_a = None
+        self._canvas_2 = None
+        self._canvas_2a = None
+        self._canvas_3 = None
+        self._web = None
+        self._disp = None
         self._frozen = False
         self._lock = Lock()
         self._voice = Voice(lang=config['main']['lang'])
         self._implementation = impl
-        self._layout = impl.layout()
-        self._width = self._layout['width']
-        self._height = self._layout['height']
+        
         self._state = State(state={
             'channel': LabeledValue(color=th_ch['color'], label=th_ch['label'], value=th_ch['value'], position=th_ch['position'],
                                     label_font=getattr(fonts, th_ch['label_font']),
@@ -79,7 +107,7 @@ class View(object):
                                 color=th_fname['color']),
 
             'name': Text(value='%s>' % 'pwnagotchi', position=th_name['position'], color=th_name['color'], font=getattr(fonts, th_name['font'])),
-            #'name': Text(value='/home/pi/plugins/fancygotchi/img/icons/name.png', position=self._layout['name'], color='lime', font=fonts.Bold, icon=True),
+            #'name': Text(value='/home/pi/plugins/fancygotchi/img/icons/name.png', position=self._layout['name'], color='lime', font=fonts.Bold),
 
 
             'status': Text(value=self._voice.default(),
@@ -98,6 +126,8 @@ class View(object):
                          font=getattr(fonts, th_mode['font']), color=th_mode['color']),
         })
 
+        logging.warning(self._layout['status']['font'])
+
         if state:
             for key, value in state.items():
                 self._state.set(key, value)
@@ -112,7 +142,8 @@ class View(object):
             self._ignore_changes = ('uptime', 'name')
 
         ROOT = self
-        #logging.info(ROOT)
+
+        self._state.set_color('name', 'red')
 
     def set_agent(self, agent):
         self._agent = agent
@@ -148,7 +179,40 @@ class View(object):
                 name = self._state.get('name')
                 #self.set('name', name.rstrip('█').strip() if '█' in name else (name + ' █'))
                 #self.set('name', name.rstrip('❤').strip() if '❤' in name else (name + ' ❤'))
+                if hasattr(pwnagotchi, 'fancy_cursor'):
+                    if th_opt['cursor'] in name:
+                        name = pwnagotchi.fancy_name + '> ' + pwnagotchi.fancy_cursor
+                        th_opt['cursor'] = pwnagotchi.fancy_cursor
                 self.set('name', name.rstrip(th_opt['cursor']).strip() if th_opt['cursor'] in name else (name + ' ' + th_opt['cursor']))
+
+
+                for val in self._state.items():
+                    #logging.warning(val)
+                    if len(self._state.get_attr(val[0], 'colors')) != 0:
+                        
+                        i = self._state.get_attr(val[0], 'icolor')
+
+                        color_list = self._state.get_attr(val[0], 'colors')
+                        #logging.warning('more than a color for '+val[0]+' '+str(i)+'/'+str(len(color_list)))
+                        self._state.set_attr(val[0], 'color', color_list[i])
+                        i += 1
+                        if i > len(color_list)-1:
+                            self._state.set_attr(val[0], 'icolor', 0)
+                        else:
+                            self._state.set_attr(val[0], 'icolor', i)
+
+                    #for key, value in val:
+                    #    logging.warning(element +' '+ value)
+                #if self._state.get_color('name') == 'lime':
+                #    self._state.set_color('name', 'red')
+                #    self._state.set_attr('name', 'icolor', 1)
+                #    #logging.warning(self._state.get_attr('name', 'icolor'))
+                #else:
+                #    self._state.set_color('name', 'lime')
+                #    self._state.set_attr('name', 'icolor', 0)
+                #    #logging.warning(self._state.get_attr('name', 'icolor'))
+
+
                 self.update()
             except Exception as e:
                 logging.warning("non fatal error while updating view: %s" % e)
@@ -209,6 +273,7 @@ class View(object):
         self.update()
 
     def set_closest_peer(self, peer, num_total):
+        th_opt = pwnagotchi._theme['theme']['options']
         if peer is None:
             self.set('friend_face', None)
             self.set('friend_name', None)
@@ -223,8 +288,9 @@ class View(object):
             else:
                 num_bars = 1
 
-            name = '▌' * num_bars
-            name += '│' * (4 - num_bars)
+            # adding the 
+            name = th_opt['friend_bars'] * num_bars
+            name += th_opt['friend_no_bars'] * (4 - num_bars)
             name += ' %s %d (%d)' % (peer.name(), peer.pwnd_run(), peer.pwnd_total())
 
             if num_total > 1:
@@ -386,8 +452,222 @@ class View(object):
         self.set('status', self._voice.custom(text))
         self.update()
 
+    def fancy_change(self, partial=False, fancy_dict=[]):
+        #-------------------------------------------------------------------------
+        # OTG theme changer
+        # checked in theory-linking status font OTG
+        # checked-linking offset OTG
+        #
+        # checked-linking the css to the OTG
+        # checked- adjusting all the default theme config files
+        # checked- making a symlink of the img folder from the theme instead of the fancygotchi plugin folder
+        # verifying the selected theme in the pwny config.toml
+        #-------------------------------------------------------------------------
+        global Bold, BoldSmall, Medium, Huge, BoldBig, Small, FONT_NAME
+        rot = self._config['main']['plugins']['fancygotchi']['rotation']
+        th_opt = pwnagotchi._theme['theme']['options']
+        actual_th = self._config['main']['plugins']['fancygotchi']['theme']
+
+        if not partial:
+
+            # loading pwnagotchi config.toml
+            with open('/etc/pwnagotchi/config.toml', 'r') as f:
+                f_toml = toml.load(f)
+                self._config['main']['plugins']['fancygotchi']['rotation'] = f_toml['main']['plugins']['fancygotchi']['rotation']
+            rot = self._config['main']['plugins']['fancygotchi']['rotation']
+
+            self._config['main']['plugins']['fancygotchi']['theme'] = f_toml['main']['plugins']['fancygotchi']['theme']
+            actual_th = self._config['main']['plugins']['fancygotchi']['theme']
+            if not pwnagotchi.config['main']['plugins']['fancygotchi']['theme'] == '':
+                th_select = actual_th
+            else:
+                th_select = '.default'
+            th_path = '%s/fancygotchi/themes/%s/' % (pwnagotchi.fancy_root, th_select)
+            th_path_disp = '%s%s/' % (th_path, pwnagotchi.config['ui']['display']['type'])
+            setattr(pwnagotchi, 'fancy_theme', th_path)
+            setattr(pwnagotchi, 'fancy_theme_disp', th_path_disp)
+
+            if actual_th != f_toml['main']['plugins']['fancygotchi']['theme']:
+                logging.info('[FANCYGOTCHI] Theme changed... Loading new theme')
+
+            if rot == 0 or rot == 180:
+                logging.info('[FANCYGOTCHI] theme file: %sconfig-h.toml' % (pwnagotchi.fancy_theme_disp))
+                config_ori = '%sconfig-h.toml' % (pwnagotchi.fancy_theme_disp)
+            if rot == 90 or rot == 270:
+                logging.info('[FANCYGOTCHI] theme file: %sconfig-v.toml' % (pwnagotchi.fancy_theme_disp))
+                config_ori = '%sconfig-v.toml' % (pwnagotchi.fancy_theme_disp)
+            
+            # loading theme config
+            with open(config_ori, 'r') as f:
+                f_toml = toml.load(f)
+                while pwnagotchi._theme != f_toml:
+                    setattr(pwnagotchi, '_theme', f_toml)
+
+            # copying the style.css of the selected theme
+            src_css = '%sstyle.css' % (th_path)
+            dst_css = '%s/web/static/css/style.css' % (os.path.dirname(os.path.realpath(__file__)))
+            logging.info('[FANCYGOTCHI] linking theme css: '+src_css +' ~~mod~~> '+ dst_css)
+            copy(src_css, dst_css)
+
+            # changing the symlink for the img folder of the slected theme
+            src_img = '%simg' % (th_path)
+            dst_img = '%s/web/static' % (os.path.dirname(os.path.realpath(__file__)))
+            logging.info('[FANCYGOTCHI] linking theme image folder: '+src_img +' ~~mod~~> '+ dst_img)
+            # removing old link
+            os.system('rm %s/img' % (dst_img))
+            # creating new link
+            os.system('ln -s %s %s' % (src_img, dst_img))
+            
+        else:
+            logging.info('[FANCYGOTCHI] partial theme refresh: %s' % (fancy_dict))
+
+        th_opt = pwnagotchi._theme["theme"]["options"]
+        if th_opt['bg_anim_image'] != '':
+            self._i = 0
+            gif = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['bg_anim_image']))
+            self._frames = []
+            for frame in ImageSequence.Iterator(gif):
+                self._frames.append(frame.convert("RGBA"))
+
+        size = [self._width, self._height]
+
+        if th_opt['bg_image'] != '':
+            bg_img = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['bg_image']))
+            self._bg = bg_img
+            self._bg = self._bg.convert('RGBA')
+        else:
+             self._bg = Image.new('RGBA', size, (0, 0, 0, 0))
+        if th_opt['fg_image'] != '':
+            self._fg = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['fg_image']))
+            self._fg = self._fg.convert('RGBA')
+        setattr(pwnagotchi, 'fps', th_opt['fps'])
+        setattr(pwnagotchi, 'fancy_cursor', th_opt['cursor'])
+        th_opt['cursor'] = th_opt['cursor']
+        setattr(pwnagotchi, 'fancy_font', th_opt['cursor'])
+        fonts.STATUS_FONT_NAME = th_opt['status_font']
+        fonts.SIZE_OFFSET = th_opt['size_offset']
+        fonts.FONT_NAME = th_opt['font']
+
+        ft = th_opt['font_sizes']
+        fonts.setup(ft[0], ft[1], ft[2], ft[3], ft[4], ft[5])
+        
+        main_elements = pwnagotchi._theme["theme"]["main_elements"]
+        plugin_elements = pwnagotchi._theme["theme"]["plugin_elements"]
+        components = main_elements.copy()
+        components.update(plugin_elements)
+        for element, values in components.items():
+            for key, value in values.items():
+                if element == 'status':
+                    s = True
+                else:
+                    s = False
+                if key == 'position':
+                    self._state.set_attr(element,'xy', value)
+                elif key == 'label':
+                    self._state.set_attr(element, key, value)
+                elif key == 'label_spacing':
+                    self._state.set_attr(element, key, value)
+                elif key == 'label_line_spacing':
+                    self._state.set_attr(element, key, value)
+                elif key == 'font':
+                    if value == 'Small': 
+                        if not s:
+                            self._state.set_font(element, fonts.Small)
+                        else:
+                            self._state.set_font(element, fonts.status_font(fonts.Small))
+                    elif value == 'Medium': 
+                        if not s:
+                            self._state.set_font(element, fonts.Medium)
+                        else:
+                            self._state.set_font(element, fonts.status_font(fonts.Medium))
+                    elif value == 'BoldSmall':
+                        if not s:
+                            self._state.set_font(element, fonts.BoldSmall)
+                        else:
+                            self._state.set_font(element, fonts.status_font(fonts.BoldSmall))
+                    elif value == 'Bold':
+                        if not s:
+                            self._state.set_font(element, fonts.Bold)
+                        else:
+                            self._state.set_font(element, fonts.status_font(fonts.Bold))
+                    elif value == 'BoldBig':
+                        if not s:
+                            self._state.set_font(element, fonts.BoldBig)
+                        else:
+                            self._state.set_font(element, fonts.status_font(fonts.BoldBig))
+                    elif value == 'Huge':
+                        if not s:
+                            self._state.set_font(element, fonts.Huge)
+                        else:
+                            self._state.set_font(element, fonts.status_font(fonts.Huge))
+                elif key == 'text_font':
+                    if value == 'Small': self._state.set_textfont(element, fonts.Small)
+                    elif value == 'Medium': self._state.set_textfont(element, fonts.Medium)
+                    elif value == 'BoldSmall': self._state.set_textfont(element, fonts.BoldSmall)
+                    elif value == 'Bold': self._state.set_textfont(element, fonts.Bold)
+                    elif value == 'BoldBig': self._state.set_textfont(element, fonts.BoldBig)
+                    elif value == 'Huge': self._state.set_textfont(element, fonts.Huge)
+                elif key == 'label_font':
+                    if value == 'Small': self._state.set_labelfont(element, fonts.Small)
+                    elif value == 'Medium': self._state.set_labelfont(element, fonts.Medium)
+                    elif value == 'BoldSmall': self._state.set_labelfont(element, fonts.BoldSmall)
+                    elif value == 'Bold': self._state.set_labelfont(element, fonts.Bold)
+                    elif value == 'BoldBig': self._state.set_labelfont(element, fonts.BoldBig)
+                    elif value == 'Huge': self._state.set_labelfont(element, fonts.Huge)
+                elif key == 'color':
+                    self._state.set_attr(element, key, value)
+                elif key == 'colors':
+                    if len(value) != 0:
+                        #logging.warning('more than one color')
+                        color_list = [self._state.get_attr(element, 'color')]
+                        color_list.extend(value)
+                        #logging.warning(color_list)
+                        self._state.set_attr(element, key, color_list)
+                    else:
+                        self._state.set_attr(element, key, [])
+                elif key == 'icon':
+                    self._state.set_attr(element, key, value)
+                    if value:
+                        for val in self._state.items():
+                    	    if val[0] == element:
+                                if isinstance(val[1], pwnagotchi.ui.components.LabeledValue):
+                                    #logging.warning(element+' is a labeled value')
+                                    type = self._state.get_attr(element, 'label')
+                                    t = 'label'
+                                elif isinstance(val[1], pwnagotchi.ui.components.Text):
+                                    #logging.warning(element+' is a text')
+                                    type = self._state.get_attr(element, 'value')
+                                    t = 'value'
+                        #logging.warning(type)
+                        if not components[element]['f_awesome']:
+                            icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, type)
+                            ##self._state.image = Image.open(icon_path)
+                            self._state.set_attr(element, 'image', Image.open(icon_path))
+                            if th_opt['main_text_color'] != '':
+                                self.image.convert('1')
+                        else:
+                            logging.warning(t)
+                            fa = ImageFont.truetype('font-awesome-solid.otf', components[element]['f_awesome_size'])
+                            code_point = int(components[element][t], 16)
+                            icon = chr(code_point)
+                            w,h = fa.getsize(icon)
+                            icon_img = Image.new('1', (int(w), int(h)), 0xff)
+                            dt = ImageDraw.Draw(icon_img)
+                            dt.text((0,0), icon, font=fa, fill=0x00)
+                            icon_img = icon_img.convert('RGBA')
+                            self._state.set_attr(element, 'image', icon_img)
+                elif key == 'f_awesome':
+                    self._state.set_attr(element, key, value)
+                elif key == 'f_awesome_size':
+                    self._state.set_attr(element, key, value)
+
+
+        time.sleep(1)
+
     def update(self, force=False, new_data={}):
         th_opt = pwnagotchi._theme['theme']['options']
+        rot = self._config['main']['plugins']['fancygotchi']['rotation']
+
         for key, val in new_data.items():
             #logging.info('key: %s; val: %s' % (str(key), str(val)))
             self.set(key, val)
@@ -399,99 +679,237 @@ class View(object):
             state = self._state
             changes = state.changes(ignore=self._ignore_changes)
             if force or len(changes):
-                self._canvas = Image.new('RGB', (self._width, self._height), 'white')
-                
+                if rot == 0 or rot == 180:
+                    size = [self._width, self._height]
+                    if th_opt['main_text_color'] == '':
+                        self._canvas = Image.new('RGB', size, 'white')
+                    else:
+                        self._canvas = Image.new('1', size, 'white')
+                elif rot == 90 or rot == 270:
+                    size = [self._height, self._width] 
+                    if th_opt['main_text_color'] == '':
+                        self._canvas = Image.new('RGB', size, 'white')
+                    else:
+                        self._canvas = Image.new('1', size, 'white')
+
+                #drawer = ImageDraw.Draw(self._canvas)
                 drawer = ImageDraw.Draw(self._canvas)
 
                 plugins.on('ui_update', self)
-                
+
+                #pwnagotchi.fancy_change = True
+                if pwnagotchi.fancy_change == True:
+                    self.fancy_change()
+                    if self._boot == 0:
+                        pwnagotchi.fancy_change = False
+                    else:
+                        self._boot = 0
+
+                    
                 copy_state = list(state.items())#way to avoid [WARNING] non fatal error while updating view: dictionary changed size during iteration
                 for key, lv in copy_state:
                     lv.draw(self._canvas, drawer)
 
                 #-------------------------------------------------------------------------
-                bg = Image.open('%s/fancygotchi/img/%s' % (pwnagotchi.fancy_root, th_opt['bg_image']))
+                # checked- Adding a foreground image option to hide the screen
+                #
+                # adding option for icons, icon (monochrome) or sprite
+                #-------------------------------------------------------------------------
 
+                if th_opt['main_text_color'] != '':
+                    #imgtext = ImageOps.colorize(imgtext.convert('L'), black = color, white = 'white')
+                    color = th_opt['main_text_color']
+                    if color == 'white' : color = (254, 254, 254, 255)
+                    if color != 'black':
+                        self._canvas = ImageOps.colorize(self._canvas.convert('L'), black = color, white = 'white')
+                    self._canvas = self._canvas.convert('RGB')
+
+
+                self._canvas = self._canvas.convert('RGB')
                 datas = self._canvas.getdata()
-                newData = []
-                newData_l = []
-                if th_opt['color_web']  == 'full' or th_opt['color_display'] == 'full':
-                    bga = bg.convert('RGBA')
-                    #logging.warning('A full color image is created')
-                    for item in datas:
-                        #logging.info(item)
-                        if item[0] == 255 and item[1] == 255 and item[2] == 255:
-                            newData.append((255, 255, 255, 0))
-                        else:
-                            newData.append(item) #version for color mode
-                    #RGBA image for the full color 
-                    rgba_im = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
-                    rgba_im.putdata(newData)
-                    bga.paste(rgba_im, (0,0), rgba_im)
-                    self._canvas = bga.convert('RGB')
+                #logging.warning(datas)
+                newData_web = []
+                newData_disp = []
+                self._web = None
+                self._disp = None
+                iweb = None
+                idisp = None
+                # if not stealth mode enabled...*********************************************************
+                if not th_opt['stealth_mode']:
+                    # option colorized background
+                    if th_opt['bg_color'] != '':
+                        iweb = Image.new('RGBA', size, th_opt['bg_color'])
+                        if th_opt['color_web']  == '2':
+                            iweb = iweb.convert('RGBA')
+                        elif th_opt['color_web'] != '2':
+                            iweb = iweb.convert('RGBA')
 
-                if th_opt['color_web'] != 'full' or th_opt['color_display'] != 'full':
-                    # convert white to transparent & switch text if not into full color
+                        idisp = Image.new('RGBA', size, th_opt['bg_color'])
+                        if th_opt['color_display']  == '2':
+                            idisp = idisp.convert('RGBA')
+                        elif th_opt['color_display'] != '2':
+                            idisp = idisp.convert('RGBA')
+                            
+                    
+                    # option for animated background
+                    if th_opt['bg_anim_image'] !='':
+                        #logging.warning(str(self._i) +'/'+str(len(self._frames)))
+                        if th_opt['anim_web']:
+                            if isinstance(iweb, Image.Image):
+                                temp_iweb = iweb.copy()
+                                temp_iweb.paste(self._frames[self._i].convert('RGBA'))
+                                iweb = temp_iweb
+                            else: 
+                                iweb = self._frames[self._i].convert('RGBA')
+                        else:
+                            if isinstance(iweb, Image.Image):
+                                temp_iweb = iweb.copy()
+                                temp_iweb.paste(self._frames[0].convert('RGBA'))
+                                iweb = temp_iweb
+                            else: 
+                                iweb = self._frames[0].convert('RGBA')
+                        if th_opt['anim_display']:
+                            if isinstance(idisp, Image.Image):
+                                temp_idisp = idisp.copy()
+                                temp_idisp.paste(self._frames[self._i].convert('RGBA'))
+                                idisp = temp_idisp
+                            else: 
+                                idisp = self._frames[self._i].convert('RGBA')
+                        else:
+                            if isinstance(idisp, Image.Image):
+                                temp_idisp = idisp.copy()
+                                temp_idisp.paste(self._frames[0].convert('RGBA'))
+                                idisp = temp_idisp
+                            else: 
+                                idisp = self._frames[0].convert('RGBA')
+                        if self._i >= len(self._frames)-1:
+                            self._i = 0
+                    
+                    # option for background image
+                    if th_opt['bg_image'] !='':
+                        if isinstance(iweb, Image.Image):
+                            temp_iweb = iweb.copy()
+                            temp_iweb.paste(self._bg, (0,0), self._bg)
+                            iweb = temp_iweb
+                        else: 
+                            iweb = self._bg.copy()
+                        if isinstance(idisp, Image.Image): 
+                            temp_idisp = idisp.copy()
+                            temp_idisp.paste(self._bg, (0,0), self._bg)
+                            idisp = temp_idisp
+                        else: 
+                            idisp = self._bg.copy()
+                    
+
+                    #------------------------------------------------------------------------------------------
                     for item in datas:
-                        #logging.info(item)
+
                         if item[0] == 255 and item[1] == 255 and item[2] == 255:
                             # white to transparent
-                            newData_l.append((255, 255, 255, 0))
+                            newData_web.append((255, 255, 255, 0))
+                            newData_disp.append((255, 255, 255, 0))
+
                         else:
-                            if th_opt['color_text'] == 'black':
-                                #logging.warning('text is black')
-                                newData_l.append((0, 0, 0, 255))
-                            if th_opt['color_text'] == 'white':
-                                #logging.warning('text is white')
-                                newData_l.append((255, 255, 255, 255))
-                            if th_opt['color_text'] == 'auto':
-                                #logging.warning('pale text is white and dark text is black')
-                                color_sum = item[0] + item[1] + item[2]
-                                if color_sum < 500:
-                                    # color is dark
-                                    newData.append((0, 0, 0, 255))
-                                else:
-                                    # color is pale
-                                    newData_l.append((255, 255, 255, 255))
-                    #RGBA image for the low color 
+                            if th_opt['color_web']  == '2':
+                                if th_opt['color_text'] == 'white':
+                                    newData_web.append((255, 255, 255, 255))
+                                elif th_opt['color_text'] == 'black':
+                                    newData_web.append((0, 0, 0, 255))
+                                elif th_opt['color_text'] == 'auto':
+                                    color_sum = item[0] + item[1] + item[2]
+                                    if color_sum < 500:
+                                        # color is dark
+                                        newData_web.append((0, 0, 0, 255))
+                                    else:
+                                        # color is pale
+                                        newData_web.append((255, 255, 255, 255))
+                            else:
+                                newData_web.append(item) #version for color mode
+                            if th_opt['color_display']  == '2':
+                                if th_opt['color_text'] == 'white':
+                                    newData_disp.append((255, 255, 255, 255))
+                                elif th_opt['color_text'] == 'black':
+                                    newData_disp.append((0, 0, 0, 255))
+                                elif th_opt['color_text'] == 'auto':
+                                    color_sum = item[0] + item[1] + item[2]
+                                    if color_sum < 500:
+                                        # color is dark
+                                        newData_disp.append((0, 0, 0, 255))
+                                    else:
+                                        # color is pale
+                                        newData_disp.append((255, 255, 255, 255))
+                            else:
+                                newData_disp.append(item) #version for color mode
+
+                    #------------------------------------------------------------------------------------------
+
+                    # maybe adding an option to make certain components
+                    # under the foreground layer and other above it for
+                    # a stelth mode
+                    #
+                    # adding the canvas layer
                     
-                    if th_opt['color_web'] == '2' or th_opt['color_display'] == '2':
-                        bga = bg.convert('RGBA')
-                        #logging.warning('A 1bit image is created')
-                        rgba_im_2 = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
-                        rgba_im_2.putdata(newData_l)
-                        bga.paste(rgba_im_2, (0,0), rgba_im_2)
-                        self._canvas_2 = bga.convert('1')
+                    if isinstance(iweb, Image.Image):
+                        temp_data_iweb = Image.new('RGBA', size, (255, 255, 255, 0))
+                        temp_data_iweb.putdata(newData_web)
+                        iweb.paste(temp_data_iweb, (0,0), temp_data_iweb)
+
+                    else:
+                        temp_data_iweb = Image.new('RGBA', size, (255, 255, 255, 0))
+                        temp_data_iweb.putdata(newData_web)
+                        iweb = temp_data_iweb
                         
-                    if th_opt['color_web'] == '3' or th_opt['color_display'] == '3':
-                        bga = bg.convert('RGBA')
-                        #logging.warning('A grayscale image is created')
-                        rgba_im_3 = Image.new('RGBA', (self._width, self._height), (255, 255, 255, 0))
-                        rgba_im_3.putdata(newData_l)
-                        bga.paste(rgba_im_3, (0,0), rgba_im_3)
-                        self._canvas_3 = bga.convert('L')
+                    if isinstance(idisp, Image.Image):
+                        temp_data_idisp = Image.new('RGBA', size, (255, 255, 255, 0))
+                        temp_data_idisp.putdata(newData_disp)
+                        idisp.paste(temp_data_idisp, (0,0), temp_data_idisp)
 
-                if th_opt['color_web'] == 'full':
-                    #logging.warning('The web UI is full color')
-                    web.update_frame(self._canvas)
-                elif th_opt['color_web'] == '2':
-                    #logging.warning('The web UI is 1bit')
-                    web.update_frame(self._canvas_2)
-                elif th_opt['color_web'] == '3':
-                    #logging.warning('The web UI is grayscale')
-                    web.update_frame(self._canvas_3)
+                    else:
+                        temp_data_idisp = Image.new('RGBA', size, (255, 255, 255, 0))
+                        temp_data_idisp.putdata(newData_disp)
+                        idisp = temp_data_idisp
+                    
+                # end of the not stealth mode **************************************************************
 
-                if th_opt['color_display'] == 'full':
-                    #logging.warning('The display is full color')
-                    for cb in self._render_cbs:
-                        cb(self._canvas)
-                elif th_opt['color_display'] == '2':
-                    #logging.warning('The display is 1bit')
-                    for cb in self._render_cbs:
-                        cb(self._canvas_2)
-                elif th_opt['color_display'] == '3':
-                    #logging.warning('The display is grayscale')
-                    for cb in self._render_cbs:
-                        cb(self._canvas_3)
+                    #if stealth mode, don't activate it on the web UI
+                    if th_opt['fg_image'] != '':
+                        if isinstance(iweb, Image.Image):
+                            temp_iweb = iweb.copy()
+                            temp_iweb.paste(self._fg, (0,0), self._fg)
+                            iweb = temp_iweb
+                        else:
+                            iweb = self._fg
+                        if isinstance(idisp, Image.Image):
+                            temp_idisp = idisp.copy()
+                            temp_idisp.paste(self._fg, (0,0), self._fg)
+                            idisp = temp_idisp
+                        else:
+                            idisp = self._fg
+                else:
+                    logging.info('[FANCYGOTCHI] stealth Mode')
+                
+                if th_opt['color_web']  == '2':
+                    self._web = iweb.convert('1')
+                else:
+                    self._web = iweb.convert('RGB')
+                if th_opt['color_display']  == '2':
+                    self._disp = idisp.convert('1')
+                else:
+                    self._disp = idisp.convert('RGB')
+                
+                if rot == 0 or rot == 180:
+                    img = self._disp
+                if rot == 90 or rot == 270:
+                    img = self._disp.rotate(90, expand=True)
+
+                if rot == 180 or rot == 270:
+                    img = img.rotate(180)
+                for cb in self._render_cbs:
+                    cb(img)
+
+                web.update_frame(self._web)
+
+                if hasattr(self, '_frames') and (th_opt['anim_web'] or th_opt['anim_display']):
+                    self._i += 1
 
                 self._state.reset()

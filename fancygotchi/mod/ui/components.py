@@ -1,16 +1,16 @@
 import logging
 import pwnagotchi
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageDraw, ImageOps, ImageFont
 from textwrap import TextWrapper
+import pwnagotchi.ui.fonts as fonts
+#import fontawesome as fa
 
 def text_to_rgb(text, tfont, color, width, height):
+    #logging.warning(fa.icons['wifi'])
+    th_opt = pwnagotchi._theme['theme']['options']
     if color == 'white' : color = (254, 254, 254, 255)
-    #logging.warning(color)
-    #logging.info('text length: %s; text font: %s; text: %s' % (len(text), tfont, text))
-    #logging.info(str(tfont.getbbox(text)))
     w,h = tfont.getsize(text)
     nb_lines = text.count('\n') + 1
-    #logging.info(nb_lines)
     h = (h + 1) * nb_lines
     if nb_lines > 1:
         lines = text.split('\n')
@@ -20,38 +20,22 @@ def text_to_rgb(text, tfont, color, width, height):
             tot_char = tot_char + len(line)
             char_line = len(line)
             if char_line > max_char: max_char = char_line
-        #logging.info('total: %d; max per line: %d' % (tot_char, max_char))
-        #logging.info(int(w / (tot_char / max_char)))
         w = int(w / (tot_char / max_char))
-        
-
-    #logging.info(str(tfont.getsize()))
-    #logging.info('width: %d; height; %d;' % (w, h))
     imgtext = Image.new('1', (int(w), int(h)), 0xff)
     dt = ImageDraw.Draw(imgtext)
     dt.text((0,0), text, font=tfont, fill=0x00)
-    nonwhite_positions = [(x,y) for x in range(imgtext.size[0]) for y in range(imgtext.size[1]) if imgtext.getdata()[x+y*imgtext.size[0]] != (255,255,255)]
-    #logging.info(str(nonwhite_positions))
-    #if not nonwhite_positions == []:
-    #    rect = (min([x for x,y in nonwhite_positions]), min([y for x,y in nonwhite_positions]), max([x for x,y in nonwhite_positions]), max([y for x,y in nonwhite_positions]))
-    #    imgtext = imgtext.crop(rect)
     if color == 0: color = 'black'
     imgtext = ImageOps.colorize(imgtext.convert('L'), black = color, white = 'white')
     imgtext = imgtext.convert('RGB')
-    #datas = imgtext.getdata()
-    #newData = []
-    #for item in datas:
-    #    if item[0] == 255 and item[1] == 255 and item[2] == 255:
-    #        newData.append((255, 255, 255, 0))
-    #    else:
-    #        newData.append(item)
-    #imgtext.putdata(newData)
+
     return imgtext
 
 class Widget(object):
     def __init__(self, xy, color=0):
         self.xy = xy
         self.color = color
+        self.icolor = 0
+        self.colors = []
 
     def draw(self, canvas, drawer):
         raise Exception("not implemented")
@@ -104,18 +88,41 @@ class FilledRect(Widget):
 
 
 class Text(Widget):
-    def __init__(self, value="", position=(0, 0), font=None, color=0, wrap=False, max_length=0, icon=False):
+    def __init__(self, value="", position=(0, 0), font=None, color=0, wrap=False, max_length=0, icon=False, f_awesome=False, f_awesome_size=0):
         super().__init__(position, color)
+        th_opt = pwnagotchi._theme['theme']['options']
         self.value = value
         self.font = font
         self.wrap = wrap
         self.max_length = max_length
         self.wrapper = TextWrapper(width=self.max_length, replace_whitespace=False) if wrap else None
         self.icon = icon
-        if icon:
-            self.image = Image.open(value)
+        self.image = None
+        self.f_awesome = f_awesome
+        self.f_awesome_size = f_awesome_size
+
+        if self.icon:
+            if not self.f_awesome:
+                icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, value)
+                self.image = Image.open(icon_path)
+                if th_opt['main_text_color'] != '':
+                    self.image.convert('1')
+            else:
+                fa = ImageFont.truetype('font-awesome-solid.otf', self.f_awesome_size)
+                code_point = int(self.value, 16)
+                icon = code_point
+                w,h = fa.getsize(icon)
+                icon_img = Image.new('1', (int(w), int(h)), 0xff)
+                dt = ImageDraw.Draw(icon_img)
+                dt.text((0,0), icon, font=fa, fill=0x00)
+                icon_img = icon_img.convert('RGBA')
+                self.image = icon_img
+        
+    def get_font(self):
+        return self.font
 
     def draw(self, canvas, drawer):
+        th_opt = pwnagotchi._theme['theme']['options']
         if self.value is not None:
             if not self.icon:
                 if self.wrap:
@@ -123,21 +130,37 @@ class Text(Widget):
                 else:
                     text = self.value
                 width, height = canvas.size
-                imgtext = text_to_rgb(text, self.font, self.color, width, height)
-                #logging.info("canvas: %s" % canvas.mode)
-                #logging.info("self.xy: %s" % self.xy)
-                if len(self.xy) >= 3:
-                    x = self.xy[0]
-                    y = self.xy[1]
+                if th_opt['main_text_color'] == '':
+                    imgtext = text_to_rgb(text, self.font, self.color, width, height)
+
+                    #logging.info("canvas: %s" % canvas.mode)
+                    #logging.info("self.xy: %s" % self.xy)
+                    if len(self.xy) >= 3:
+                        x = self.xy[0]
+                        y = self.xy[1]
+                    else:
+                        x, y = self.xy
+                    canvas.paste(imgtext, (x, y))
                 else:
-                    x, y = self.xy
-                canvas.paste(imgtext, (x, y))
-                #drawer.text(self.xy, text, self.font, font=self.font, fill=self.color)
+                    drawer.text(self.xy, text, font=self.font, fill=0x00)
+                    #drawer.text(self.xy, text, self.font, font=self.font, fill=self.color)
             else:
-                canvas.paste(self.image, self.xy, self.image)
+                if not self.f_awesome:
+                    canvas.paste(self.image, self.xy, self.image)
+                else:
+                    if self.color == 'white' : self.color = (254, 254, 254, 255)
+                    #logging.warning(self.color)
+                    if th_opt['main_text_color'] == '':
+                        icon_img = ImageOps.colorize(self.image.convert('L'), black = self.color, white = 'white')
+                        icon_img = icon_img.convert('RGBA')
+                        canvas.paste(icon_img, self.xy, icon_img)
+                    else:
+                        canvas.paste(self.image, pos_label, self.image)
+
+
 
 class LabeledValue(Widget):
-    def __init__(self, label, value="", position=(0, 0), label_font=None, text_font=None, color=0, label_spacing=9):
+    def __init__(self, label, value="", position=(0, 0), label_font=None, text_font=None, color=0, label_spacing=9, icon=False, label_line_spacing=0, f_awesome=False, f_awesome_size=0):
         th_opt = pwnagotchi._theme['theme']['options']
         label_spacing = th_opt['label_spacing']
         super().__init__(position, color)
@@ -146,25 +169,74 @@ class LabeledValue(Widget):
         self.label_font = label_font
         self.text_font = text_font
         self.label_spacing = label_spacing
+        self.label_line_spacing = label_line_spacing
+        self.icon = icon
+        self.image = None
+        self.f_awesome = f_awesome
+        self.f_awesome_size = f_awesome_size
+        if icon:
+            if not self.f_awesome:
+                icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, label)
+                self.image = Image.open(icon_path)
+                if th_opt['main_text_color'] != '':
+                    self.image.convert('1')
+            else:
+                fa = ImageFont.truetype('font-awesome-solid.otf', self.f_awesome_size)
+                code_point = int(self.label, 16)
+                icon = code_point
+                w,h = fa.getsize(icon)
+                icon_img = Image.new('1', (int(w), int(h)), 0xff)
+                dt = ImageDraw.Draw(icon_img)
+                dt.text((0,0), icon, font=fa, fill=0x00)
+                icon_img = icon_img.convert('RGBA')
+                self.image = icon_img
+
+        
+            
 
     def draw(self, canvas, drawer):
+        th_opt = pwnagotchi._theme['theme']['options']
         width, height = canvas.size
+        pos_label = [int(self.xy[0]), int(self.xy[1]) + self.label_line_spacing]
+        pos_value = (pos_label[0] + self.label_spacing + 5 * len(self.label), pos_label[1] - self.label_line_spacing)
         if self.label is None:
-            
-            imgtext = text_to_rgb(self.value, self.label_font, self.color, width, height)
-            canvas.paste(imgtext, self.xy)
-
-            #drawer.text(self.xy, self.value, font=self.label_font, fill=self.color)
+            if th_opt['main_text_color'] == '':
+                imgtext = text_to_rgb(self.value, self.label_font, self.color, width, height)
+                canvas.paste(imgtext, self.xy)
+            else:
+                drawer.text(self.xy, self.value, font=self.label_font, fill=0x00)
+                #drawer.text(self.xy, self.value, font=self.label_font, fill=self.color)
         else:
-            pos_label = [int(self.xy[0]), int(self.xy[1])]
-            pos_value = (pos_label[0] + self.label_spacing + 5 * len(self.label), pos_label[1])
-            #logging.info('%s   --   %s' % (str(pos_label), str(pos_value)))
+            if not self.icon:
 
-            imgtext = text_to_rgb(self.label, self.label_font, self.color, width, height)
-            canvas.paste(imgtext, pos_label)
+                #logging.info('%s   --   %s' % (str(pos_label), str(pos_value)))
+                if th_opt['main_text_color'] == '':
+                    imgtext = text_to_rgb(self.label, self.label_font, self.color, width, height)
+                    canvas.paste(imgtext, pos_label)
+                    imgtext = text_to_rgb(self.value, self.text_font, self.color, width, height)
+                    canvas.paste(imgtext, pos_value)
+                else:
+                    drawer.text(pos_label, self.label, font=self.label_font, fill=0x00)
+                    drawer.text(pos_value, self.value, font=self.text_font, fill=0x00)
+            else:
+                #logging.warning(self.f_awesome)
+                if not self.f_awesome:
+                    canvas.paste(self.image, pos_label, self.image)
+                else:
+                    if self.color == 'white' : self.color = (254, 254, 254, 255)
+                    #logging.warning(self.color)
+                    if th_opt['main_text_color'] == '':
+                        icon_img = ImageOps.colorize(self.image.convert('L'), black = self.color, white = 'white')
+                        icon_img = icon_img.convert('RGBA')
+                        canvas.paste(icon_img, pos_label, icon_img)
+                    else:
+                        canvas.paste(self.image, pos_label, self.image)
 
-            imgtext = text_to_rgb(self.value, self.label_font, self.color, width, height)
-            canvas.paste(imgtext, pos_value)
+                if th_opt['main_text_color'] == '':
+                    imgtext = text_to_rgb(self.value, self.text_font, self.color, width, height)
+                    canvas.paste(imgtext, pos_value)
+                else:
+                    drawer.text(pos_value, self.value, font=self.text_font, fill=0x00)
 
             #drawer.text(pos, self.label, font=self.label_font, fill=self.color)
             #drawer.text((pos[0] + self.label_spacing + 5 * len(self.label), pos[1]), self.value, font=self.text_font, fill=self.color)

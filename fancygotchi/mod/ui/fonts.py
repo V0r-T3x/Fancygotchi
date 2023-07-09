@@ -28,14 +28,18 @@ def init(config):
 
 
 def status_font(old_font):
+    #logging.warning(old_font)
     global STATUS_FONT_NAME, SIZE_OFFSET
-    #STATUS_FONT_NAME = pwnagotchi._theme['theme']['options']['status_font']
+    STATUS_FONT_NAME = pwnagotchi._theme['theme']['options']['status_font']
+    #logging.warning(STATUS_FONT_NAME)
     return ImageFont.truetype(STATUS_FONT_NAME, size=old_font.size + SIZE_OFFSET)
 
-
 def setup(bold, bold_small, medium, huge, bold_big, small):
-    global Bold, BoldSmall, Medium, Huge, BoldBig, Small, FONT_NAME
-
+    global Bold, BoldSmall, Medium, Huge, BoldBig, Small, FONT_NAME, STATUS_FONT_NAME
+    #logging.warning(STATUS_FONT_NAME)
+    #if hasattr(pwnagotchi, 'fancy_font'):
+    #logging.warning(FONT_NAME)
+    #    FONT_NAME = pwnagotchi.fancy_font
     th_fsize = pwnagotchi._theme['theme']['options']['font_sizes']
     bold = th_fsize[0]
     bold_small = th_fsize[1]

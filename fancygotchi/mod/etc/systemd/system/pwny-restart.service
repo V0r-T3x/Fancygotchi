@@ -1,0 +1,8 @@
+[Unit]
+Description=Search syslog for Go map crash
+
+[Service]
+ExecStart=/root/pwny-restart.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -105,9 +105,27 @@ def load_theme(config):
         th_select = str(config['main']['plugins']['fancygotchi']['theme'])
     else:
         th_select = '.default'
-    logging.info('%s/fancygotchi/themes/%s/%s/config.toml' % (fancy_path, th_select, config['ui']['display']['type']))
-    with open('%s/fancygotchi/themes/%s/%s/config.toml' % (fancy_path, th_select, config['ui']['display']['type']), 'r') as f:
+
+    th_path = '%s/fancygotchi/themes/%s/' % (fancy_path, th_select)
+    th_path_disp = '%s%s/' % (th_path, config['ui']['display']['type'])
+    #logging.info('%sconfig-h.toml' % (th_path_disp))
+    rot = config['main']['plugins']['fancygotchi']['rotation']
+    if rot == 0 or rot == 180 :
+        logging.info('%sconfig-h.toml' % (th_path_disp))
+        config_ori = '%sconfig-h.toml' % (th_path_disp)
+    elif rot == 90 or rot == 270:
+        logging.info('%sconfig-v.toml' % (th_path_disp))
+        config_ori = '%sconfig-v.toml' % (th_path_disp)
+            
+    logging.warning(config_ori)
+    with open(config_ori, 'r') as f:
+        logging.warning('loop in theme config.toml')
         setattr(pwnagotchi, '_theme', toml.load(f))
+        setattr(pwnagotchi, 'fancy_theme', th_path)
+        setattr(pwnagotchi, 'fancy_theme_disp', th_path_disp)
+        setattr(pwnagotchi, 'fancy_change', True)
+        setattr(pwnagotchi, 'fancy_name', config['main']['name'])
+        #setattr(pwnagotchi, 'fancy_orient', config['main']['plugins']['fancygotchi']['orientation'])
         #pwnagotchi._theme = toml.load(f)
         logging.info(pwnagotchi._theme)
 
