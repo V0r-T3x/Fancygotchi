@@ -165,7 +165,7 @@ Animated background gif name.
 
 `font_sizes`:  
 Font sizes in this order  
-# [Bold, BoldSmall, Medium, Huge, BoldBig, Small]  
+[Bold, BoldSmall, Medium, Huge, BoldBig, Small]  
 
 `font = 'DejaVuSansMono'`
 Font name.  
