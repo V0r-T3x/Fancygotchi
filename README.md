@@ -112,16 +112,16 @@ After that, if all was successful, the theme should be come back and the update 
 
 Local update:
 ----
-1-create a update folder inside the fancygotchi folder.
-2-download the fancygotchi-main-20XX-XX-X.zip.
-3-unzip this zip inside the .../fancygotchi/update/ folder. (this should give this path .../fancygotchi/update/fancygotchi-main/...
-4-go inside the plugin page in the web UI.
-5-click on Check fancygotchi update
-6-this will verify the local update folder to see if this one is a new version.
-7-if the new version is detected, it'll ask if you want install the update.
-8-a pop-up will show up when the install is finish (or if it failed...).
-9-the pwnagotchi should restart itself.
-10-you need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)
+1-create a update folder inside the fancygotchi folder.  
+2-download the fancygotchi-main-20XX-XX-X.zip.  
+3-unzip this zip inside the .../fancygotchi/update/ folder. (this should give this path .../fancygotchi/update/fancygotchi-main/...  
+4-go inside the plugin page in the web UI.  
+5-click on Check fancygotchi update  
+6-this will verify the local update folder to see if this one is a new version.  
+7-if the new version is detected, it'll ask if you want install the update.  
+8-a pop-up will show up when the install is finish (or if it failed...).  
+9-the pwnagotchi should restart itself.  
+10-you need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)  
 
 After that, if all was successful, the theme should be come back and the update is supposed to be apply.  
 
