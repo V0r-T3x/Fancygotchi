@@ -99,16 +99,16 @@ main.plugins.fancygotchi.rotation = 0 #<--- use it
 
 Online update:
 ----
-1-go inside the plugin page in the web UI
-2-check the box 'Online Update'
-3-click on Check fancygotchi update
-4-this will verify the online update folder to see if this one is a new version.
-5-if the new version is detected, it'll ask if you want install the update.
-6-a pop-up will show up when the install is finish (or if it failed...).
-7-the pwnagotchi should restart itself.
-8-you need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)
+1-go inside the plugin page in the web UI  
+2-check the box 'Online Update'  
+3-click on Check fancygotchi update  
+4-this will verify the online update folder to see if this one is a new version.  
+5-if the new version is detected, it'll ask if you want install the update.  
+6-a pop-up will show up when the install is finish (or if it failed...).  
+7-the pwnagotchi should restart itself.  
+8-you need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)  
 
-After that, if all was successful, the theme should be come back and the update is supposed to be apply.
+After that, if all was successful, the theme should be come back and the update is supposed to be apply.  
 
 Local update:
 ----
