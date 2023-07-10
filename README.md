@@ -125,17 +125,160 @@ Local update:
 
 After that, if all was successful, the theme should be come back and the update is supposed to be apply.  
 
-### To create a them:  
+### To create a theme:  
 ----  
 you can create your own theme easily with fancygothci. You just have to copy the right display folders from the theme folder inside the fancygothci folder.  
 
 The folder three is always the same for each theme. Like the cyber theme folder.   
+
+![theme tree](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/themes_tree_note.png)   
 
 You have the img folder for all images used inside the theme. A css file to modify the webui. And a folder with the display name. The cyber use the displayhatmini.  
 
 Inside the display folder, you will have two file config-h.toml and config-v.toml.  
 
 They stand for the Horizon and vertical configuration files. Inside it you have all the possible options. Each position, color, if it can icon or not.. etc etc etc  
+
+### Configuration files:
+----
+The configuration file header is composed with all the gobal options for the theme.  
+
+Global options:  
+----  
+
+This start with `[theme.options]`.  
+
+`stealth_mode = false`:  
+It's not implemented yet, but will give a way to hide the pwnagotchi UI with a foreground image and potentially custom naive components.  
+
+`fg_image`:
+Foreground image name.  
+
+`bg_color`:  
+Background color.  
+
+`bg_image`:  
+Background image name.  
+
+`bg_anim_image`:  
+Animated background gif name.  
+
+`font_sizes`:  
+Font sizes in this order  
+# [Bold, BoldSmall, Medium, Huge, BoldBig, Small]  
+
+`font = 'DejaVuSansMono'`
+Font name.  
+
+`status_font`:  
+Status font name (not work properly for now).  
+
+`label_spacing`:  
+General label space.  
+
+`size_offset`:   
+Status font offset.  
+
+`fps`:  
+Refresh rate of the UI.  
+
+`cursor`:  
+Name cursor.  
+
+`friend_bars`:  
+Friend bar icons.  
+
+`friend_no_bars`:  
+Friend bar at 0.  
+
+`color_web` &  `color_display`:  
+The color mode for the web UI or the Display.  
+'2' = 1bit color mode B&W  
+'' = full color mode  
+
+`anim_web` & `anim_display`:  
+If an animated background is set it can be use as a fixed image too  
+true = animated  
+false = fixed on the first frame  
+
+`main_text_color`:  
+If the full color or animated full color is enabled  
+the main color will have priority on all text color  
+*this option help to avoid too much lag on a raspberry pi zero w*  
+
+`color_text`:  
+What will be the text color for a low color display, possible options:  
+'black'  
+'white'  
+'auto' = pale color will be 'white' and dark color will be 'black'  
+
+Main theme options:  
+----  
+
+This part is for all the options native options of the pwnagotchi.  
+This start with `[theme.main_elements]`.  
+
+Each __Text__ components options can have those options:  
+
+`position`:  
+Position [x,y].  
+
+`font`:  
+Font type.  
+
+`color`:  
+The component color.  
+
+`colors`:  
+The component color table for an color animation [colorname1, colorname2, ...].  
+
+`icon`:  
+If enabled (true), the component value is treated as an image name to add to the image folder parth to use an image instead of a text.  
+
+`f_awesome`:  
+If enabled (true) and the icon feature is enabled, the component value is use to select the right font awesome character to use instead of a text.  
+
+`f_awesome_size`:  
+The font size for Font Awesome.  
+
+Each __Label__ components options can have those options:  
+
+`position`:  
+Position [x,y].  
+
+`label`:  
+The label value.  
+
+`label_font`:   
+The label font.  
+
+`text_font`:  
+The text font.  
+
+`label_spacing`:  
+Custom label spacing for the component.  
+
+`label_line_spacing`:  
+Custom label vertical position compared to the label text.  
+
+`color`:  
+The component color.  
+
+`colors`:  
+The component color table for an color animation [colorname1, colorname2, ...].  
+
+`icon`:  
+If enabled (true), the component value is treated as an image name to add to the image folder parth to use an image instead of a text.  
+
+`f_awesome`:  
+If enabled (true) and the icon feature is enabled, the component value is use to select the right font awesome character to use instead of a text.  
+
+`f_awesome_size`:  
+The font size for Font Awesome.  
+
+Plugins options:  
+----  
+The third section is for all other custom plugins configuration. This start with `[theme.plugin_elements]`.  
 
 ### To custom other plugin appearance:  
 ----  
