@@ -4,6 +4,9 @@
 There's a preview of dev.    
 Pimoroni Display Hat Mini 320x240  
 ![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/pwnagotchi.png)  
+![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/horizontal.png)  
+![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/vertical.jpg)  
+
 
 -----------------------
 
