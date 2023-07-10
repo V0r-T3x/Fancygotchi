@@ -193,6 +193,7 @@ Friend bar at 0.
 
 `color_web` &  `color_display`:  
 The color mode for the web UI or the Display.  
+They are independant, the web UI (and share to twitter, telegram, discord, etc) can be in full color, but the pwnagotchi can use a e-ink waveshare into 1bit color mode.  
 '2' = 1bit color mode B&W  
 '' = full color mode  
 
