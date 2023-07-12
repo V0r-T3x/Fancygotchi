@@ -82,8 +82,8 @@ v.2022.07.3
 
 ### Quick install steps:
 ----
-- setting up your pi and the display correctly activate the web UI too
-- downloading files inside the custom plugins folder (or into the default plugins folder) on your pwnagotchi (fancygotchi.py and the fancygotchi folder)
+- Setting up your pi and the display correctly activate the web UI too
+- Downloading files inside the custom plugins folder (or into the default plugins folder) on your pwnagotchi (fancygotchi.py and the fancygotchi folder)
 - I keep the fancygotchi disabled when I restart the pwnagotchi
 ```
 ui.display.enabled = true
@@ -92,42 +92,42 @@ ui.display.color = "black"
 ui.display.rotation = 0 #keep it to 0, don't use it
 
 main.plugins.fancygotchi.enabled = false
-main.plugins.fancygotchi.theme = ''
+main.plugins.fancygotchi.theme = '' # Keep empty to load the default theme.
 main.plugins.fancygotchi.rotation = 0 #<--- use it
 ```
-- restart the pwnagotchi
-- goto inside the web ui plugin page
-- wait for the automatic restart.
-- the pwnagotchi should restart with it new face.
+- Restart the pwnagotchi
+- Goto inside the web ui plugin page
+- Wait for the automatic restart.
+- The pwnagotchi should restart with it new face.
 
 ### Update steps:
 ----
 
 Online update:
 ----
-1-go inside the plugin page in the web UI  
-2-check the box 'Online Update'  
-3-click on Check fancygotchi update  
-4-this will verify the online update folder to see if this one is a new version.  
-5-if the new version is detected, it'll ask if you want install the update.  
-6-a pop-up will show up when the install is finish (or if it failed...).  
-7-the pwnagotchi should restart itself.  
-8-you need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)  
+1- Go inside the plugin page in the web UI  
+2- Check the box 'Online Update'  
+3- Click on Check fancygotchi update  
+4- This will verify the online update folder to see if this one is a new version.  
+5- If the new version is detected, it'll ask if you want install the update.  
+6- A pop-up will show up when the install is finish (or if it failed...).  
+7- The pwnagotchi should restart itself.  
+8- You need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)  
 
 After that, if all was successful, the theme should be come back and the update is supposed to be apply.  
 
 Local update:
 ----
-1-create a update folder inside the fancygotchi folder.  
-2-download the fancygotchi-main-20XX-XX-X.zip.  
-3-unzip this zip inside the .../fancygotchi/update/ folder. (this should give this path .../fancygotchi/update/fancygotchi-main/...  
-4-go inside the plugin page in the web UI.  
-5-click on Check fancygotchi update  
-6-this will verify the local update folder to see if this one is a new version.  
-7-if the new version is detected, it'll ask if you want install the update.  
-8-a pop-up will show up when the install is finish (or if it failed...).  
-9-the pwnagotchi should restart itself.  
-10-you need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)  
+1- Create a update folder inside the fancygotchi folder.  
+2- Download the fancygotchi-main-20XX-XX-X.zip.  
+3- Unzip this zip inside the .../fancygotchi/update/ folder. (this should give this path .../fancygotchi/update/fancygotchi-main/...  
+4- Goinside the plugin page in the web UI.  
+5- Click on Check fancygotchi update  
+6- This will verify the local update folder to see if this one is a new version.  
+7- If the new version is detected, it'll ask if you want install the update.  
+8- A pop-up will show up when the install is finish (or if it failed...).  
+9- The pwnagotchi should restart itself.  
+10- You need to restart the service manually one time to finish the update. (the UI should be the orginal black and white one)  
 
 After that, if all was successful, the theme should be come back and the update is supposed to be apply.  
 
@@ -338,7 +338,7 @@ position = [14, 28]
 font = "Huge"
 color = "lime"
 colors = ['yellow','orange','red','purple','blue']
-icon = true # enable here
+icon = true # Enable here
 ```
 
 /etc/pwnagotchi/config.toml  
@@ -350,6 +350,7 @@ ui.faces.look_r_happy = "look_r_happy.png" #"( ◕‿◕)"
 ui.faces.look_l_happy = "look_l_happy.png" #"(◕‿◕ )"
 ...
 ```
+*The face condiguration will surely be included into the theme config file soon.*. 
 
 ### On-The-Go refresh:  
 ----  
