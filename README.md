@@ -133,7 +133,7 @@ After that, if all was successful, the theme should be come back and the update 
 
 ### To create a theme:  
 ----  
-you can create your own theme easily with fancygothci. You just have to copy the right display folders from the theme folder inside the fancygothci folder.  
+You can create your own theme easily with fancygothci. You just have to copy the right display folders from the theme folder inside the fancygothci folder.  
 
 The folder three is always the same for each theme. Like the cyber theme folder.   
 
@@ -144,6 +144,15 @@ You have the img folder for all images used inside the theme. A css file to modi
 Inside the display folder, you will have two file config-h.toml and config-v.toml.  
 
 They stand for the Horizon and vertical configuration files. Inside it you have all the possible options. Each position, color, if it can icon or not.. etc etc etc  
+
+1- Copy the .default folder.  
+2- Rename it with the name of your choice, ex. yourtheme:  
+.../fancygotchi/themes/yourtheme 
+3- Inside this folder, you need a folder named with your display type (look into the config.toml file at `ui.display.type`). If the folder don't exist, just copy another one and rename it with the display type:   
+.../fancygotchi/themes/yourtheme/displayname/config-h.toml  
+4- Change your /etc/pwngotchi/config.toml file with your custom name:   main.plugins.fancygotchi.theme = 'yourtheme'. 
+5- You can now modify this config-h.toml file to create your own interface.  
+6- After saving the config file, no need to restart the pwnagotchi, just goto the fancygotchi web plugin page, and refresh it, this will activate the OTG feature, and the UI should be refresh.  
 
 ### Configuration files:
 ----
