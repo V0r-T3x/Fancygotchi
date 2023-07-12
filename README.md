@@ -150,7 +150,7 @@ They stand for the Horizon and vertical configuration files. Inside it you have 
 .../fancygotchi/themes/yourtheme 
 3- Inside this folder, you need a folder named with your display type (look into the config.toml file at `ui.display.type`). If the folder don't exist, just copy another one and rename it with the display type:   
 .../fancygotchi/themes/yourtheme/displayname/config-h.toml  
-4- Change your /etc/pwngotchi/config.toml file with your custom name:   main.plugins.fancygotchi.theme = 'yourtheme'. 
+4- Change your /etc/pwngotchi/config.toml file with your custom name:   main.plugins.fancygotchi.theme = 'yourtheme'.  
 5- You can now modify this config-h.toml file to create your own interface.  
 6- After saving the config file, no need to restart the pwnagotchi, just goto the fancygotchi web plugin page, and refresh it, this will activate the OTG feature, and the UI should be refresh.  
 
