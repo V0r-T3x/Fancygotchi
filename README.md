@@ -2,10 +2,10 @@
 ----
 
 There's some previews of dev.    
-Pimoroni Display Hat Mini 320x240 with color background image in horizontal
+Pimoroni Display Hat Mini 320x240 with color background image in horizontal  
 ![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/pwnagotchi.png)  
 
-Pimoroni Display Hat Mini 320x240 with color animated background in horizontal
+Pimoroni Display Hat Mini 320x240 with color animated background in horizontal  
 ![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/horizontal.png)  
 
 Pimoroni Display Hat Mini 320x240 with black background in vertical  
