@@ -34,7 +34,7 @@ anim_display = true
 
 # if the full color or animated full color is enabled
 # the main color will have priority on all text color
-main_text_color = ''
+main_text_color = 'lime'
 
 # what will be the text color for a low color display
 # 'black'
@@ -50,6 +50,35 @@ font = "Huge"
 color = "lime"
 colors = ['yellow','orange','red','purple','blue']
 icon = false
+image_type = 'png'
+face = true
+
+[theme.main_elements.face.faces]
+look_r = "( ⚆_⚆)"
+look_l = "(☉_☉ )"
+look_r_happy = "( ◕‿◕)"
+look_l_happy = "(◕‿◕ )"
+sleep = "(⇀‿‿↼)"
+sleep2 = "(≖‿‿≖)"
+awake = "(◕‿‿◕)"
+bored = "(-__-)"
+intense = "(°▃▃°)"
+cool = "(⌐■_■)"
+happy = "(•‿‿•)"
+excited = "(ᵔ◡◡ᵔ)"
+grateful = "(^‿‿^)"
+motivated = "(☼‿‿☼)"
+demotivated = "(≖__≖)"
+smart = "(✜‿‿✜)"
+lonely = "(ب__ب)"
+sad = "(╥☁╥ )"
+angry = "(-_-')"
+friend = "(♥‿‿♥)"
+broken = "(☓‿‿☓)"
+debug = "(#__#)"
+upload = "(1__0)"
+upload1 = "(1__1)"
+upload2 = "(0__1)"
 
 [theme.main_elements.name]
 position = [20,20]
@@ -169,7 +198,7 @@ f_awesome_size = 40
 
 [theme.plugin_elements.bluetooth]
 position = [276, 170]
-label = 'BT'
+label = 'f293'
 value = '-'
 label_font = 'Bold'
 text_font = 'Medium'
@@ -177,8 +206,8 @@ label_spacing = 9
 label_line_spacing = 0
 color = 'lime'
 colors = ['yellow','orange','red','purple','blue']
-icon = false
-f_awesome = false
+icon = true
+f_awesome = true
 f_awesome_size = 40
 
 [theme.plugin_elements.memtemp_cpu]

@@ -36,16 +36,6 @@ for i in range(len(FILES_TO_MOD['path'])):
     path = data_dict['path'][i]
     file = data_dict['file'][i]
 
-COMPATIBLE_PLUGINS = [
-    'bt-tether',
-    'memtemp',
-    'clock',
-    'display-password',
-    'crack_house',
-    'pisugar2',
-    'pisugar3',
-]
-
 with open('%s/fancygotchi/sys/index.html' % (FANCY_ROOT), 'r') as file:
     html_contents = file.read()
 INDEX = html_contents
@@ -108,10 +98,10 @@ def replace_file(name, path, backup, force, hidden, extension = "bak"):
     path_target = '%s%s' % (path[0], name[0])
     if backup:
         if ((force) or (not force and not os.path.exists(path_backup))):
-            logging.info('[FANCYGOTCHI] %s ~~bak~~> %s' % (path_target, path_backup))
+            #logging.info('[FANCYGOTCHI] %s ~~bak~~> %s' % (path_target, path_backup))
             shutil.copyfile(path_target, path_backup)
     if len(path) == 2:
-        logging.info('[FANCYGOTCHI] %s --mod--> %s' % (path_source, path_target))
+        #logging.info('[FANCYGOTCHI] %s --mod--> %s' % (path_source, path_target))
         shutil.copyfile(path_source, path_target)
 
 # function to verify if a new version is available
@@ -264,7 +254,7 @@ def uninstall(soft=False):
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2023.05.0'
+    __version__ = '2023.04.2'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -289,31 +279,6 @@ class Fancygotchi(plugins.Plugin):
         if not custom_plugins_path[-1] == '/': custom_plugins_path += '/'
         ui = pwnagotchi.config['ui']['display']['type']
         theme = pwnagotchi.config['main']['plugins']['fancygotchi']['theme']
-
-        # Verification to the enabled display
-        if ui == 'lcdhat':
-            logging.info('[FANCYGOTCHI] waveshare 1.33" LCD screen')
-        elif ui == 'waveshare_v2':
-            logging.info('[FANCYGOTCHI] waveshare v.2 E-paper screen')
-        elif ui == 'oledhat':
-            logging.info('[FANCYGOTCHI] waveshare 1.3" OLED screen')
-        elif ui == 'waveshare27inch':
-            logging.info('[FANCYGOTCHI] waveshare 2.7" E-paper screen')
-        elif ui == 'waveshare144lcd':
-            logging.info('[FANCYGOTCHI] waveshare 1.44" LCD screen')
-        elif ui == 'displayhatmini':
-            logging.info('[FANCYGOTCHI] pimoroni 2" LCD Display Hat Mini screen')
-        elif ui == 'waveshare35lcd':
-            logging.info('[FANCYGOTCHI] waveshare 3,5" LCD screen')
-        elif ui == 'pitft':
-            logging.info('[FANCYGOTCHI] pitft 320x240 screen')
-        elif ui == 'spotpear24inch':
-            logging.info('[FANCYGOTCHI] spotpear 2.4" LCD screen')
-
-        elif not pwnagotchi.config['ui']['display']['enabled']:
-            logging.info('[FANCYGOTCHI] Pwnagotchi headless mode')
-        else:
-            logging.info('[FANCYGOTCHI] The screen is not tested with the plugin')
             
         # Linking bg image to the web ui
         if pwnagotchi.config['main']['plugins']['fancygotchi']['theme'] != '':
@@ -389,20 +354,6 @@ class Fancygotchi(plugins.Plugin):
 
         logging.info('[FANCYGOTCHI] Theme manager loaded')
 
-        # Verification to enabled and compatible plugins
-        for plugin in pwnagotchi.config['main']['plugins']:
-            if pwnagotchi.config['main']['plugins'][plugin]['enabled']:
-                for c_plugin in COMPATIBLE_PLUGINS:
-                    if plugin == c_plugin:
-                        # scanning custom plugins folder
-                        for x in os.listdir(pwnagotchi.config['main']['custom_plugins']):
-                            if x.endswith(".py") and x == '%s.py' % (plugin):
-                                logging.info('[FANCYGOTCHI] %s/%s' % (pwnagotchi.config['main']['custom_plugins'], x))
-                        #scanning main plugins folder
-                        for x in os.listdir('%s/plugins/default/' % (ROOT_PATH)):
-                            if x.endswith(".py") and x == '%s.py' % (plugin):  
-                                logging.info('[FANCYGOTCHI] %s/plugins/default/%s' % (ROOT_PATH, x))
-
     def on_webhook(self, path, request):
         if not self.ready:
             return "Plugin not ready"
@@ -414,12 +365,30 @@ class Fancygotchi(plugins.Plugin):
             elif path == "get-config":
                 # send configuration
                 return json.dumps(self.config, default=serializer)
-            elif path == "get-theme":
+            elif path == "get-options":
+                # send options
+                return json.dumps(pwnagotchi._theme['theme']['options'], default=serializer)
+            elif path == "get-main":
+                # send main components
+                return json.dumps(pwnagotchi._theme['theme']['main_elements'], default=serializer)
+            elif path == "get-plugins":
+                # send plugins components
+                return json.dumps(pwnagotchi._theme['theme']['plugin_elements'], default=serializer)
+            elif path == "get-css":
+                # send css
+                with open('%s/style.css' % (pwnagotchi.fancy_theme), 'r') as css_file:
+                    css_content = css_file.read()
+                css_dump = {
+                    'css': css_content
+                }
+                return json.dumps(css_dump, default=serializer)
+
+            elif path == "get-info":
                 # Verifying the image size for resolution
                 with Image.open('/var/tmp/pwnagotchi/pwnagotchi.png') as img:
                     width, height = img.size
                 # Filling the system/theme config
-                theme = {
+                info = {
                     'is_display': self.config['ui']['display']['enabled'],
                     'display': self.config['ui']['display']['type'],
                     'resolution': [width, height],
@@ -427,7 +396,7 @@ class Fancygotchi(plugins.Plugin):
                     'bg_image': pwnagotchi._theme['theme']['options']['bg_image']
                 }
                 # adding all the main and the plugins position
-                return json.dumps(theme, default=serializer)
+                return json.dumps(info, default=serializer)
             else:
                 abort(404)
 

@@ -18,7 +18,8 @@ I'm in active development, if you want encourage me, become a [Patreon](https://
 This mod can be a bit slow with some features enabled on a raspberry pi zero.
 (I'll add a note about the best light config to your with a rpi0w soon)  
 
-
+*the editor is not working actually, but you can see all the configuration info from the configuration toml film from the running theme.*  
+----
 ```
 I SHARE IT AS BACKUP AND TO SHARE THE PROGRESS  
 BACKUP YOUR PWNAGOTCHI BEFORE INSTALL 
@@ -26,6 +27,12 @@ BACKUP YOUR PWNAGOTCHI BEFORE INSTALL
 
 A complete theme manager for the Pwnagotchi [In development]   
 this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
+
+V.2023.07.0  
+
+✔️ [Added delay after deauth to avoid triggering some sort of firmware bug in nexmon. works but I don't really know why (by Sniffleupagus)](https://github.com/Sniffleupagus/pwnagotchi-snflpgs/commit/9978d5da36ab28dc015e0f2af882907eb0009d38)  
+✔️ Fixing the face images mapping  
+-- And the begining of the web UI editor and some new them (WIP)  
 
 v.2023.05.0  
 
@@ -330,7 +337,8 @@ f_awesome_size = 40
 ```
 ### To change the pwnagotchi face with image:  
 ----  
-If you want you can change the pwny face too. Enable the icon feature, and by changing all faces variable inside the /etc/pwnagotchi/config.toml file with the image name stored inside the /themes/mytheme/img/.  
+
+If you want you can change the pwny face too. Enable the icon feature, and places all the images faces with the right names in /themes/mytheme/img/. You can change the image type to use (I only tested it with png). The pure white on images will become transparent. Each image need to have the same size.  
 
 ```
 [theme.main_elements.face]
@@ -339,18 +347,38 @@ font = "Huge"
 color = "lime"
 colors = ['yellow','orange','red','purple','blue']
 icon = true # Enable here
+image_type = "png"
 ```
 
-/etc/pwnagotchi/config.toml  
+images name in /themes/mytheme/img/:  
+
 ```
-...
-ui.faces.look_r = "look_r.png" #"( ⚆_⚆)"
-ui.faces.look_l = "look_l.png" #"(☉_☉ )"
-ui.faces.look_r_happy = "look_r_happy.png" #"( ◕‿◕)"
-ui.faces.look_l_happy = "look_l_happy.png" #"(◕‿◕ )"
-...
+look_r.png
+look_l.png
+look_r_happy.png
+look_l_happy.png
+sleep.png
+sleep2.png
+awake.png
+bored.png
+intense.png
+cool.png
+happy.png
+excited.png
+grateful.png
+motivated.png
+demotivated.png
+smart.png
+lonely.png
+sad.png
+angry.png
+friend.png
+broken.png
+debug.png
+upload.png
+upload1.png
+upload2.png
 ```
-*The face condiguration will surely be included into the theme config file soon.*. 
 
 ### On-The-Go refresh:  
 ----  

@@ -36,7 +36,7 @@ class State(object):
         for attr in dir(self._state):
             if not attr.startswith("__"):
                 value = getattr(self._state, attr)
-                logging.warning('%s: %s' % (attr, value))
+                #logging.warning('%s: %s' % (attr, value))
         
     def get_attr(self, key, attribute='value'):
         with self._lock:

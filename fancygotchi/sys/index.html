@@ -37,26 +37,130 @@
         z-index:100;
         border:1px solid lime;
     }
+    #upd{
+        margin: 0;
+        top: -7px;
+    }
+    #divTop{
+        //height:50px;
+        border-bottom: 1px solid lime;
+        //margin: -10px;
+        //padding: -10px;
+    }
+    #divDevTop{
+        //height:50px;
+        border-bottom: 1px solid lime;
+        //margin: -10px;
+        //padding: -10px;
+    }
+    #wrap_cmd{
+        float:left;
+        text-align: center;
+        padding: 10px;
+        align-items: center;
+        justify-content: center;
+        //width:50%;
+        flex-grow: 1;
+        border: 1px solid lime;
+    }
+    #cmd_tabs{
+        //height:50px;
+        border-bottom: 1px solid lime;
+        //margin: -10px;
+        //padding: -10px;
+    }
+    #wrap_img{
+        text-align: center;
+        padding: 10px;
+        align-items: center;
+        justify-content: center;
+        float:right;
+        //width:50%;
+        position: relative;
+    }
+    #editor{
+        display: flex;
+        width: 100%;
+        //border:1px solid red;
+        margin-right: 0;
+    }
+    #btnDevBackup{
+        top: 9px;
+    }
+    #tableoptions{
+        border-bottom: 1px solid lime;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-    <div id="divTop">
-        <span><input id="textDevBackup" type="text" placeholder="Backup folder name..."></input></span>
-        <span><button id="btnDevBackup" type="button" onclick="dev_backup()">dev_backup fancygotchi</button></span>
-        <button id="btnSave" type="button" onclick="saveConfig()">Save theme and restart</button>
-        <button id="btnUninstall" type="button" onclick="uninstall()">Uninstall fancygotchi</button>
-        Online update<input type=checkbox id="upd_on"></input>
-        <button id="btnUpdate" type="button" onclick="check_update()">Check fancygotchi update</button>
-        <input type="text" id="searchText" placeholder="Search for options ..." title="Type an option name">
+    <div id="divDevTop" data-role="navbar" data-iconpos="left">
+        <ul>
+            <li class="navitem"><input id="textDevBackup" type="text" placeholder="Backup folder name..."></input></li>
+            <li class="navitem"><button id="btnDevBackup" type="button" onclick="dev_backup()">dev_backup fancygotchi</button></li>
+        </ul>
+
     </div>
-    <div>THEME MANAGER</div>
+    <div id="divTop" data-role="navbar" data-iconpos="left">
+        <ul>
+            <li class="navitem"><button id="btnLoad" type="button" onclick="loadConfig()">Load theme</button></li>
+            <li class="navitem"><button id="btnSave" type="button" onclick="saveConfig()">Save theme</button></li>
+            <li class="navitem"><button id="btnUninstall" type="button" onclick="uninstall()">Uninstall fancygotchi</button></li>
+            <li class="navitem"><button id="btnUpdate" type="button" onclick="check_update()">Check fancygotchi update</button></li>
+            <li class="navitem"><input type="checkbox" id="upd_on" /><label for="upd_on"  id="upd">Online update</label></li>
+        </ul>
+    </div>
+    <div id="editor">
+        <div id="wrap_cmd" data-role="tabs">
+            <div id="cmd_tabs" data-role="navbar">
+                <ul>
+                    <li><a href="#info" data-theme="a" data-ajax="false" class="ui-btn-active">Theme info</a></li>
+                    <li><a href="#options" data-theme="a" data-ajax="false">Options</a></li>
+                    <li><a href="#main" data-theme="a" data-ajax="false">Main components</a></li>
+                    <li><a href="#plugins" data-theme="a" data-ajax="false">Plugins components</a></li>
+                    <li><a href="#css" data-theme="a" data-ajax="false">CSS</a></li>
+                </ul>
+            </div>
+            <div id="info" class="ui-content">
+                <h1>Theme info tab contents</h1>
+                <input type="text" id="searchText" placeholder="Search for options ..." title="Type an option name"></input>
+                <div id="content_info"></div>
+            </div>
+            <div id="options" class="ui-content">
+                <h1>Options tab contents</h1>
+                <div id="content_options"></div>
+            </div>
+            <div id="main" class="ui-content">
+                <h1>Main components tab contents</h1>
+
+                <div class="ui-field-contain">
+                    <label for="custom-tab-select">Main components</label>
+                    <select name="custom-tab-select" id="select-native-2" data-mini="true" data-native-menu="false" class="custom-tab-select">
+                        <option value="1" data-href="#main-comp" data-theme="a" data-ajax="false">Main Components</option>
+                        <option value="2" data-href="#comp1" data-theme="a" data-ajax="false">The 2nd Option</option>
+                        <option value="3">The 3rd Option</option>
+                        <option value="4">The 4th Option</option>
+                    </select>
+                </div>
+                <div id="content_main"></div>
+            </div>
+            <div id="plugins" class="ui-content">
+                <h1>Plugins tab contents</h1>
+                <div id="content_plugins"></div>
+            </div>
+            <div id="css" class="ui-content">
+                <h1>CSS tab contents</h1>
+                <div id="content_css"></div>
+            </div>
+        </div>
+        
+        <div id="wrap_img">
+            <div id="filter_color"></div>
+            <div id="bg_img"></div>
+        </div>
+    </div>
     <div id="debug"></div>
-    <div id="wrap_img">
-        <div id="filter_color"></div>
-        <div id="bg_img"></div>
-    </div>
-    <div id="content"></div>
+    
 {% endblock %}
 
 {% block script %}
@@ -289,19 +393,23 @@
             tr.parentNode.removeChild(tr);
         }
 
-        function jsonToTable(json) {
+        function jsonToTable(json, del) {
             var table = document.createElement("table");
             table.id = "tableOptions";
 
             // create header
             var tr = table.insertRow();
-            var thDel = document.createElement("th");
-            thDel.innerHTML = "";
+            if (del == true) {
+                var thDel = document.createElement("th");
+                thDel.innerHTML = "";
+            }
             var thOpt = document.createElement("th");
             thOpt.innerHTML = "Option";
             var thVal = document.createElement("th");
             thVal.innerHTML = "Value";
-            tr.appendChild(thDel);
+            if (del == true) {
+                tr.appendChild(thDel);
+            }
             tr.appendChild(thOpt);
             tr.appendChild(thVal);
 
@@ -309,6 +417,20 @@
             // iterate over keys
             Object.keys(json).forEach(function(key) {
                 tr = table.insertRow();
+                if (del == true) {
+                    // del button
+                    divDelBtn = document.createElement("div");
+                    divDelBtn.className = "del_btn_wrapper";
+                    td = document.createElement("td");
+                    td.setAttribute("data-label", "");
+                    btnDel = document.createElement("Button");
+                    btnDel.innerHTML = "X";
+                    btnDel.onclick = function(){ delRow(this);};
+                    btnDel.className = "remove";
+                    divDelBtn.appendChild(btnDel);
+                    td.appendChild(divDelBtn);
+                    tr.appendChild(td);
+                }
                 // option
                 td = document.createElement("td");
                 td.setAttribute("data-label", "Option");
@@ -394,11 +516,11 @@
         }
 
         // Call to generate the page
-        loadJSON("fancygotchi/get-theme", function(response) {
+        loadJSON("fancygotchi/get-info", function(response) {
             var flat_json = flattenJson(response);
-            var table = jsonToTable(flat_json);
+            var table = jsonToTable(flat_json, false);
             var theme_array = jsonToArray(flat_json);
-            var divContent = document.getElementById("content");
+            var divContent = document.getElementById("content_info");
             var bg_img = document.getElementById('bg_img');
             var wrap_img = document.getElementById('wrap_img');
             var is_up = document.getElementById('btnUpdate');
@@ -415,7 +537,32 @@
 
             divContent.innerHTML = "";
             divContent.appendChild(table);
+        });
+        loadJSON("fancygotchi/get-options", function(response) {
+            var flat_json = flattenJson(response);
+            var table = jsonToTable(flat_json, false);
+            var theme_array = jsonToArray(flat_json);
+            var divContent = document.getElementById("content_options");
 
-            
+            divContent.innerHTML = "";
+            divContent.appendChild(table);
+        });
+        loadJSON("fancygotchi/get-main", function(response) {
+            var flat_json = flattenJson(response);
+            var table = jsonToTable(flat_json, false);
+            var theme_array = jsonToArray(flat_json);
+            var divContent = document.getElementById("content_main");
+
+            divContent.innerHTML = "";
+            divContent.appendChild(table);
+        });
+        loadJSON("fancygotchi/get-plugins", function(response) {
+            var flat_json = flattenJson(response);
+            var table = jsonToTable(flat_json, true);
+            var theme_array = jsonToArray(flat_json);
+            var divContent = document.getElementById("content_plugins");
+
+            divContent.innerHTML = "";
+            divContent.appendChild(table);
         });
 {% endblock %}

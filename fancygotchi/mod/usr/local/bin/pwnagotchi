@@ -71,6 +71,7 @@ def do_auto_mode(agent):
                     # deauth all client stations in order to get a full handshake
                     for sta in ap['clients']:
                         agent.deauth(ap, sta)
+                        time.sleep(1)  # delay to not trigger nexmon firmware bugs
 
             # An interesting effect of this:
             #
@@ -117,9 +118,9 @@ def load_theme(config):
         logging.info('%sconfig-v.toml' % (th_path_disp))
         config_ori = '%sconfig-v.toml' % (th_path_disp)
             
-    logging.warning(config_ori)
+    #logging.warning(config_ori)
     with open(config_ori, 'r') as f:
-        logging.warning('loop in theme config.toml')
+        #logging.warning('loop in theme config.toml')
         setattr(pwnagotchi, '_theme', toml.load(f))
         setattr(pwnagotchi, 'fancy_theme', th_path)
         setattr(pwnagotchi, 'fancy_theme_disp', th_path_disp)
@@ -127,7 +128,7 @@ def load_theme(config):
         setattr(pwnagotchi, 'fancy_name', config['main']['name'])
         #setattr(pwnagotchi, 'fancy_orient', config['main']['plugins']['fancygotchi']['orientation'])
         #pwnagotchi._theme = toml.load(f)
-        logging.info(pwnagotchi._theme)
+        #logging.info(pwnagotchi._theme)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -3,10 +3,12 @@ import pwnagotchi
 from PIL import Image, ImageDraw, ImageOps, ImageFont
 from textwrap import TextWrapper
 import pwnagotchi.ui.fonts as fonts
+import pwnagotchi.ui.view as view
+import sys
+import os
 #import fontawesome as fa
 
 def text_to_rgb(text, tfont, color, width, height):
-    #logging.warning(fa.icons['wifi'])
     th_opt = pwnagotchi._theme['theme']['options']
     if color == 'white' : color = (254, 254, 254, 255)
     w,h = tfont.getsize(text)
@@ -88,7 +90,7 @@ class FilledRect(Widget):
 
 
 class Text(Widget):
-    def __init__(self, value="", position=(0, 0), font=None, color=0, wrap=False, max_length=0, icon=False, f_awesome=False, f_awesome_size=0):
+    def __init__(self, value="", position=(0, 0), font=None, color=0, wrap=False, max_length=0, icon=False, f_awesome=False, f_awesome_size=0, face=False):
         super().__init__(position, color)
         th_opt = pwnagotchi._theme['theme']['options']
         self.value = value
@@ -100,6 +102,22 @@ class Text(Widget):
         self.image = None
         self.f_awesome = f_awesome
         self.f_awesome_size = f_awesome_size
+        self.face = face
+        th = pwnagotchi._theme['theme']['main_elements']
+        self.mapping = {}
+        th_faces = th['face']['faces']
+        th_img_t = th['face']['image_type']
+        if th['face']['icon']:
+            for face_name, face_value in th_faces.items():
+                icon_path = '%simg/%s.%s' % (pwnagotchi.fancy_theme, face_name, th_img_t)
+                icon_broken = '%simg/%s.%s' % (pwnagotchi.fancy_theme, 'broken', th_img_t)
+                #logging.warning(icon_path)
+                if os.path.isfile(icon_path):
+                    face_image = Image.open(icon_path)
+                else:
+                    logging.warning('Missing the %s.%s image' % (face_name, th_img_t))
+                    face_image = Image.open(icon_broken)
+                self.mapping[face_value] = face_image
 
         if self.icon:
             if not self.f_awesome:
@@ -146,10 +164,15 @@ class Text(Widget):
                     #drawer.text(self.xy, text, self.font, font=self.font, fill=self.color)
             else:
                 if not self.f_awesome:
-                    canvas.paste(self.image, self.xy, self.image)
+                    if not self.face:
+                        canvas.paste(self.image, self.xy, self.image)
+                    else:
+                        img = self.mapping[self.value]
+
+                        canvas.paste(img, self.xy, img)
+                        #canvas.paste(self.image, self.xy, self.image)
                 else:
                     if self.color == 'white' : self.color = (254, 254, 254, 255)
-                    #logging.warning(self.color)
                     if th_opt['main_text_color'] == '':
                         icon_img = ImageOps.colorize(self.image.convert('L'), black = self.color, white = 'white')
                         icon_img = icon_img.convert('RGBA')

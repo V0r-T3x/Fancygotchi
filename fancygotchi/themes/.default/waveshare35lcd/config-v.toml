@@ -50,6 +50,33 @@ font = "Huge"
 color = "magenta"
 icon = false
 
+[theme.main_elements.face.faces]
+look_r = "( ⚆_⚆)"
+look_l = "(☉_☉ )"
+look_r_happy = "( ◕‿◕)"
+look_l_happy = "(◕‿◕ )"
+sleep = "(⇀‿‿↼)"
+sleep2 = "(≖‿‿≖)"
+awake = "(◕‿‿◕)"
+bored = "(-__-)"
+intense = "(°▃▃°)"
+cool = "(⌐■_■)"
+happy = "(•‿‿•)"
+excited = "(ᵔ◡◡ᵔ)"
+grateful = "(^‿‿^)"
+motivated = "(☼‿‿☼)"
+demotivated = "(≖__≖)"
+smart = "(✜‿‿✜)"
+lonely = "(ب__ب)"
+sad = "(╥☁╥ )"
+angry = "(-_-')"
+friend = "(♥‿‿♥)"
+broken = "(☓‿‿☓)"
+debug = "(#__#)"
+upload = "(1__0)"
+upload1 = "(1__1)"
+upload2 = "(0__1)"
+
 [theme.main_elements.name]
 position = [10, 30]
 font = "Bold"

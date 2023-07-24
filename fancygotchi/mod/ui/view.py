@@ -29,11 +29,11 @@ ROOT = None
 class View(object):
     def __init__(self, config, impl, state=None):
         global ROOT
-
-        # setup faces from the configuration in case the user customized them
-        faces.load_from_config(config['ui']['faces'])
-        
         th = pwnagotchi._theme['theme']['main_elements']
+        # setup faces from the configuration in case the user customized them
+        #faces.load_from_config(config['ui']['faces'])
+        faces.load_from_config(th['face']['faces'])
+
         th_opt = pwnagotchi._theme['theme']['options']
         th_ch = th['channel']
         th_aps = th['aps']
@@ -100,7 +100,7 @@ class View(object):
             'line1': Line(th_line1['position'], color='lime'),
             'line2': Line(th_line2['position'], color='lime'),
 
-            'face': Text(value=faces.SLEEP, position=th_face['position'], color=th_face['color'], font=getattr(fonts, th_face['font'])),
+            'face': Text(value=faces.SLEEP, position=th_face['position'], color=th_face['color'], font=getattr(fonts, th_face['font']), face=True),
 
             'friend_face': Text(value=None, position=th_fface['position'], font=getattr(fonts, th_fface['font']), color=th_fface['color']),
             'friend_name': Text(value=None, position=th_fname['position'], font=getattr(fonts, th_fname['font']),
@@ -125,8 +125,6 @@ class View(object):
             'mode': Text(value='AUTO', position=th_mode['position'],
                          font=getattr(fonts, th_mode['font']), color=th_mode['color']),
         })
-
-        logging.warning(self._layout['status']['font'])
 
         if state:
             for key, value in state.items():
@@ -187,31 +185,17 @@ class View(object):
 
 
                 for val in self._state.items():
-                    #logging.warning(val)
                     if len(self._state.get_attr(val[0], 'colors')) != 0:
                         
                         i = self._state.get_attr(val[0], 'icolor')
 
                         color_list = self._state.get_attr(val[0], 'colors')
-                        #logging.warning('more than a color for '+val[0]+' '+str(i)+'/'+str(len(color_list)))
                         self._state.set_attr(val[0], 'color', color_list[i])
                         i += 1
                         if i > len(color_list)-1:
                             self._state.set_attr(val[0], 'icolor', 0)
                         else:
                             self._state.set_attr(val[0], 'icolor', i)
-
-                    #for key, value in val:
-                    #    logging.warning(element +' '+ value)
-                #if self._state.get_color('name') == 'lime':
-                #    self._state.set_color('name', 'red')
-                #    self._state.set_attr('name', 'icolor', 1)
-                #    #logging.warning(self._state.get_attr('name', 'icolor'))
-                #else:
-                #    self._state.set_color('name', 'lime')
-                #    self._state.set_attr('name', 'icolor', 0)
-                #    #logging.warning(self._state.get_attr('name', 'icolor'))
-
 
                 self.update()
             except Exception as e:
@@ -491,10 +475,10 @@ class View(object):
                 logging.info('[FANCYGOTCHI] Theme changed... Loading new theme')
 
             if rot == 0 or rot == 180:
-                logging.info('[FANCYGOTCHI] theme file: %sconfig-h.toml' % (pwnagotchi.fancy_theme_disp))
+                #logging.info('[FANCYGOTCHI] theme file: %sconfig-h.toml' % (pwnagotchi.fancy_theme_disp))
                 config_ori = '%sconfig-h.toml' % (pwnagotchi.fancy_theme_disp)
             if rot == 90 or rot == 270:
-                logging.info('[FANCYGOTCHI] theme file: %sconfig-v.toml' % (pwnagotchi.fancy_theme_disp))
+                #logging.info('[FANCYGOTCHI] theme file: %sconfig-v.toml' % (pwnagotchi.fancy_theme_disp))
                 config_ori = '%sconfig-v.toml' % (pwnagotchi.fancy_theme_disp)
             
             # loading theme config
@@ -506,13 +490,13 @@ class View(object):
             # copying the style.css of the selected theme
             src_css = '%sstyle.css' % (th_path)
             dst_css = '%s/web/static/css/style.css' % (os.path.dirname(os.path.realpath(__file__)))
-            logging.info('[FANCYGOTCHI] linking theme css: '+src_css +' ~~mod~~> '+ dst_css)
+            #logging.info('[FANCYGOTCHI] linking theme css: '+src_css +' ~~mod~~> '+ dst_css)
             copy(src_css, dst_css)
 
             # changing the symlink for the img folder of the slected theme
             src_img = '%simg' % (th_path)
             dst_img = '%s/web/static' % (os.path.dirname(os.path.realpath(__file__)))
-            logging.info('[FANCYGOTCHI] linking theme image folder: '+src_img +' ~~mod~~> '+ dst_img)
+            #logging.info('[FANCYGOTCHI] linking theme image folder: '+src_img +' ~~mod~~> '+ dst_img)
             # removing old link
             os.system('rm %s/img' % (dst_img))
             # creating new link
@@ -627,40 +611,65 @@ class View(object):
                         self._state.set_attr(element, key, [])
                 elif key == 'icon':
                     self._state.set_attr(element, key, value)
-                    if value:
-                        for val in self._state.items():
-                    	    if val[0] == element:
-                                if isinstance(val[1], pwnagotchi.ui.components.LabeledValue):
-                                    #logging.warning(element+' is a labeled value')
-                                    type = self._state.get_attr(element, 'label')
-                                    t = 'label'
-                                elif isinstance(val[1], pwnagotchi.ui.components.Text):
-                                    #logging.warning(element+' is a text')
-                                    type = self._state.get_attr(element, 'value')
-                                    t = 'value'
-                        #logging.warning(type)
-                        if not components[element]['f_awesome']:
-                            icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, type)
-                            ##self._state.image = Image.open(icon_path)
-                            self._state.set_attr(element, 'image', Image.open(icon_path))
-                            if th_opt['main_text_color'] != '':
-                                self.image.convert('1')
-                        else:
-                            logging.warning(t)
-                            fa = ImageFont.truetype('font-awesome-solid.otf', components[element]['f_awesome_size'])
-                            code_point = int(components[element][t], 16)
-                            icon = chr(code_point)
-                            w,h = fa.getsize(icon)
-                            icon_img = Image.new('1', (int(w), int(h)), 0xff)
-                            dt = ImageDraw.Draw(icon_img)
-                            dt.text((0,0), icon, font=fa, fill=0x00)
-                            icon_img = icon_img.convert('RGBA')
-                            self._state.set_attr(element, 'image', icon_img)
+                    for ckey, cvalue in components[element].items():
+                        if not element == 'face':
+                            if value:
+                                for val in self._state.items():
+                                    if val[0] == element:
+                                        if isinstance(val[1], pwnagotchi.ui.components.LabeledValue):
+                                            #logging.warning(element+' is a labeled value')
+                                            type = self._state.get_attr(element, 'label')
+                                            t = 'label'
+                                        elif isinstance(val[1], pwnagotchi.ui.components.Text):
+                                            #if not 'face' in components[element].items():
+                                            #logging.warning(element+' is a text')
+                                            type = self._state.get_attr(element, 'value')
+                                            t = 'value'
+                                if not components[element]['f_awesome']:
+                                    #if not 'face' in components[element].items():
+                                    icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, type)
+                                    ##self._state.image = Image.open(icon_path)
+                                    self._state.set_attr(element, 'image', Image.open(icon_path))
+                                    if th_opt['main_text_color'] != '':
+                                        self.image.convert('1')
+                                else:
+                                    #logging.warning(t)
+                                    fa = ImageFont.truetype('font-awesome-solid.otf', components[element]['f_awesome_size'])
+                                    code_point = int(components[element][t], 16)
+                                    icon = chr(code_point)
+                                    w,h = fa.getsize(icon)
+                                    icon_img = Image.new('1', (int(w), int(h)), 0xff)
+                                    dt = ImageDraw.Draw(icon_img)
+                                    dt.text((0,0), icon, font=fa, fill=0x00)
+                                    icon_img = icon_img.convert('RGBA')
+                                    self._state.set_attr(element, 'image', icon_img)
                 elif key == 'f_awesome':
                     self._state.set_attr(element, key, value)
                 elif key == 'f_awesome_size':
                     self._state.set_attr(element, key, value)
-
+                elif key == 'faces':
+                    for ckey, cvalue in components[element].items():
+                        if ckey == 'icon':
+                            isiconic = cvalue
+                    if isiconic:
+                        for ckey, cvalue in components[element].items():
+                            if ckey == 'faces':
+                                th_faces = cvalue
+                            if ckey == 'image_type':
+                                th_img_t = cvalue
+                        faces.load_from_config(value)
+                        mapping = {}
+                        for face_name, face_value in th_faces.items():
+                            icon_path = '%simg/%s.%s' % (pwnagotchi.fancy_theme, face_name, th_img_t)
+                            icon_broken = '%simg/%s.%s' % (pwnagotchi.fancy_theme, 'broken', th_img_t)
+                            if os.path.isfile(icon_path):
+                                face_image = Image.open(icon_path)
+                            else:
+                                #logging.warning('[FANCYGOTCHI] missing the %s image' % (face_name))
+                                face_image = Image.open(icon_path)
+                            #self.mapping = {face_value: face_image}
+                            mapping[face_value] = face_image
+                        self._state.set_attr(element, 'mapping', mapping)
 
         time.sleep(1)
 
@@ -727,7 +736,6 @@ class View(object):
 
                 self._canvas = self._canvas.convert('RGB')
                 datas = self._canvas.getdata()
-                #logging.warning(datas)
                 newData_web = []
                 newData_disp = []
                 self._web = None
