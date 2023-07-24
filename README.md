@@ -19,7 +19,7 @@ This mod can be a bit slow with some features enabled on a raspberry pi zero.
 (I'll add a note about the best light config to your with a rpi0w soon)  
 
 *the editor is not working actually, but you can see all the configuration info from the configuration toml film from the running theme.*  
-----
+
 ```
 I SHARE IT AS BACKUP AND TO SHARE THE PROGRESS  
 BACKUP YOUR PWNAGOTCHI BEFORE INSTALL 
