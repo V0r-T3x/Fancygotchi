@@ -49,6 +49,7 @@ position = [0, 43]
 font = "Huge"
 color = "magenta"
 icon = false
+image_type = 'png'
 
 [theme.main_elements.face.faces]
 look_r = "( ⚆_⚆)"
