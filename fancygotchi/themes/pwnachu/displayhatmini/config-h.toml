@@ -45,13 +45,14 @@ color_text = 'white'
 [theme.main_elements]
 
 [theme.main_elements.face]
-position = [35, 50]
+position = [35, 20]
 font = "Huge"
 color = "magenta"
 icon = true
 image_type = 'png'
 f_awesome = false
 f_awesome_size = 40
+zoom = 0.75
 
 [theme.main_elements.face.faces]
 look_r = "( ⚆_⚆)"

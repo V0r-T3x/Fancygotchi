@@ -40,7 +40,7 @@ main_text_color = ''
 # 'black'
 # 'white'
 # 'auto' = pale color will be 'white' and dark color will be 'black'
-color_text = 'auto'
+color_text = 'white'
 
 [theme.main_elements]
 

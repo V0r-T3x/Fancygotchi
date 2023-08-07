@@ -32,6 +32,59 @@ def text_to_rgb(text, tfont, color, width, height):
 
     return imgtext
 
+def adjust_image(image_path, zoom, mask=False):
+    try:
+        # Open the image
+        image = Image.open(image_path)
+        image = image.convert('RGBA') 
+        #image.save('/home/pi/original.png')
+        # Get the original width and height
+        original_width, original_height = image.size
+        # Calculate the new dimensions based on the zoom factor
+        new_width = int(original_width * zoom)
+        new_height = int(original_height * zoom)
+        # Resize the image while maintaining the aspect ratio
+        adjusted_image = image.resize((new_width, new_height))#, Image.ANTIALIAS)
+
+        #adjusted_image.save('/home/pi/middle.png')
+
+        if mask:
+            image = adjusted_image.convert('RGBA') 
+            width, height = image.size
+            pixels = image.getdata()
+            new_pixels = []
+            for pixel in pixels:
+                r, g, b, a = pixel
+                
+                # If pixel is not fully transparent (alpha is not 0), convert it to black
+                #if a > 50:
+                if a > 150:
+                    new_pixel = (0, 0, 0, 255)
+                else:
+                    new_pixel = (0, 0, 0, 0)
+                
+                new_pixels.append(new_pixel)
+
+            # Create a new image with the modified pixel data
+            new_img = Image.new("RGBA", image.size)
+            new_img.putdata(new_pixels)
+            #for x in range(width):
+            #    for y in range(height):
+            #        r, g, b, a = image.getpixel((x, y))
+            #        # Convert non-alpha pixels to black
+            #        if a < 255:
+            #            image.putpixel((x, y), (0, 0, 0, 255))
+            #new_img.save('/home/pi/mask.png')
+            adjusted_image = new_img
+
+
+        # Return the resized image
+        return adjusted_image
+
+    except Exception as e:
+        logging.warning("Error:", str(e))
+        return None
+
 class Widget(object):
     def __init__(self, xy, color=0):
         self.xy = xy
@@ -90,7 +143,7 @@ class FilledRect(Widget):
 
 
 class Text(Widget):
-    def __init__(self, value="", position=(0, 0), font=None, color=0, wrap=False, max_length=0, icon=False, f_awesome=False, f_awesome_size=0, face=False):
+    def __init__(self, value="", position=(0, 0), font=None, color=0, wrap=False, max_length=0, icon=False, f_awesome=False, f_awesome_size=0, face=False, zoom=1):
         super().__init__(position, color)
         th_opt = pwnagotchi._theme['theme']['options']
         self.value = value
@@ -103,26 +156,38 @@ class Text(Widget):
         self.f_awesome = f_awesome
         self.f_awesome_size = f_awesome_size
         self.face = face
+        self.zoom = zoom
         th = pwnagotchi._theme['theme']['main_elements']
         self.mapping = {}
         th_faces = th['face']['faces']
         th_img_t = th['face']['image_type']
+
+        # If one image is 1bit color mask or 1bit convertion create a second mapping
+
+        if not th_opt['main_text_color'] == '':
+            self.mask = True
+        else:
+            self.mask = False
         if th['face']['icon']:
             for face_name, face_value in th_faces.items():
                 icon_path = '%simg/%s.%s' % (pwnagotchi.fancy_theme, face_name, th_img_t)
                 icon_broken = '%simg/%s.%s' % (pwnagotchi.fancy_theme, 'broken', th_img_t)
                 #logging.warning(icon_path)
                 if os.path.isfile(icon_path):
-                    face_image = Image.open(icon_path)
+                    face_image = adjust_image(icon_path, self.zoom, self.mask)#Image.open(icon_path)
+
                 else:
                     logging.warning('Missing the %s.%s image' % (face_name, th_img_t))
-                    face_image = Image.open(icon_broken)
+                    face_image = adjust_image(icon_broken, self.zoom, self.mask)#Image.open(icon_broken)
+                #face_image.save('/home/pi/%s.png' % (face_name))
+                #logging.warning('/home/pi/%s.png' % (face_name))
                 self.mapping[face_value] = face_image
 
         if self.icon:
             if not self.f_awesome:
                 icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, value)
-                self.image = Image.open(icon_path)
+                self.image =  adjust_image(icon_path, self.zoom, self.mask)#Image.open(icon_path)
+
                 if th_opt['main_text_color'] != '':
                     self.image.convert('1')
             else:
@@ -168,7 +233,7 @@ class Text(Widget):
                         canvas.paste(self.image, self.xy, self.image)
                     else:
                         img = self.mapping[self.value]
-
+                        #img.save('/home/pi/actual.png')
                         canvas.paste(img, self.xy, img)
                         #canvas.paste(self.image, self.xy, self.image)
                 else:
@@ -183,7 +248,7 @@ class Text(Widget):
 
 
 class LabeledValue(Widget):
-    def __init__(self, label, value="", position=(0, 0), label_font=None, text_font=None, color=0, label_spacing=9, icon=False, label_line_spacing=0, f_awesome=False, f_awesome_size=0):
+    def __init__(self, label, value="", position=(0, 0), label_font=None, text_font=None, color=0, label_spacing=9, icon=False, label_line_spacing=0, f_awesome=False, f_awesome_size=0, zoom=1):
         th_opt = pwnagotchi._theme['theme']['options']
         label_spacing = th_opt['label_spacing']
         super().__init__(position, color)
@@ -195,12 +260,17 @@ class LabeledValue(Widget):
         self.label_line_spacing = label_line_spacing
         self.icon = icon
         self.image = None
+        self.zoom = zoom
         self.f_awesome = f_awesome
         self.f_awesome_size = f_awesome_size
+        if not th_opt['main_text_color'] == '':
+            self.mask = True
+        else:
+            self.mask = False
         if icon:
             if not self.f_awesome:
                 icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, label)
-                self.image = Image.open(icon_path)
+                self.image =  adjust_image(icon_path, self.zoom, self.mask)#Image.open(icon_path)
                 if th_opt['main_text_color'] != '':
                     self.image.convert('1')
             else:

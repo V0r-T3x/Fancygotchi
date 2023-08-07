@@ -299,6 +299,11 @@ If enabled (true) and the icon feature is enabled, the component value is use to
 `f_awesome_size`:  
 The font size for Font Awesome.  
 
+`zoom`:  
+The multiplier to adjust the image size.  
+Number < 0 = smaller image (0.5 = half size)  
+Number > 0 = bigger image (2 = double size)  
+
 Plugins options:  
 ----  
 The third section is for all other custom plugins configuration. This start with `[theme.plugin_elements]`.  

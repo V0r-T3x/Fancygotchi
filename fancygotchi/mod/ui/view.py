@@ -179,9 +179,9 @@ class View(object):
                 #self.set('name', name.rstrip('❤').strip() if '❤' in name else (name + ' ❤'))
                 if hasattr(pwnagotchi, 'fancy_cursor'):
                     if th_opt['cursor'] in name:
-                        name = pwnagotchi.fancy_name + '> ' + pwnagotchi.fancy_cursor
+                        name = pwnagotchi.fancy_name + '>' + pwnagotchi.fancy_cursor
                         th_opt['cursor'] = pwnagotchi.fancy_cursor
-                self.set('name', name.rstrip(th_opt['cursor']).strip() if th_opt['cursor'] in name else (name + ' ' + th_opt['cursor']))
+                self.set('name', name.rstrip(th_opt['cursor']).strip() if th_opt['cursor'] in name else (name + th_opt['cursor']))
 
 
                 for val in self._state.items():
@@ -629,7 +629,15 @@ class View(object):
                                     #if not 'face' in components[element].items():
                                     icon_path = '%simg/%s' % (pwnagotchi.fancy_theme, type)
                                     ##self._state.image = Image.open(icon_path)
-                                    self._state.set_attr(element, 'image', Image.open(icon_path))
+                                    zoom = 1
+                                    for ckey, cvalue in components[element].items():
+                                        if ckey == 'zoom':
+                                            zoom = cvalue
+                                            if not th_opt['main_text_color'] == '':
+                                                mask = True
+                                            else:
+                                                mask = False
+                                    self._state.set_attr(element, 'image',  adjust_image(icon_path, zoom, mask))#Image.open(icon_path))
                                     if th_opt['main_text_color'] != '':
                                         self.image.convert('1')
                                 else:
@@ -662,11 +670,19 @@ class View(object):
                         for face_name, face_value in th_faces.items():
                             icon_path = '%simg/%s.%s' % (pwnagotchi.fancy_theme, face_name, th_img_t)
                             icon_broken = '%simg/%s.%s' % (pwnagotchi.fancy_theme, 'broken', th_img_t)
+                            zoom = 1
+                            for ckey, cvalue in components[element].items():
+                                if ckey == 'zoom':
+                                    zoom = cvalue
+                                    if not th_opt['main_text_color'] == '':
+                                        mask = True
+                                    else:
+                                        mask = False
                             if os.path.isfile(icon_path):
-                                face_image = Image.open(icon_path)
+                                face_image = adjust_image(icon_path, zoom, mask)#Image.open(icon_path)
                             else:
                                 #logging.warning('[FANCYGOTCHI] missing the %s image' % (face_name))
-                                face_image = Image.open(icon_path)
+                                face_image = adjust_image(icon_broken, zoom, mask)#Image.open(icon_path)
                             #self.mapping = {face_value: face_image}
                             mapping[face_value] = face_image
                         self._state.set_attr(element, 'mapping', mapping)
