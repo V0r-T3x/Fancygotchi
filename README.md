@@ -11,6 +11,9 @@ Pimoroni Display Hat Mini 320x240 with color animated background in horizontal
 Pimoroni Display Hat Mini 320x240 with black background in vertical  
 ![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/vertical.jpg)  
 
+Waveshare v2 150x122 1bit color with full color web UI  
+![preview](https://github.com/V0r-T3x/fancygotchi/blob/main/img/wsv2_pwnachu.jpg)  
+
 -----------------------
 
 I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop).  
