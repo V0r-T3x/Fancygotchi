@@ -23,6 +23,8 @@ This mod can be a bit slow with some features enabled on a raspberry pi zero.
 
 *the editor is not working actually, but you can see all the configuration info from the configuration toml film from the running theme.*  
 
+[resolution comparaison of compatible display for the pwnagotchi](https://user-images.githubusercontent.com/70115207/258594224-e60d18aa-ab26-40cd-a9bd-c234ed05261a.png)
+
 ```
 I SHARE IT AS BACKUP AND TO SHARE THE PROGRESS  
 BACKUP YOUR PWNAGOTCHI BEFORE INSTALL 
@@ -30,6 +32,12 @@ BACKUP YOUR PWNAGOTCHI BEFORE INSTALL
 
 A complete theme manager for the Pwnagotchi [In development]   
 this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
+
+V.2023.08.0  
+
+✔️ Zoom feature to make icons or images bigger or smaller  
+✔️ Mask creation for image before conversion into 1bit  
+✔️ Adding the base for my Pwnachu theme version  
 
 V.2023.07.0  
 
