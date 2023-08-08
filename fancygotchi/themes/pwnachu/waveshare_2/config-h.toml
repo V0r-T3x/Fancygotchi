@@ -6,10 +6,10 @@
 stealth_mode = false
 fg_image = ''
 bg_color = 'yellow'
-bg_image = 'bg.png'
-bg_anim_image = 'bg.gif'
+bg_image = 'bg-250x122.png'
+bg_anim_image = 'bg-250x122.gif'
 # Bold, BoldSmall, Medium, Huge, BoldBig, Small
-font_sizes = [10, 8, 8, 55, 25, 4]
+font_sizes = [10, 8, 8, 32, 25, 4]
 font = 'DejaVuSansMono'
 status_font = 'DejaVuSansMono'
 label_spacing = 9
@@ -90,7 +90,7 @@ f_awesome = false
 f_awesome_size = 40
 
 [theme.main_elements.channel]
-position = [213, 80]
+position = [105, 80]
 label = ""
 value = "00"
 label_font = "Bold"
@@ -134,23 +134,23 @@ position = [0, -10, 240, -10]
 color = "black"
 
 [theme.main_elements.friend_face]
-position = [0, 130]
-font = "Bold"
+position = [140, 20]
+font = "Huge"
 color = "black"
 icon = false
 f_awesome = false
 f_awesome_size = 40
 
 [theme.main_elements.friend_name]
-position = [40, 135]
-font = "BoldSmall"
+position = [150, 18]
+font = "Medium"
 color = "black"
 icon = false
 f_awesome = false
 f_awesome_size = 40
 
 [theme.main_elements.shakes]
-position = [208, 102]
+position = [92, 104]
 label = ""
 value = "0 (00)"
 label_font = "Bold"
@@ -169,7 +169,7 @@ color = "black"
 icon = false
 
 [theme.main_elements.status]
-position = [100, 72]
+position = [140, 72]
 value = "AUTO"
 font = "Small"
 color = "black"
