@@ -14,6 +14,19 @@ Pimoroni Display Hat Mini 320x240 with black background in vertical
 Waveshare v2 150x122 1bit color with full color web UI  
 ![preview](https://github.com/V0r-T3x/fancygotchi/blob/main/img/wsv2_pwnachu.jpg)  
 
+#Pwnachu compatibilities (only into the horizontal mode (rotation=0 or rotation=180):  
+----
+```
+waveshare_1  
+waveshare_2  
+waveshare_3  
+dfrobotv1  
+dforbotv2  
+waveshare29inch  
+waveshare213bc  
+waveshare213d  
+inky  
+```
 -----------------------
 
 I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop).  
@@ -112,6 +125,7 @@ ui.display.rotation = 0 #keep it to 0, don't use it
 main.plugins.fancygotchi.enabled = false
 main.plugins.fancygotchi.theme = '' # Keep empty to load the default theme.
 main.plugins.fancygotchi.rotation = 0 #<--- use it
+main.plugins.fancygotchi.python = 3.7
 ```
 - Restart the pwnagotchi
 - Goto inside the web ui plugin page
