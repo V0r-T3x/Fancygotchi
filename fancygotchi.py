@@ -17,7 +17,7 @@ from pwnagotchi.utils import save_config
 from flask import abort, render_template_string
 import requests
 
-ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
+ROOT_PATH = '/usr/local/lib/python%s/dist-packages/pwnagotchi' % (pwnagotchi.config['main']['plugins']['fancygotchi']['python'])
 FANCY_ROOT = os.path.dirname(os.path.realpath(__file__))
 setattr(pwnagotchi, 'fancy_root', FANCY_ROOT)
 
@@ -276,7 +276,9 @@ class Fancygotchi(plugins.Plugin):
         logging.info("[FANCYGOTCHI] Beginning Fancygotchi load")
 
         custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
-        if not custom_plugins_path[-1] == '/': custom_plugins_path += '/'
+        logging.info("[FANCYGOTCHI] before backup check " + custom_plugins_path)
+        if custom_plugins_path == '': custom_plugins_path = ROOT_PATH + '/plugins/default/'
+        if not custom_plugins_path[-1] == '/' : custom_plugins_path += '/'
         ui = pwnagotchi.config['ui']['display']['type']
         theme = pwnagotchi.config['main']['plugins']['fancygotchi']['theme']
             
@@ -293,6 +295,8 @@ class Fancygotchi(plugins.Plugin):
 
         # Loop to verify if the backup is here, and if not it backup original files
         # and replace them all with link from plugin folder
+
+        logging.info("[FANCYGOTCHI] before backup check")
         restart = 0
         for i in range(len(FILES_TO_MOD['path'])):            
             path = data_dict['path'][i]
