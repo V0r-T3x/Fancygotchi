@@ -95,6 +95,12 @@ def do_auto_mode(agent):
                 logging.exception("main loop exception (%s)", e)
 
 def load_theme(config):
+    py_v = platform.python_version()
+    v_parts = py_v.split('.')
+    py_v = '.'.join(v_parts[:2])
+    pwny_path = pwnagotchi.__file__
+    setattr(pwnagotchi, 'root_path', os.path.dirname(pwny_path))
+    #logging.warning(pwnagotchi.root_path)
     custom_path = config['main']['custom_plugins']
     if not custom_path == '':
         if custom_path[-1] == '/':
@@ -102,7 +108,8 @@ def load_theme(config):
         if os.path.exists('%s/fancygotchi.py' % (custom_path)):
             fancy_path = custom_path
     else:
-        fancy_path = '/usr/local/lib/python%s/dist-packages/pwnagotchi/plugins/default' % (config['main']['plugins']['fancygotchi']['python'])
+        fancy_path = '%s/plugins/default' % (pwnagotchi.root_path)
+    setattr(pwnagotchi, 'fancy_path', fancy_path)
     if not config['main']['plugins']['fancygotchi']['theme'] == '':
         th_select = str(config['main']['plugins']['fancygotchi']['theme'])
     else:
@@ -212,3 +219,4 @@ if __name__ == '__main__':
         do_manual_mode(agent)
     else:
         do_auto_mode(agent)
+

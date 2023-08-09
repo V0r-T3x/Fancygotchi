@@ -125,7 +125,6 @@ ui.display.rotation = 0 #keep it to 0, don't use it
 main.plugins.fancygotchi.enabled = false
 main.plugins.fancygotchi.theme = '' # Keep empty to load the default theme.
 main.plugins.fancygotchi.rotation = 0 #<--- use it
-main.plugins.fancygotchi.python = 3.7
 ```
 - Restart the pwnagotchi
 - Goto inside the web ui plugin page

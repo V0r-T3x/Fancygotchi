@@ -4,7 +4,6 @@ main.whitelist = []
 main.plugins.fancygotchi.enabled = false
 main.plugins.fancygotchi.theme = ""
 main.plugins.fancygotchi.rotation = 180
-main.plugins.fancygotchi.python = 3.7
 
 ui.display.enabled = true
 # screens tested with the theme by V0rt3x
