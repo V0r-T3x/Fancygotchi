@@ -17,7 +17,6 @@ from pwnagotchi.utils import save_config
 from flask import abort, render_template_string
 import requests
 
-logging.info('python version: ' + py_v)
 ROOT_PATH = pwnagotchi.root_path
 FANCY_ROOT = pwnagotchi.fancy_path
 setattr(pwnagotchi, 'fancy_root', FANCY_ROOT)
