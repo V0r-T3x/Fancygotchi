@@ -17,8 +17,12 @@ from pwnagotchi.utils import save_config
 from flask import abort, render_template_string
 import requests
 
-ROOT_PATH = pwnagotchi.root_path
-FANCY_ROOT = pwnagotchi.fancy_path
+pwny_path = pwnagotchi.__file__
+pwny_path = os.path.dirname(pwny_path)
+pwnagotchi.root_path = pwny_path
+
+ROOT_PATH = pwny_path
+FANCY_ROOT = os.path.dirname(os.path.realpath(__file__))
 setattr(pwnagotchi, 'fancy_root', FANCY_ROOT)
 
 with open('%s/fancygotchi/sys/files.csv' % (FANCY_ROOT), newline='') as csvfile:
