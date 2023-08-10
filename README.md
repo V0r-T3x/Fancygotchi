@@ -1,5 +1,7 @@
 # FANCYGOTCHI  
 ----
+*I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop) or send me a voluntary contribution with [Paypal](https://www.paypal.com/paypalme/v0r73x?country.x=CA&locale.x=en_US)*  
+
 
 There's some previews of dev.    
 Pimoroni Display Hat Mini 320x240 with color background image in horizontal  
@@ -29,7 +31,7 @@ inky
 ```
 -----------------------
 
-I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop).  
+
 
 This mod can be a bit slow with some features enabled on a raspberry pi zero.
 (I'll add a note about the best light config to your with a rpi0w soon)  
