@@ -1,5 +1,7 @@
 # FANCYGOTCHI  
 ----
+*I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop) or send me a voluntary contribution with [Paypal](https://www.paypal.com/paypalme/v0r73x?country.x=CA&locale.x=en_US)*  
+
 
 There's some previews of dev.    
 Pimoroni Display Hat Mini 320x240 with color background image in horizontal  
@@ -20,16 +22,17 @@ Waveshare v2 150x122 1bit color with full color web UI
 waveshare_1  
 waveshare_2  
 waveshare_3  
-dfrobotv1  
-dforbotv2  
 waveshare29inch  
-waveshare213bc  
-waveshare213d  
-inky  
+inky
+
+dfrobotv1 (need a fix)  
+dforbotv2 (need a fix)
+waveshare213bc (need a fix)  
+waveshare213d (need a fix)  
 ```
 -----------------------
 
-I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop).  
+
 
 This mod can be a bit slow with some features enabled on a raspberry pi zero.
 (I'll add a note about the best light config to your with a rpi0w soon)  

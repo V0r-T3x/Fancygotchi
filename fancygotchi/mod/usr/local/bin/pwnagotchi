@@ -95,9 +95,6 @@ def do_auto_mode(agent):
                 logging.exception("main loop exception (%s)", e)
 
 def load_theme(config):
-    py_v = platform.python_version()
-    v_parts = py_v.split('.')
-    py_v = '.'.join(v_parts[:2])
     pwny_path = pwnagotchi.__file__
     setattr(pwnagotchi, 'root_path', os.path.dirname(pwny_path))
     #logging.warning(pwnagotchi.root_path)
