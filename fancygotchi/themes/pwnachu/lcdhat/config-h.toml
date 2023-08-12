@@ -97,7 +97,6 @@ label_font = "Bold"
 text_font = "Bold"
 label_spacing = 9
 color = "red"
-colors = ["lime", "blue"]
 icon = false
 f_awesome = false
 f_awesome_size = 40

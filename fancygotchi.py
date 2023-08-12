@@ -22,6 +22,8 @@ pwny_path = os.path.dirname(pwny_path)
 pwnagotchi.root_path = pwny_path
 
 ROOT_PATH = pwny_path
+
+#ROOT_PATH = '/usr/local/lib/python3.7/dist-packages/pwnagotchi'
 FANCY_ROOT = os.path.dirname(os.path.realpath(__file__))
 setattr(pwnagotchi, 'fancy_root', FANCY_ROOT)
 

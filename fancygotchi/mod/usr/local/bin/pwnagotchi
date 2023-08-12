@@ -102,8 +102,8 @@ def load_theme(config):
     if not custom_path == '':
         if custom_path[-1] == '/':
             custom_path = custom_path[:-1]
-        if os.path.exists('%s/fancygotchi.py' % (custom_path)):
-            fancy_path = custom_path
+    if os.path.exists('%s/fancygotchi.py' % (custom_path)):
+        fancy_path = custom_path
     else:
         fancy_path = '%s/plugins/default' % (pwnagotchi.root_path)
     setattr(pwnagotchi, 'fancy_path', fancy_path)
