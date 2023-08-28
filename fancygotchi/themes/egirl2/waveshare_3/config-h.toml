@@ -107,7 +107,7 @@ label = "AP:"
 value = "00(00)"
 label_font = "Medium"
 text_font = "Medium"
-label_spacing = 2
+label_spacing = 0
 color = "black"
 icon = false
 f_awesome = false
@@ -190,42 +190,53 @@ icon = false
 f_awesome = false
 f_awesome_size = 40
 
-[theme.plugin_elements.memtemp_cpu]
-position = [100, 20]
-color = 'black'
-label = 'CPU:'
-value = '000'
-label_font = 'Bold'
+[theme.plugin_elements.altitude]
+position = [91, 42]
+label = 'Alt:'
+value = '-'
+label_font = 'Medium'
 text_font = 'Medium'
-label_spacing = 0
-label_line_spacing = 0
+label_spacing = 9
+color = 'black'
 icon = false
 f_awesome = false
 f_awesome_size = 40
 
-[theme.plugin_elements.memtemp_mem]
-position = [100, 30]
-color = 'black'
-label = 'MEM:'
-value = '000'
-label_font = 'Bold'
+[theme.plugin_elements.longitude]
+position = [86, 32]
+label = 'Long:'
+value = '-'
+label_font = 'Medium'
 text_font = 'Medium'
-label_spacing = 0
-label_line_spacing = 0
+label_spacing = 9
+color = 'black'
 icon = false
 f_awesome = false
 f_awesome_size = 40
 
-[theme.plugin_elements.memtemp_temp]
-position = [99, 40]
-color = 'black'
-label = 'TEMP:'
-value = '000'
-label_font = 'Bold'
+[theme.plugin_elements.latitude]
+position = [91, 22]
+label = 'Llt:'
+value = '-'
+label_font = 'Medium'
 text_font = 'Medium'
-label_spacing = 0
-label_line_spacing = 0
+label_spacing = 9
+color = 'black'
 icon = false
 f_awesome = false
 f_awesome_size = 40
+
+[theme.plugin_elements.display-password]
+position = [3, 106]
+label = ''
+value = ''
+label_font = 'Small'
+text_font = 'Small'
+label_spacing = 0
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+
 
