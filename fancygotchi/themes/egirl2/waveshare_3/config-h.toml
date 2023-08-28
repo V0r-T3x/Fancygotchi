@@ -192,11 +192,11 @@ f_awesome_size = 40
 
 [theme.plugin_elements.altitude]
 position = [91, 42]
-label = 'Alt:'
+label = 'alt:'
 value = '-'
 label_font = 'Medium'
 text_font = 'Medium'
-label_spacing = 9
+label_spacing = 4
 color = 'black'
 icon = false
 f_awesome = false
@@ -204,11 +204,11 @@ f_awesome_size = 40
 
 [theme.plugin_elements.longitude]
 position = [86, 32]
-label = 'Long:'
+label = 'long:'
 value = '-'
 label_font = 'Medium'
 text_font = 'Medium'
-label_spacing = 9
+label_spacing = 4
 color = 'black'
 icon = false
 f_awesome = false
@@ -216,11 +216,11 @@ f_awesome_size = 40
 
 [theme.plugin_elements.latitude]
 position = [91, 22]
-label = 'Llt:'
+label = 'lat:'
 value = '-'
 label_font = 'Medium'
 text_font = 'Medium'
-label_spacing = 9
+label_spacing = 4
 color = 'black'
 icon = false
 f_awesome = false
