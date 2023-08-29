@@ -151,6 +151,7 @@ class View(object):
 
     def add_element(self, key, elem):
         self._state.add_element(key, elem)
+        pwnagotchi.fancy_change = True
 
     def remove_element(self, key):
         self._state.remove_element(key)
@@ -170,8 +171,8 @@ class View(object):
 
     def _refresh_handler(self):
         th_opt = pwnagotchi._theme['theme']['options']
-        #delay = 1.0 / self._config['ui']['fps']
-        delay = 1.0 / th_opt['fps']
+        delay = 1.0 / self._config['ui']['fps']
+        #delay = 1.0 / th_opt['fps']
         while True:
             try:
                 name = self._state.get('name')
@@ -467,7 +468,7 @@ class View(object):
             else:
                 th_select = '.default'
             th_path = '%s/fancygotchi/themes/%s/' % (pwnagotchi.fancy_root, th_select)
-            th_path_disp = '%s%s/' % (th_path, pwnagotchi.config['ui']['display']['type'])
+            th_path_disp = '%s%s/' % (th_path, pwnagotchi.res)
             setattr(pwnagotchi, 'fancy_theme', th_path)
             setattr(pwnagotchi, 'fancy_theme_disp', th_path_disp)
 
@@ -524,7 +525,7 @@ class View(object):
         if th_opt['fg_image'] != '':
             self._fg = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['fg_image']))
             self._fg = self._fg.convert('RGBA')
-        setattr(pwnagotchi, 'fps', th_opt['fps'])
+        #setattr(pwnagotchi, 'fps', th_opt['fps'])
         setattr(pwnagotchi, 'fancy_cursor', th_opt['cursor'])
         th_opt['cursor'] = th_opt['cursor']
         setattr(pwnagotchi, 'fancy_font', th_opt['cursor'])
@@ -600,7 +601,9 @@ class View(object):
                     elif value == 'Huge': self._state.set_labelfont(element, fonts.Huge)
                 elif key == 'color':
                     self._state.set_attr(element, key, value)
+                    self._state.set_attr(element, '%ss' % key, [])
                 elif key == 'colors':
+                    self._state.set_attr(element, key, [])
                     if len(value) != 0:
                         #logging.warning('more than one color')
                         color_list = [self._state.get_attr(element, 'color')]
@@ -672,6 +675,7 @@ class View(object):
                             icon_broken = '%simg/%s.%s' % (pwnagotchi.fancy_theme, 'broken', th_img_t)
                             zoom = 1
                             for ckey, cvalue in components[element].items():
+                                mask = False
                                 if ckey == 'zoom':
                                     zoom = cvalue
                                     if not th_opt['main_text_color'] == '':

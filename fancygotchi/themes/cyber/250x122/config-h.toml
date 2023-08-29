@@ -1,0 +1,253 @@
+[theme]
+
+[theme.options]
+#display = "displayhatmini"
+#resolution = [320, 240]
+stealth_mode = false
+fg_image = ''#'320x240hs.png'
+bg_color = 'black'
+bg_image = "320x240e-t-g.png"
+bg_anim_image = ''#"320x240matrix.gif"
+# Bold, BoldSmall, Medium, Huge, BoldBig, Small
+font_sizes = [10, 8, 10, 55, 25, 9]
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+label_spacing = 9
+size_offset = 5
+fps = 10
+
+cursor = '❤'
+friend_bars = '>'#'▌'
+friend_no_bars = '│'
+
+# color mode for the web UI and the display
+# '2' = 1bit color mode B&W
+# '' = full color mode
+color_web = ''
+color_display = ''
+
+# if an animated background is set it can be use as a fixed image too
+# true = animated
+# false = fixed on the first frame
+anim_web = true
+anim_display = true
+
+# if the full color or animated full color is enabled
+# the main color will have priority on all text color
+main_text_color = ''
+
+# what will be the text color for a low color display
+# 'black'
+# 'white'
+# 'auto' = pale color will be 'white' and dark color will be 'black'
+color_text = 'auto'
+
+[theme.main_elements]
+
+[theme.main_elements.face]
+position = [14, 28]
+font = "Huge"
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+image_type = 'png'
+face = true
+
+[theme.main_elements.face.faces]
+look_r = "( ⚆_⚆)"
+look_l = "(☉_☉ )"
+look_r_happy = "( ◕‿◕)"
+look_l_happy = "(◕‿◕ )"
+sleep = "(⇀‿‿↼)"
+sleep2 = "(≖‿‿≖)"
+awake = "(◕‿‿◕)"
+bored = "(-__-)"
+intense = "(°▃▃°)"
+cool = "(⌐■_■)"
+happy = "(•‿‿•)"
+excited = "(ᵔ◡◡ᵔ)"
+grateful = "(^‿‿^)"
+motivated = "(☼‿‿☼)"
+demotivated = "(≖__≖)"
+smart = "(✜‿‿✜)"
+lonely = "(ب__ب)"
+sad = "(╥☁╥ )"
+angry = "(-_-')"
+friend = "(♥‿‿♥)"
+broken = "(☓‿‿☓)"
+debug = "(#__#)"
+upload = "(1__0)"
+upload1 = "(1__1)"
+upload2 = "(0__1)"
+
+[theme.main_elements.name]
+position = [20,20]
+font = "Bold"
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.channel]
+position = [278, 96]
+label = "CH"
+value = "00"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+label_line_spacing = 0
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.aps]
+position = [224, 96]
+label = 'e585'#eb'#"wifi.png"#
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 0
+label_line_spacing = -8
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = true
+f_awesome = true
+f_awesome_size = 20
+
+[theme.main_elements.uptime]
+position = [134, 3]
+label = "UP"
+value = "00:00:00"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+label_line_spacing = 0
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.line1]
+position = [0, 0, 320, 0]
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+
+[theme.main_elements.line2]
+position = [0, 0, 320, 0]
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+
+[theme.main_elements.friend_face]
+position = [34, 205]
+font = "Bold"
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.friend_name]
+position = [74, 205]
+font = "BoldSmall"
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.shakes]
+position = [34, 193]
+label = "PWND "
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+label_line_spacing = 0
+color = 'lime'
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.mode]
+position = [22, 3]
+value = "AUTO"
+font = "Bold"
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.status]
+position = [26, 124]
+value = "AUTO"
+font = "Bold"
+color = "lime"
+colors = ['yellow','orange','red','purple','blue']
+wrap = true
+max = 20
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements]
+
+[theme.plugin_elements.bluetooth]
+position = [276, 170]
+label = 'f293'
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+color = 'lime'
+colors = ['yellow','orange','red','purple','blue']
+icon = true
+f_awesome = true
+f_awesome_size = 40
+
+[theme.plugin_elements.memtemp_cpu]
+position = [217,23]
+color = 'lime'
+label = ''
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.memtemp_mem]
+position = [273,23]
+color = 'lime'
+label = ''
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.memtemp_temp]
+position = [218,61]
+color = 'lime'
+label = ''
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+colors = ['yellow','orange','red','purple','blue']
+icon = false
+f_awesome = false
+f_awesome_size = 40

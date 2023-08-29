@@ -16,23 +16,6 @@ Pimoroni Display Hat Mini 320x240 with black background in vertical
 Waveshare v2 150x122 1bit color with full color web UI  
 ![preview](https://github.com/V0r-T3x/fancygotchi/blob/main/img/wsv2_pwnachu.jpg)  
 
-#Pwnachu compatibilities (only into the horizontal mode (rotation=0 or rotation=180):  
-----
-```
-waveshare_1  
-waveshare_2  
-waveshare_3  
-waveshare29inch  
-inky
-
-dfrobotv1 (need a fix)  
-dforbotv2 (need a fix)
-waveshare213bc (need a fix)  
-waveshare213d (need a fix)  
-```
------------------------
-
-
 
 This mod can be a bit slow with some features enabled on a raspberry pi zero.
 (I'll add a note about the best light config to your with a rpi0w soon)  
@@ -48,6 +31,13 @@ BACKUP YOUR PWNAGOTCHI BEFORE INSTALL
 
 A complete theme manager for the Pwnagotchi [In development]   
 this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
+
+v.2023.08.4  
+
+✔️ Theme folder classed by resolution instead of display type (less doublon, and more futur compatibilities)  
+✔️ Root path fix, and should be rigth for any python version or installation path  
+✔️ Plugin enable/disable trigger fancy_change  
+✔️ Adjusting the egirl2 from LawrySauce
 
 V.2023.08.0  
 
@@ -165,7 +155,7 @@ Local update:
 
 After that, if all was successful, the theme should be come back and the update is supposed to be apply.  
 
-### To create a theme:  
+### To create a theme (*this is valid for the version before 2023.08.4- Update to come*):  
 ----  
 You can create your own theme easily with fancygothci. You just have to copy the right display folders from the theme folder inside the fancygothci folder.  
 

@@ -1,0 +1,242 @@
+ [theme]
+
+[theme.options]
+#display = "displayhatmini"
+#resolution = [320, 240]
+stealth_mode = false
+fg_image = ''
+bg_color = 'white'
+bg_image = 'bg-250x122.png'
+bg_anim_image = ''
+# Bold, BoldSmall, Medium, Huge, BoldBig, Small
+font_sizes = [9, 3, 9, 30, 9, 11]
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+label_spacing = 9
+size_offset = 6
+fps = 5
+
+cursor = '/'
+friend_bars = '▌'
+friend_no_bars = '│'
+
+# color mode for the web UI and the display
+# '2' = 1bit color mode B&W
+# '' = full color mode
+color_web = ''
+color_display = '2'
+
+# if an animated background is set it can be use as a fixed image too
+# true = animated
+# false = fixed on the first frame
+anim_web = false
+anim_display = false
+
+# if the full color or animated full color is enabled
+# the main color will have priority on all text color
+main_text_color = ''
+
+# what will be the text color for a low color display
+# 'black'
+# 'white'
+# 'auto' = pale color will be 'white' and dark color will be 'black'
+color_text = 'auto'
+
+[theme.main_elements]
+
+[theme.main_elements.face]
+position = [10, 32]
+font = "Huge"
+color = "black"
+icon = true
+image_type = 'png'
+f_awesome = false
+f_awesome_size = 40
+zoom = 1
+
+[theme.main_elements.face.faces]
+look_r = "( ⚆_⚆)"
+look_l = "(☉_☉ )"
+look_r_happy = "( ◕‿◕)"
+look_l_happy = "(◕‿◕ )"
+sleep = "(⇀‿‿↼)"
+sleep2 = "(≖‿‿≖)"
+awake = "(◕‿‿◕)"
+bored = "(-__-)"
+intense = "(°▃▃°)"
+cool = "(⌐■_■)"
+happy = "(•‿‿•)"
+excited = "(ᵔ◡◡ᵔ)"
+grateful = "(^‿‿^)"
+motivated = "(☼‿‿☼)"
+demotivated = "(≖__≖)"
+smart = "(✜‿‿✜)"
+lonely = "(ب__ب)"
+sad = "(╥☁╥ )"
+angry = "(-_-')"
+friend = "(♥‿‿♥)"
+broken = "(☓‿‿☓)"
+debug = "(#__#)"
+upload = "(1__0)"
+upload1 = "(1__1)"
+upload2 = "(0__1)"
+
+[theme.main_elements.name]
+position = [26, 11]
+font = "Medium"
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.channel]
+position = [86, 11]
+label = "CH:"
+value = "000"
+label_font = "Medium"
+text_font = "Medium"
+label_spacing = 14
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.aps]
+position = [201, 11]
+label = "AP:"
+value = "00(00)"
+label_font = "Medium"
+text_font = "Medium"
+label_spacing = 0
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.uptime]
+position = [134, 11]
+label = "UP:"
+value = "00:00:00"
+label_font = "Medium"
+text_font = "Medium"
+label_spacing = 7
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.line1]
+position = [0, -12, 242, -12]
+color = "black"
+
+[theme.main_elements.line2]
+position = [0, -12, 242, -12]
+color = "black"
+
+[theme.main_elements.friend_face]
+position = [86, 100]
+font = "Huge"
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.friend_name]
+position = [88, 100]
+font = "Medium"
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.shakes]
+position = [86, 55]
+label = "HS:"
+value = "00(00)"
+label_font = "Medium"
+text_font = "Medium"
+label_spacing = 2
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.mode]
+position = [227, 0]
+value = "AUTO"
+font = "Medium"
+color = "black"
+icon = false
+
+[theme.main_elements.status]
+position = [86, 68]
+value = "AUTO"
+font = "BoldSmall"
+color = "black"
+wrap = true
+max = 20
+
+[theme.plugin_elements]
+
+[theme.plugin_elements.bluetooth]
+position = [201, 0]
+label = 'BT'
+value = '-'
+label_font = 'BoldBig'
+text_font = 'BoldBig'
+label_spacing = 2
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.altitude]
+position = [91, 42]
+label = 'alt:'
+value = '-'
+label_font = 'Medium'
+text_font = 'Medium'
+label_spacing = 4
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.longitude]
+position = [86, 32]
+label = 'long:'
+value = '-'
+label_font = 'Medium'
+text_font = 'Medium'
+label_spacing = 4
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.latitude]
+position = [91, 22]
+label = 'lat:'
+value = '-'
+label_font = 'Medium'
+text_font = 'Medium'
+label_spacing = 4
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.display-password]
+position = [3, 106]
+label = ''
+value = ''
+label_font = 'Small'
+text_font = 'Small'
+label_spacing = 0
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+
+

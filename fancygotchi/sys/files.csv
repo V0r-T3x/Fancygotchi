@@ -11,7 +11,6 @@ ui/web/templates/,plugins.html,1
 ui/web/templates/,profile.html,1
 plugins/,__init__.py,1
 plugins/default/,logtail.py,1
-plugins/default/,memtemp.py,1
 /,identity.py,1
 /usr/local/bin/,pwnagotchi,1
 /usr/share/fonts/truetype/,font-awesome-solid.otf,0

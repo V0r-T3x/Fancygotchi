@@ -1,0 +1,200 @@
+[theme]
+
+[theme.options]
+#display = "lcdhat"
+#resolution = [240, 240]
+stealth_mode = false
+fg_image = ''
+bg_color = 'black'
+bg_image = ''
+bg_anim_image = ''
+# Bold, BoldSmall, Medium, Huge, BoldBig, Small
+font_sizes = [10, 9, 10, 35, 25, 9]
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+label_spacing = 9
+size_offset = 5
+fps = 3
+
+cursor = '❤'
+friend_bars = '▌'
+friend_no_bars = '│'
+
+# color mode for the web UI and the display
+# '2' = 1bit color mode B&W
+# '' = full color mode
+color_web = ''
+color_display = ''
+
+# if an animated background is set it can be use as a fixed image too
+# true = animated
+# false = fixed on the first frame
+anim_web = true
+anim_display = true
+
+# if the full color or animated full color is enabled
+# the main color will have priority on all text color
+main_text_color = ''
+
+# what will be the text color for a low color display
+# 'black'
+# 'white'
+# 'auto' = pale color will be 'white' and dark color will be 'black'
+color_text = 'auto'
+
+[theme.main_elements]
+
+[theme.main_elements.face]
+position = [0, 40]
+font = "Huge"
+color = "magenta"
+icon = false
+
+[theme.main_elements.face.faces]
+look_r = "( ⚆_⚆)"
+look_l = "(☉_☉ )"
+look_r_happy = "( ◕‿◕)"
+look_l_happy = "(◕‿◕ )"
+sleep = "(⇀‿‿↼)"
+sleep2 = "(≖‿‿≖)"
+awake = "(◕‿‿◕)"
+bored = "(-__-)"
+intense = "(°▃▃°)"
+cool = "(⌐■_■)"
+happy = "(•‿‿•)"
+excited = "(ᵔ◡◡ᵔ)"
+grateful = "(^‿‿^)"
+motivated = "(☼‿‿☼)"
+demotivated = "(≖__≖)"
+smart = "(✜‿‿✜)"
+lonely = "(ب__ب)"
+sad = "(╥☁╥ )"
+angry = "(-_-')"
+friend = "(♥‿‿♥)"
+broken = "(☓‿‿☓)"
+debug = "(#__#)"
+upload = "(1__0)"
+upload1 = "(1__1)"
+upload2 = "(0__1)"
+
+[theme.main_elements.name]
+position = [5, 20]
+font = "Bold"
+color = "lime"
+icon = false
+
+# Exemple test to add icons to an element label/value
+#[theme.main_elements.test_icon]
+#position = [0, 18]
+#label_icon = true
+#label = ["/.../.../.../icon.png"]
+#value_icon = true
+#value = ["/.../.../.../icon2.png", "/.../.../.../icon3.png"]
+#label_font = "Bold"
+#text_font = "Medium"
+#color = "BLACK"
+
+[theme.main_elements.channel]
+position = [0, 0]
+label = "CH"
+value = "00"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = "lime"
+icon = false
+
+[theme.main_elements.aps]
+position = [28, 0]
+label = "APS"
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = "lime"
+icon = false
+
+[theme.main_elements.uptime]
+position = [175, 0]
+label = "UP"
+value = "00:00:00"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = "lime"
+icon = false
+
+[theme.main_elements.line1]
+position = [0, 14, 240, 14]
+color = "lime"
+
+[theme.main_elements.line2]
+position = [0, 108, 240, 108]
+color = "lime"
+
+[theme.main_elements.friend_face]
+position = [0, 92]
+font = "Bold"
+color = "lime"
+icon = false
+
+[theme.main_elements.friend_name]
+position = [40, 94]
+font = "BoldSmall"
+color = "lime"
+icon = false
+
+[theme.main_elements.shakes]
+position = [0, 109]
+label = "PWND "
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = 'lime'
+icon = false
+
+[theme.main_elements.mode]
+position = [215, 109]
+value = "AUTO"
+font = "Bold"
+color = "lime"
+icon = false
+
+[theme.main_elements.status]
+position = [125, 20]
+value = "AUTO"
+font = "Medium"
+color = "lime"
+wrap = true
+max = 20
+
+[theme.plugin_elements]
+
+[theme.plugin_elements.bluetooth]
+position = [280, 170]
+label = 'BT'
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+icon = false
+
+[theme.plugin_elements.crack_house]
+
+[theme.plugin_elements.crack_house.crack_house]
+position = [-10, 185]
+label_font = "Bold"
+text_font = "Small"
+label_spacing = 9
+color = "BLACK"
+icon = false
+
+[theme.plugin_elements.crack_house.crack_house_stats]
+position = [-10, 170]
+label_font = "Bold"
+text_font = "Small"
+label_spacing = 9
+color = "BLACK"
+icon = false

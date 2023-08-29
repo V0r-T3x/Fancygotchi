@@ -1,0 +1,330 @@
+[theme]
+
+[theme.options]
+#display = "displayhatmini"
+#resolution = [320, 240]
+stealth_mode = false
+fg_image = ''
+bg_color = 'yellow'
+bg_image = 'bg-250x122.png'
+bg_anim_image = 'bg-250x122.gif'
+# Bold, BoldSmall, Medium, Huge, BoldBig, Small
+font_sizes = [10, 8, 8, 32, 25, 4]
+font = 'DejaVuSansMono'
+status_font = 'DejaVuSansMono'
+label_spacing = 9
+size_offset = 5
+fps = 3
+
+cursor = '❤'
+friend_bars = '▌'
+friend_no_bars = '│'
+
+# color mode for the web UI and the display
+# '2' = 1bit color mode B&W
+# '' = full color mode
+color_web = ''
+color_display = '2'
+
+# if an animated background is set it can be use as a fixed image too
+# true = animated
+# false = fixed on the first frame
+anim_web = false
+anim_display = false
+
+# if the full color or animated full color is enabled
+# the main color will have priority on all text color
+main_text_color = ''
+
+# what will be the text color for a low color display
+# 'black'
+# 'white'
+# 'auto' = pale color will be 'white' and dark color will be 'black'
+color_text = 'auto'
+
+[theme.main_elements]
+
+[theme.main_elements.face]
+position = [13, 30]
+font = "Huge"
+color = "magenta"
+icon = true
+image_type = 'png'
+f_awesome = false
+f_awesome_size = 40
+zoom = 0.5
+
+[theme.main_elements.face.faces]
+look_r = "( ⚆_⚆)"
+look_l = "(☉_☉ )"
+look_r_happy = "( ◕‿◕)"
+look_l_happy = "(◕‿◕ )"
+sleep = "(⇀‿‿↼)"
+sleep2 = "(≖‿‿≖)"
+awake = "(◕‿‿◕)"
+bored = "(-__-)"
+intense = "(°▃▃°)"
+cool = "(⌐■_■)"
+happy = "(•‿‿•)"
+excited = "(ᵔ◡◡ᵔ)"
+grateful = "(^‿‿^)"
+motivated = "(☼‿‿☼)"
+demotivated = "(≖__≖)"
+smart = "(✜‿‿✜)"
+lonely = "(ب__ب)"
+sad = "(╥☁╥ )"
+angry = "(-_-')"
+friend = "(♥‿‿♥)"
+broken = "(☓‿‿☓)"
+debug = "(#__#)"
+upload = "(1__0)"
+upload1 = "(1__1)"
+upload2 = "(0__1)"
+
+[theme.main_elements.name]
+position = [8,108]
+font = "Bold"
+color = "red"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.channel]
+position = [105, 80]
+label = ""
+value = "00"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.aps]
+position = [175, 9]
+label = ""
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.uptime]
+position = [96, 9]
+label = ""
+value = "00:00:00"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.line1]
+position = [0, -10, 240, -10]
+color = "black"
+
+[theme.main_elements.line2]
+position = [0, -10, 240, -10]
+color = "black"
+
+[theme.main_elements.friend_face]
+position = [140, 20]
+font = "Huge"
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.friend_name]
+position = [150, 18]
+font = "Medium"
+color = "black"
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.shakes]
+position = [92, 104]
+label = ""
+value = "0 (00)"
+label_font = "Bold"
+text_font = "Medium"
+label_spacing = 9
+color = 'black'
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.main_elements.mode]
+position = [32, 25]
+value = "AUTO"
+font = "Bold"
+color = "black"
+icon = false
+
+[theme.main_elements.status]
+position = [140, 72]
+value = "AUTO"
+font = "Small"
+color = "black"
+wrap = true
+max = 20
+
+[theme.plugin_elements]
+
+[theme.plugin_elements.memtemp_cpu]
+position = [3,5]
+color = 'black'
+label = ''
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.memtemp_mem]
+position = [34,5]
+color = 'black'
+label = ''
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.memtemp_temp]
+position = [64,5]
+color = 'black'
+label = ''
+value = '-'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+label_line_spacing = 0
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.bluetooth]
+position = [0, 10]
+label = 'BT'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.clock]
+position = [0, 25]
+label = 'clock'
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.longitude]
+position = [0, 40]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.latitude]
+position = [10, 40]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.altitude]
+position = [20, 40]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.crack_house]
+position = [0, 70]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.crack_house_stats]
+position = [0, 75]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.bat]
+position = [0, 0]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+
+[theme.plugin_elements.chg]
+position = [0, 0]
+label = ''
+label_font = 'Bold'
+text_font = 'Medium'
+label_spacing = 9
+color = 'lime'
+colors = []
+icon = false
+f_awesome = false
+f_awesome_size = 40
+

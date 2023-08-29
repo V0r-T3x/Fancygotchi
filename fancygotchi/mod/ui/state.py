@@ -10,6 +10,7 @@ class State(object):
         self._changes = {}
 
     def add_element(self, key, elem):
+        #logging.warning("Adding " + key + " = " + str(elem))
         self._state[key] = elem
         self._changes[key] = True
 
@@ -17,6 +18,7 @@ class State(object):
         return key in self._state
 
     def remove_element(self, key):
+        #logging.warning("Removing " + key)
         del self._state[key]
         self._changes[key] = True
 

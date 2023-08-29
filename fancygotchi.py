@@ -260,7 +260,7 @@ def uninstall(soft=False):
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2023.08.1'
+    __version__ = '2023.08.4'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -282,7 +282,7 @@ class Fancygotchi(plugins.Plugin):
         logging.info("[FANCYGOTCHI] Beginning Fancygotchi load")
 
         custom_plugins_path = pwnagotchi.config['main']['custom_plugins']
-        logging.info("[FANCYGOTCHI] before backup check " + custom_plugins_path)
+        #logging.info("[FANCYGOTCHI] before backup check " + custom_plugins_path)
         if custom_plugins_path == '': custom_plugins_path = ROOT_PATH + '/plugins/default/'
         if not custom_plugins_path[-1] == '/' : custom_plugins_path += '/'
         ui = pwnagotchi.config['ui']['display']['type']
@@ -302,7 +302,7 @@ class Fancygotchi(plugins.Plugin):
         # Loop to verify if the backup is here, and if not it backup original files
         # and replace them all with link from plugin folder
 
-        logging.info("[FANCYGOTCHI] before backup check")
+        #logging.info("[FANCYGOTCHI] before backup check")
         restart = 0
         for i in range(len(FILES_TO_MOD['path'])):            
             path = data_dict['path'][i]
@@ -357,9 +357,9 @@ class Fancygotchi(plugins.Plugin):
                     for command in com_list:
                         logging.warning('[FANCYGOTCHI] special command: '+command)
                         os.system(command)
-        logging.warning(restart)
+        #logging.warning(restart)
         if restart == 1:
-            logging.warning('need a restart')
+            #logging.warning('need a restart')
             os.system('service pwnagotchi restart')
 
         logging.info('[FANCYGOTCHI] Theme manager loaded')
