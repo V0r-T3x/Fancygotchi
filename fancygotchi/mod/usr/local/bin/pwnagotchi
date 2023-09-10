@@ -154,9 +154,13 @@ def load_theme(config):
     else:
         th_select = '.default'
 
-
-    display_type = config['ui']['display']['type']
+    if config['ui']['display']['enabled']:
+        display_type = config['ui']['display']['type']
+    else:
+        display_type = 'waveshare_2'  
     resolution = '%sx%s' % (str(display_list[display_type][0]), str(display_list[config['ui']['display']['type']][1]))
+
+
     setattr(pwnagotchi, 'res', resolution)
     th_path = '%s/fancygotchi/themes/%s/' % (fancy_path, th_select)
     #th_path_disp = '%s%s/' % (th_path, config['ui']['display']['type'])
