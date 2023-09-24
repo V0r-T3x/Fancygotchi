@@ -4,7 +4,7 @@ __FANCYGOTCHI IS NOT COMPATIBLE WITH:__
 __ALUMINUM-ICE 1.7.8 AND LATER__  
 __JAYOFELONY 2.2.9 AND LATER__  
 __STILL WORKING ON THE WPA2-1.5.5FIX IMAGE__  
-I fixed the compatibility problem. 
+I fixed the compatibility problem. Fancygotchi need to be uninstalled before doing an auto-update on jayofelony/xbits image.
 
 I'm working to write my code again to embed Fancygotchi into the Pwnagotchi Core.  
 A plugin will be availble to install/uninstall it, but will be available to install it natively into the new upgraded images.  
