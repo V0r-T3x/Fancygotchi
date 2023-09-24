@@ -1,9 +1,11 @@
 # __DISCLAIMER/ANNOUNCEMENT:__  
-__COMPATIBILITY PROBLEM REPORTED__  
+__COMPATIBILITY PROBLEM FIXED FOR__  
 __FANCYGOTCHI IS NOT COMPATIBLE WITH:__  
 __ALUMINUM-ICE 1.7.8 AND LATER__  
 __JAYOFELONY 2.2.9 AND LATER__  
 __STILL WORKING ON THE WPA2-1.5.5FIX IMAGE__  
+I fixed the compatibility problem. 
+
 I'm working to write my code again to embed Fancygotchi into the Pwnagotchi Core.  
 A plugin will be availble to install/uninstall it, but will be available to install it natively into the new upgraded images.  
 I will work on a fork of the Pwnagotchi and keep this repo for the future plugin.  
@@ -50,6 +52,9 @@ BACKUP YOUR PWNAGOTCHI BEFORE INSTALL
 
 A complete theme manager for the Pwnagotchi [In development]   
 this project started with the [colorized_darkmode](https://github.com/V0r-T3x/pwnagotchi_LCD_colorized_darkmode)  
+
+v.2023.09.1  
+✔️ Fix for compatibility problem of aluminum-ice 1.7.8+ and xbits 2.2.9+
 
 v.2023.08.4  
 
