@@ -5,6 +5,7 @@ import random
 import toml
 import time
 import os
+import re
 from shutil import copy
 
 from threading import Lock
@@ -25,6 +26,101 @@ from pwnagotchi.voice import Voice
 WHITE = 0xff
 BLACK = 0x00
 ROOT = None
+
+def load_theme(config):
+    pwny_path = pwnagotchi.__file__
+    setattr(pwnagotchi, 'root_path', os.path.dirname(pwny_path))
+    display_path = '%s/ui/hw' % (pwnagotchi.root_path)
+    display_list = {}  # Dictionary to store the extracted data
+    #logging.warning(display_path)
+    
+    # Step 1: Scan each .py file from the specified path without scanning subfolders
+    for file in os.listdir(display_path):
+        if file.endswith(".py"):
+            file_path = os.path.join(display_path, file)
+            label = None
+            width = None
+            height = None
+            #logging.warning(file_path)
+            # Step 2-4: Read and process each line in the .py file
+            with open(file_path, 'r') as f:
+                for line in f:
+                    if 'super' in line and "'" in line:
+                        #logging.warning('the super line')
+                        label_match = re.search(r"'(.*?)'", line)
+                        if label_match:
+                            label = label_match.group(1)
+                            #logging.warning(label)
+                            
+                    if 'width' in line and '=' in line:
+                        #logging.warning('the width line')
+                        width_match = re.search(r'\s*=\s*(\d+)', line)
+                        if width_match:
+                            width = int(width_match.group(1))
+                            #logging.warning(width)
+                            
+                    if 'height' in line and '=' in line:
+                        #logging.warning('the height line')
+                        height_match = re.search(r'\s*=\s*(\d+)', line)
+                        if height_match:
+                            height = int(height_match.group(1))
+                            #logging.warning(height)
+                            
+                    if label and width is not None and height is not None:
+                        display_list[label] = (width, height)
+                        break  # Stop processing the file if all data is found    logging.warning(display_list)
+#    #logging.warning(display_list)
+    
+    #logging.warning(pwnagotchi.root_path)
+    custom_path = config['main']['custom_plugins']
+    if not custom_path == '':
+        if custom_path[-1] == '/':
+            custom_path = custom_path[:-1]
+    if os.path.exists('%s/fancygotchi.py' % (custom_path)):
+        fancy_path = custom_path
+    else:
+        fancy_path = '%s/plugins/default' % (pwnagotchi.root_path)
+    setattr(pwnagotchi, 'fancy_path', fancy_path)
+    if not config['main']['plugins']['fancygotchi']['theme'] == '':
+        th_select = str(config['main']['plugins']['fancygotchi']['theme'])
+    else:
+        th_select = '.default'
+
+    if config['ui']['display']['enabled']:
+        display_type = config['ui']['display']['type']
+    else:
+        display_type = 'waveshare_2'  
+    resolution = '%sx%s' % (str(display_list[display_type][0]), str(display_list[config['ui']['display']['type']][1]))
+
+
+    setattr(pwnagotchi, 'res', resolution)
+    th_path = '%s/fancygotchi/themes/%s/' % (fancy_path, th_select)
+    #th_path_disp = '%s%s/' % (th_path, config['ui']['display']['type'])
+    th_path_disp = '%s%sx%s/' % (th_path, str(display_list[display_type][0]), str(display_list[config['ui']['display']['type']][1]))
+    #logging.warning(display_list[display_type][0])
+    #logging.warning(display_list[display_type][1])
+    #logging.warning('%s%sx%s/' % (th_path, str(display_list[display_type][0]), str(display_list[display_type][1])))
+    #logging.info('%sconfig-h.toml' % (th_path_disp))
+    rot = config['main']['plugins']['fancygotchi']['rotation']
+    if rot == 0 or rot == 180 :
+        #logging.info('%sconfig-h.toml' % (th_path_disp))
+        config_ori = '%sconfig-h.toml' % (th_path_disp)
+    elif rot == 90 or rot == 270:
+        #logging.info('%sconfig-v.toml' % (th_path_disp))
+        config_ori = '%sconfig-v.toml' % (th_path_disp)
+
+        #logging.warning(config_ori)
+    with open(config_ori, 'r') as f:
+        #logging.warning('loop in theme config.toml')
+        setattr(pwnagotchi, '_theme', toml.load(f))
+        setattr(pwnagotchi, 'fancy_theme', th_path)
+        setattr(pwnagotchi, 'fancy_theme_disp', th_path_disp)
+        setattr(pwnagotchi, 'fancy_change', True)
+        setattr(pwnagotchi, 'fancy_name', config['main']['name'])
+        #setattr(pwnagotchi, 'fancy_orient', config['main']['plugins']['fancygotchi']['orientation'])
+        #pwnagotchi._theme = toml.load(f)
+        #logging.info(pwnagotchi._theme)
+
 
 class View(object):
     def __init__(self, config, impl, state=None):
@@ -50,6 +146,8 @@ class View(object):
         self._layout = impl.layout()
         self._width = self._layout['width']
         self._height = self._layout['height']
+        logging.warning("got here")
+
         size = [self._width, self._height]
         if th_opt['bg_anim_image'] != '':
             gif = Image.open('%simg/%s' % (pwnagotchi.fancy_theme, th_opt['bg_anim_image']))

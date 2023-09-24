@@ -218,6 +218,24 @@ def uninstall(soft=False):
     logging.info('[FANCYGOTCHI] removing img folder link '+dest)
     os.system('rm %s' % (dest))
     
+    file_path = '/usr/local/bin/pwnagotchi'
+    #file_path = '/home/pi/pwnagotchi'
+
+    # Check if the file exists
+    if not os.path.exists(file_path):
+        logging.info(f"File '{file_path}' does not exist.")
+    else:
+        with open(file_path, 'r') as old_file:
+            lines = old_file.readlines()
+
+        with open(file_path, 'w') as new_file:
+            for line in lines:
+                if 'load_theme' not in line:
+                    new_file.write(line)
+                else:
+                    logging.info(line + ' removed')
+
+
     for i in range(len(FILES_TO_MOD['path'])):
         path = data_dict['path'][i]
         file = data_dict['file'][i]
@@ -260,7 +278,7 @@ def uninstall(soft=False):
 class Fancygotchi(plugins.Plugin):
     __name__ = 'Fancygotchi'
     __author__ = '@V0rT3x https://github.com/V0r-T3x'
-    __version__ = '2023.08.4'
+    __version__ = '2023.09.1'
     __license__ = 'GPL3'
     __description__ = 'A theme manager for the Pwnagotchi [cannot be disabled, need to be uninstalled from inside the plugin]'
 
@@ -301,6 +319,24 @@ class Fancygotchi(plugins.Plugin):
 
         # Loop to verify if the backup is here, and if not it backup original files
         # and replace them all with link from plugin folder
+
+        file_path = '/usr/local/bin/pwnagotchi'
+        #file_path = '/home/pi/pwnagotchi'
+        pattern = '    fonts.init(config)'
+        subst = [
+            '    from pwnagotchi.ui.view import load_theme',
+            '    load_theme(config)',
+            '    fonts.init(config)',
+        ]
+        rf = ''
+        with open(file_path, 'r') as file:
+            rf = file.read()
+            if all(line in rf for line in subst):
+                logging.info("Lines already exist. No changes needed.")
+            else:
+                replace_line(file_path, pattern, subst)
+                logging.info("Lines added successfully.")
+
 
         #logging.info("[FANCYGOTCHI] before backup check")
         restart = 0

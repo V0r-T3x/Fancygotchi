@@ -223,7 +223,7 @@ class Text(Widget):
                         y = self.xy[1]
                     else:
                         x, y = self.xy
-                    canvas.paste(imgtext, (x, y))
+                    canvas.paste(imgtext, (int(x), int(y)))
                 else:
                     drawer.text(self.xy, text, font=self.font, fill=0x00)
                     #drawer.text(self.xy, text, self.font, font=self.font, fill=self.color)
