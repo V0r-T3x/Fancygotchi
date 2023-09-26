@@ -212,6 +212,7 @@ class Text(Widget):
                     text = '\n'.join(self.wrapper.wrap(self.value))
                 else:
                     text = self.value
+                text = str(text)
                 width, height = canvas.size
                 if th_opt['main_text_color'] == '':
                     imgtext = text_to_rgb(text, self.font, self.color, width, height)
