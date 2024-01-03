@@ -1,16 +1,14 @@
 # __DISCLAIMER/ANNOUNCEMENT:__  
-__COMPATIBILITY PROBLEM FIXED FOR__  
-__FANCYGOTCHI IS NOT COMPATIBLE WITH:__  
-__ALUMINUM-ICE 1.7.8 AND LATER__  
-__JAYOFELONY 2.2.9 AND LATER__  
-__STILL WORKING ON THE WPA2-1.5.5FIX IMAGE__  
-I fixed the compatibility problem. Fancygotchi need to be uninstalled before doing an auto-update on jayofelony/xbits image.
+# [Fanygotchi](https://github.com/Pwnagotchi-Unofficial/pwnagotchi-fancygotchi) is not embedded into a pwnagotchi fork and is linked to the Unofficial Pwnagotchi Organization.
 
-I'm working to write my code again to embed Fancygotchi into the Pwnagotchi Core.  
-A plugin will be availble to install/uninstall it, but will be available to install it natively into the new upgraded images.  
-I will work on a fork of the Pwnagotchi and keep this repo for the future plugin.  
-An other repo will be used to store all the community themes in the future.  
-Stay tuned and thanks for the support.  
+# [Fancytools](https://github.com/V0r-T3x/Fancytools) is the new Fancygotchi installer.  
+# This new plugin will give access to many tools.  
+# It will be the best modder tool kit.  
+
+##This repo is depreciated. I didn't tested this old code on the new pwnagotchi image.  
+##I will not work on this repo anymore.  
+
+
 
 ## Disclaimer
 > From **v0R-t3X** (inspired by [**roodriiigooo**](https://github.com/roodriiigooo)): The content here is free for use, but it doesn't mean you can use it however you want. No author or contributor assumes responsibility for the misuse of this device, project, or any component herein. The project and modifications were **developed solely for educational purposes**.
