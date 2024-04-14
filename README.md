@@ -1,4 +1,7 @@
 # __DISCLAIMER/ANNOUNCEMENT:__  
+# Fancygotchi is returning as a plugin.
+# This will make it compatible with any pwnagotchi fork including jay's one.
+
 # [Fanygotchi](https://github.com/Pwnagotchi-Unofficial/pwnagotchi-fancygotchi) is not embedded into a pwnagotchi fork and is linked to the Unofficial Pwnagotchi Organization.
 
 # [Fancytools](https://github.com/V0r-T3x/Fancytools) is the new Fancygotchi installer.  
