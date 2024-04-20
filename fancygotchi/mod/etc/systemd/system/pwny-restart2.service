@@ -1,8 +1,0 @@
-[Unit]
-Description=Search syslog for Go panic
-
-[Service]
-ExecStart=/root/pwny-restart2.sh
-
-[Install]
-WantedBy=multi-user.target
