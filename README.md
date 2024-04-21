@@ -1,8 +1,13 @@
 # FANCYGOTCHI 2.0
 ----
-![fancygotchi2 0](https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/fancygotchi2.0.png =250x)
+<p align="center">
+<img src='https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/fancygotchi2.0.png' width='500px'></img>
+</p>
 
-## Fancygotchi is the ultimate theme manager for pwnagotchi.
+*Fancygotchi is the ultimate theme manager for pwnagotchi*
+----
+
+> "Are you ready to be refaced!?"
 
 ## Disclaimer
 > From **V0r-T3x** (inspired by [**roodriiigooo**](https://github.com/roodriiigooo)): The content here is free for use, but it doesn't mean you can use it however you want. No author or contributor assumes responsibility for the misuse of this device, project, or any component herein. The project and modifications were **developed solely for educational purposes**.
