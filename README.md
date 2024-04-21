@@ -1,8 +1,7 @@
-
-![fancygotchi2 0](https://github.com/V0r-T3x/fancygotchi/assets/70115207/a77ec5aa-8742-45b7-acb5-2d445c6148ce)
-
 # FANCYGOTCHI 2.0
 ----
+![fancygotchi2 0](https://github.com/V0r-T3x/fancygotchi/assets/70115207/9da58704-7e30-4b5e-9e80-7ac6c2f68e79)
+
 ## Fancygotchi is the ultimate theme manager for pwnagotchi.
 
 ## Disclaimer
