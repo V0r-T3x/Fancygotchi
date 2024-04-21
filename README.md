@@ -19,13 +19,13 @@
 
 There's some previews of dev.    
 Pimoroni Display Hat Mini 320x240 with color background image in horizontal  
-![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/pwnagotchi.png)  
+![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/pwnagotchi.png)  
 
 Pimoroni Display Hat Mini 320x240 with color animated background in horizontal  
-![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/horizontal.png)  
+![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/horizontal.png)  
 
 Pimoroni Display Hat Mini 320x240 with black background in vertical  
-![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/img/vertical.jpg)  
+![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/vertical.jpg)  
 
 Waveshare v2 150x122 1bit color with full color web UI  
-![preview](https://github.com/V0r-T3x/fancygotchi/blob/main/img/wsv2_pwnachu.jpg)  
+![preview](https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/wsv2_pwnachu.jpg)  
