@@ -20,7 +20,7 @@
 
 - Pimoroni Display Hat Mini 320x240 with color background image in horizontal and vertical mode  
 <p align="center">
-<img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/pwnagotchi.png' width='350px'></img><img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/vertical.jpg' height='350px'></img><img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/horizontal.png' width='350px'></img>
+<img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/horizontal.png' width='350px'></img><img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/vertical.jpg' height='350px'></img><img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/pwnagotchi.png' width='350px'></img>
 </p>
 
 - Waveshare v2 150x122 1bit color with full color web UI
