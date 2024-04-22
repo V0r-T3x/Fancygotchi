@@ -7,7 +7,8 @@
 *Fancygotchi is the ultimate theme manager for pwnagotchi*
 ----
 
-> "Are you ready to be refaced!?"
+> "Are you ready to be refaced!?"  
+> - *Fancygotchi, 2024.*
 
 ## Disclaimer
 > From **V0r-T3x** (inspired by [**roodriiigooo**](https://github.com/roodriiigooo)): The content here is free for use, but it doesn't mean you can use it however you want. No author or contributor assumes responsibility for the misuse of this device, project, or any component herein. The project and modifications were **developed solely for educational purposes**.
@@ -17,15 +18,12 @@
 
 ## A new documentation will be available in the [wiki](https://github.com/V0r-T3x/fancygotchi/wiki/Fancygotchi-2.0)
 
-There's some previews of dev.    
-Pimoroni Display Hat Mini 320x240 with color background image in horizontal  
-![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/pwnagotchi.png)  
+- Pimoroni Display Hat Mini 320x240 with color background image in horizontal and vertical mode  
+<p align="center">
+<img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/pwnagotchi.png' width='350px'></img><img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/vertical.jpg' height='350px'></img><img src='https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/horizontal.png' width='350px'></img>
+</p>
 
-Pimoroni Display Hat Mini 320x240 with color animated background in horizontal  
-![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/horizontal.png)  
-
-Pimoroni Display Hat Mini 320x240 with black background in vertical  
-![preview](https://raw.githubusercontent.com/V0r-T3x/fancygotchi/main/.assets/vertical.jpg)  
-
-Waveshare v2 150x122 1bit color with full color web UI  
-![preview](https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/wsv2_pwnachu.jpg)  
+- Waveshare v2 150x122 1bit color with full color web UI
+<p align="center">
+<img src='https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/wsv2_pwnachu.jpg' width='400px'></img>
+</p>
