@@ -17,6 +17,7 @@
 *I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop) or send me a voluntary contribution with [Paypal](https://www.paypal.com/paypalme/v0r73x?country.x=CA&locale.x=en_US)*  
 
 ## A new documentation will be available in the [wiki](https://github.com/V0r-T3x/fancygotchi/wiki)
+## The theme v2.0 will be available [here](https://github.com/V0r-T3x/Fancygotchi_themes/tree/main/fancygotchi_2.0)
 
 - Pimoroni Display Hat Mini 320x240 with color background image in horizontal and vertical mode  
 <p align="center">
