@@ -7,6 +7,7 @@ ui.display.type = "displayhatmini" #<-- select your display
 main.plugins.Fancygotchi.enabled = true #<-- Fancygotchi will generate a default config 
 main.plugins.Fancygotchi.rotation = 0 # 0 or 180 is horizontal mode, 90 or 270 is vertival mode
 main.plugins.Fancygotchi.theme = "" #<-- if empty the default theme will be loaded
+main.plugins.Fancygotchi.fancyserver = false # Fancyserver is used for FancyMenu and for additional control. It is disabled by default.
 
 fs.memory.mounts.data.enabled = false #<-- need to be false to avoid the errno 30 and the tmp file become read only and the pwnagotchi can't save his data
 fs.memory.mounts.data.mount = "/var/tmp/pwnagotchi"
