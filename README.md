@@ -17,5 +17,7 @@
 
 *I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop) or send me a voluntary contribution with [Paypal](https://www.paypal.com/paypalme/v0r73x?country.x=CA&locale.x=en_US)*  
 
+> To use Fancygotchi 2.0 you need to have a board ABOVE the raspberry pi zero w. 
+
 # :books: The documentation is available in the [FANCYGOTCHI WIKI](https://github.com/V0r-T3x/fancygotchi/wiki)
 # :art: The theme v2.0 are available [FANCYGOTCHI 2.0 THEMES](https://github.com/V0r-T3x/Fancygotchi_themes/tree/main/fancygotchi_2.0)
