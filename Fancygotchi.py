@@ -4605,6 +4605,7 @@ fi"""}]
             os.remove(diagnostic_path)
         with open(diagnostic_path, "w") as diagnostic_file:
             diagnostic_file.write(DIAGNOSTIC)
+            os.system(f'chmod +x {diagnostic_path}')
         if fancygotchi_config.get('fancyserver', False):
             # Create FancyMenu instance with the updated theme
             #self.log("Fancyserver detected, adding /usr/local/bin/fancytools and /usr/local/bin/diagnostic.sh")
@@ -4621,7 +4622,7 @@ fi"""}]
 
                 # Change permissions to make the file executable
                 os.system(f'chmod +x {fancytools_path}')
-                os.system(f'chmod +x {diagnostic_path}')
+                
                 self.running = True
                 #self.on_loaded()
             except Exception as e:
