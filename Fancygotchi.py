@@ -3383,7 +3383,7 @@ def check_and_fix_fb():
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.0'
+    __version__ = '2.0.1'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3394,7 +3394,7 @@ class Fancygotchi(plugins.Plugin):
         self.fancy_menu = None
         self.actions_log = []
         #self.fancy_server = FancyServer()
-
+        self.second_screen = Image.new('RGBA', (1,1), 'black')
         self.fancy_menu_img = None
         #self.display_controller = FancyDisplay()
         self.display_config = {'mode': 'screen_saver', 'sub_mode': 'show_logo'}
@@ -3877,7 +3877,8 @@ fi"""}]
 
 
     def navigate_fancymenu(self, cmd=None):
-        if self.fancyserver and hasattr(self, 'fancy_menu'):
+        logging.warning(cmd)
+        if hasattr(self, 'fancy_menu'):
             if cmd:
                 menu_command = cmd
             else:
@@ -4034,7 +4035,7 @@ fi"""}]
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'refresh' in self._theme['theme']['dev']:
                 self.refresh_trigger = self._theme['theme']['dev']['refresh']
 
-            if hasattr(self, 'fancyserver') and self.fancyserver and self.fancyserver and hasattr(self, 'fancy_menu'):
+            if hasattr(self, 'fancy_menu'):
                 menu_command = self.check_menu_command()
                 if menu_command:
                     cmd = menu_command['action']
@@ -4598,9 +4599,14 @@ fi"""}]
         #self.log(pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}))
         #if pwnagotchi.config['main']['plugins']['Fancygotchi']['fancyserver']:
         fancygotchi_config = pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {})
+        self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
+        diagnostic_path = "/usr/local/bin/diagnostic.sh"
+        if os.path.exists(diagnostic_path):
+            os.remove(diagnostic_path)
+        with open(diagnostic_path, "w") as diagnostic_file:
+            diagnostic_file.write(DIAGNOSTIC)
         if fancygotchi_config.get('fancyserver', False):
             # Create FancyMenu instance with the updated theme
-            self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
             #self.log("Fancyserver detected, adding /usr/local/bin/fancytools and /usr/local/bin/diagnostic.sh")
             try:
                 fancytools_content = FANCYTOOLS.replace("{pyenv}", self.pyenv)
@@ -4612,12 +4618,6 @@ fi"""}]
 
                 with open(fancytools_path, "w") as fancytools_file:
                     fancytools_file.write(fancytools_content)
-
-                diagnostic_path = "/usr/local/bin/diagnostic.sh"
-                if os.path.exists(diagnostic_path):
-                    os.remove(diagnostic_path)
-                with open(diagnostic_path, "w") as diagnostic_file:
-                    diagnostic_file.write(DIAGNOSTIC)
 
                 # Change permissions to make the file executable
                 os.system(f'chmod +x {fancytools_path}')
