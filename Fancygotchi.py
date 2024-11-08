@@ -5938,7 +5938,7 @@ fi"""}]
                             css_src = os.path.join(self._th_path, 'style.css')
                             info_src = os.path.join(self._th_path, 'info.json')
 
-                            if css != "No custom Info":
+                            if info != "No custom Info":
                                 if os.path.exists(info_src):
                                     os.remove(info_src)
                                 with open(info_src, 'w') as info_file:
