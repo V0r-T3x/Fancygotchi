@@ -1,4 +1,3 @@
-# Standard library imports
 import argparse
 import asyncio
 import copy
@@ -21,18 +20,16 @@ import time
 import toml
 import traceback
 import zipfile
+
 from io import BytesIO
 from multiprocessing.connection import Client, Listener
 from os import system
 from shutil import copy2, copyfile, copytree
 from textwrap import TextWrapper
 from toml import dump, load
-
-# Third-party library imports
 from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageOps, ImageSequence
 from flask import abort, jsonify, make_response, render_template_string, send_file
 
-# Pwnagotchi imports
 import pwnagotchi
 import pwnagotchi.plugins as plugins
 import pwnagotchi.ui.fonts as fonts
@@ -509,48 +506,40 @@ INDEX = """
 theme_info("{{name}}");
 loadConfig(0, "{{name}}");
 
-// Get the button
 var scrollToTopBtn = document.getElementById("scrollToTopBtn");
 
 function theNet() {
-    var div = document.querySelector(".dev"); // Use class selector for the div
-    var logo = document.querySelector("#logo"); // Ensure you have the correct selector for the logo
+    var div = document.querySelector(".dev");
+    var logo = document.querySelector("#logo");
 
     if (!div || !logo) {
         console.error('Element not found: .dev or #logo');
         return;
     }
 
-    // Get the computed color of the logo
     var computedColor = window.getComputedStyle(logo).color;
     console.log(computedColor)
 
-    // Convert RGB color to a readable string for comparison
     function rgbToColor(rgb) {
         return rgb.replace(/\s+/g, '').toLowerCase();
     }
 
-    // Define the color in RGB format to compare
-    var limeColor = rgbToColor("rgb(0, 255, 0)"); // Lime color in RGB format
+    var limeColor = rgbToColor("rgb(0, 255, 0)"); 
 
-    // Check if the div is hidden
     if (div.style.display === "none" || div.style.display === "") {
-        // Check if the current color is lime
         if (rgbToColor(computedColor) === limeColor) {
-            logo.style.color = "red"; // Change to red if it's lime
+            logo.style.color = "red"; 
         } else {
-            logo.style.color = "lime"; // Set to lime if not already
+            logo.style.color = "lime"; 
         }
 
-        // Apply glitch effect and show the div
         glitchEffect(true);
         div.style.display = "block";
-        logo.style.backgroundColor = "black"; // Optionally set the background color
+        logo.style.backgroundColor = "black";
     } else {
-        // Hide the div and reset logo color
         div.style.display = "none";
-        logo.style.color = ""; // Remove inline color
-        logo.style.backgroundColor = ""; // Remove inline background color
+        logo.style.color = ""; 
+        logo.style.backgroundColor = "";
     }
 }
 
@@ -564,8 +553,6 @@ window.onload = function() {
     setInterval(updateImage, 1000);
 }
 
-
-// Show the button when scrolled down 100px from the top
 window.onscroll = function() {
     if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
         scrollToTopBtn.classList.add("show");
@@ -574,14 +561,13 @@ window.onscroll = function() {
     }
 };
 
-// Scroll to the top when the button is clicked
 scrollToTopBtn.addEventListener("click", function() {
-    window.scrollTo({top: 0, behavior: 'smooth'}); // Smooth scroll to the top
+    window.scrollTo({top: 0, behavior: 'smooth'});
 });
 
 function active_theme(callback) {
     loadJSON("Fancygotchi/active_theme", function(response) {
-        callback(response.theme);  // Pass theme value to the callback
+        callback(response.theme);
     });
 }
 
@@ -611,7 +597,6 @@ function fancyserver(){
 }
 
 function loadConfig(a, theme) {
-    //alert('load config');
     if (a == 1) {
         alert(theme + ' selected');
     }
@@ -663,7 +648,6 @@ function jsonToTable(json) {
   var table = document.createElement("table");
   table.id = "tableOptions";
 
-  // create header
   var tr = table.insertRow();
   var thDel = document.createElement("th");
   thDel.innerHTML = "";
@@ -676,10 +660,8 @@ function jsonToTable(json) {
   tr.appendChild(thVal);
 
   var td, divDelBtn, btnDel;
-  // iterate over keys
   Object.keys(json).forEach(function(key) {
     tr = table.insertRow();
-    // del button
     divDelBtn = document.createElement("div");
     divDelBtn.className = "del_btn_wrapper";
     td = document.createElement("td");
@@ -694,12 +676,10 @@ function jsonToTable(json) {
       td.appendChild(divDelBtn);
     }
     tr.appendChild(td);
-    // option
     td = document.createElement("td");
     td.setAttribute("data-label", "Option");
     td.innerHTML = key;
     tr.appendChild(td);
-    // value
     td = document.createElement("td");
     td.setAttribute("data-label", "Value");
     if(typeof(json[key])==='boolean'){
@@ -731,14 +711,12 @@ function jsonToTable(json) {
     tr.appendChild(td);
   });
 
-  // Add a new row for adding a new config option
   var newTr = table.insertRow();
   var newTd = newTr.insertCell();
   newTd.setAttribute("data-label", "");
   var addButton = document.createElement("button");
   addButton.innerHTML = "+";
   addButton.onclick = function() {
-    // Create a new row for the new config option
     var newRow = table.insertRow();
     var newTd = newRow.insertCell();
     var delButton = document.createElement("button");
@@ -762,7 +740,6 @@ function jsonToTable(json) {
   newTd.appendChild(addButton);
   newTr.appendChild(newTd);
   newTr.appendChild(document.createElement("td"));
-  //newTr.appendChild(document.createElement("td"));
 
   return table;
 }
@@ -771,12 +748,10 @@ function delRow(btn) {
     var tr = btn.closest("tr");
     if (tr && key) {
         tr.parentNode.removeChild(tr);
-        // You might want to update your internal data structure here as well
     }
 }
 
 function saveConfig() {
-    //alert('trying to save config');
     var config = document.getElementById("tableOptions");
     var css = document.getElementById("CSS").textContent;
     var info = document.getElementById("Info").textContent;
@@ -820,42 +795,40 @@ function tableToJson(table) {
         if (input[0].type == "text") {
           const inputValue = input[0].value.trim();
           if (inputValue === "") {
-            value = ""; // Keep empty string as value
+            value = ""; 
           } else if (inputValue.startsWith("[") && inputValue.endsWith("]")) {
             try {
-              value = JSON.parse(inputValue); // Handle arrays
+              value = JSON.parse(inputValue); 
             } catch (e) {
               console.error('Invalid JSON array:', inputValue);
-              value = inputValue; // Keep raw input if parsing fails
+              value = inputValue;
             }
           } else if (inputValue === 'true' || inputValue === 'false') {
-            value = inputValue === 'true'; // Handle booleans
+            value = inputValue === 'true'; 
           } else if (!isNaN(inputValue)) {
-            value = parseInt(inputValue, 10); // Convert to integer
+            value = parseInt(inputValue, 10); 
           } else {
-            value = inputValue; // Handle strings
+            value = inputValue;
           }
         } else if (input[0].type == "number") {
-          value = Number(input[0].value); // Handle numbers
+          value = Number(input[0].value); 
         }
       } else if (select && select.length > 0) {
-        value = select[0].options[select[0].selectedIndex].value === 'true'; // Handle booleans
+        value = select[0].options[select[0].selectedIndex].value === 'true';
       }
 
-      // Split the key by '.' and create nested objects
       var keyParts = key.split('.');
       var currentObj = json;
       for (var j = 0; j < keyParts.length - 1; j++) {
         if (!currentObj[keyParts[j]]) {
-          currentObj[keyParts[j]] = {};  // Create nested structure
+          currentObj[keyParts[j]] = {}; 
         }
         currentObj = currentObj[keyParts[j]];
       }
-      currentObj[keyParts[keyParts.length - 1]] = value;  // Assign value
+      currentObj[keyParts[keyParts.length - 1]] = value;
     }
   }
 
-  // Handle adding new rows
   var newRows = document.querySelectorAll("tr input[type='text'][placeholder='New Key']");
   newRows.forEach(function(newKeyInput) {
     var newValueInput = newKeyInput.closest("tr").querySelector("input[placeholder='New Value']");
@@ -864,35 +837,32 @@ function tableToJson(table) {
 
     
   if (newKey) {
-    // Apply the same logic as for inputValue
     if (newValue === "") {
-      newValue = ""; // Keep empty value
+      newValue = "";
     } else if (newValue.startsWith("[") && newValue.endsWith("]")) {
       try {
-        newValue = JSON.parse(newValue); // Handle arrays
+        newValue = JSON.parse(newValue);
       } catch (e) {
         console.error('Invalid JSON array:', newValue);
-        newValue = newValue; // Keep raw input if parsing fails
+        newValue = newValue;
       }
     } else if (newValue === 'true' || newValue === 'false') {
-      newValue = newValue === 'true'; // Convert to boolean
+      newValue = newValue === 'true';
     } else if (!isNaN(newValue)) {
-      newValue = parseFloat(newValue); // Convert to number (int or float)
+      newValue = parseFloat(newValue);
     } else {
-      newValue = newValue; // Handle strings
+      newValue = newValue;
     }
 
       var newKeyParts = newKey.split('.');
       var currentNewObj = json;
         console.log(newKeyParts)
-      // Create nested objects for the new key
       for (var k = 0; k < newKeyParts.length - 1; k++) {
         if (!currentNewObj[newKeyParts[k]]) {
           currentNewObj[newKeyParts[k]] = {};
         }
         currentNewObj = currentNewObj[newKeyParts[k]];
       }
-      // Assign the new value to the new key
       currentNewObj[newKeyParts[newKeyParts.length - 1]] = newValue;
     }
   });
@@ -971,7 +941,6 @@ function copyTheme() {
 function renameTheme() {
     var theme = document.getElementById("theme-selector").value;
 
-    // Fetch the active theme asynchronously
     active_theme(function(activeTheme) {
         if (theme !== "Default" && theme !== activeTheme) {
             if (theme) {
@@ -980,7 +949,7 @@ function renameTheme() {
                     sendJSON("Fancygotchi/theme_rename", {"theme": theme, "new_name": newName}, function(response) {
                         if (response.status == 200) {
                             alert("Theme renamed successfully");
-                            theme_list();  // Reload theme list after rename
+                            theme_list(); 
                         } else {
                             alert("Error renaming theme: " + response.responseText);
                         }
@@ -1016,10 +985,9 @@ function theme_upload(event) {
             return;
         }
 
-        // Directly use the response as a string
         if (response.startsWith('Zip file uploaded')) {
             alert(response);
-            theme_list(); // Refresh the theme list
+            theme_list();
         } else if (response.startsWith('Some folders were not copied')) {
             alert(response);
         } else {
@@ -1040,7 +1008,6 @@ function theme_export() {
         alert('Default theme cannot be exported.');
     }
 }
-// Function to perform theme deletion after confirmation
 $(document).on('click', '#confirm-delete', function() {
     var theme = $('#theme-selector').val();
     if (theme != "Default") {
@@ -1066,7 +1033,7 @@ function theme_info() {
     sendJSON("Fancygotchi/theme_info", json, function(xhr) {
         if (xhr.status == 200) {
             var themeInfo = JSON.parse(xhr.responseText); // Parse the response as JSON
-            populateThemeInfo(themeInfo); // Pass the parsed themeInfo to populateThemeInfo()
+            populateThemeInfo(themeInfo);
         }
     });
 }
@@ -1083,7 +1050,7 @@ function populateThemeSelector(themes) {
         selectElement.append(option);
     });
     if (!themes.includes('Default')) {
-        defaultOption.attr('selected', 'selected'); // Set selected attribute
+        defaultOption.attr('selected', 'selected');
     }
     selectElement.selectmenu('refresh');
 }
@@ -1098,7 +1065,6 @@ function populateThemeInfo(themeInfo) {
     $themeDescriptionContent.empty();
     $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
     
-    // Create new Image object to check if the image exists
     var img = new Image();
     var imgPath = '/screenshots/' + theme + '/screenshot.png';
     
@@ -1107,7 +1073,6 @@ function populateThemeInfo(themeInfo) {
     };
     
     img.onerror = function() {
-        // Set a default/fallback image if the theme screenshot doesn't exist
         document.getElementById('screenshot').src = '/screenshots/screenshot.png';
     };
     
@@ -1140,7 +1105,7 @@ function sendFormData(url, formData, callback) {
     xhr.setRequestHeader('x-csrf-token', csrf);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
-            console.log("Response received:", xhr.responseText); // Log the response
+            console.log("Response received:", xhr.responseText); 
             if (xhr.status === 200) {
                 document.getElementById('zipFile').value = '';
                 document.getElementById('message').innerHTML = 'Upload successful!';
@@ -1172,15 +1137,12 @@ function flattenJson(data) {
 
     function recurse(cur, prop) {
         if (Array.isArray(cur)) {
-            // Map the array, adding quotes around strings
             result[prop] = cur.map(function(item) {
                 return typeof item === 'string' ? `"${item}"` : item;
             });
         } else if (Object(cur) !== cur) {
-            // If it's a primitive, store it directly
             result[prop] = cur;
         } else {
-            // Recursively flatten for nested objects
             for (var p in cur) {
                 recurse(cur[p], prop ? prop + "." + p : p);
             }
@@ -1195,9 +1157,7 @@ function jsonToArray(json) {
     var theme_array = [];
     var x = 0;
     Object.keys(json).forEach(function(key) {
-        //alert(json[key]);
         theme_array[x] = [key, json[key]];
-        //alert(theme_array[x][0]);
         x+=1;
     });
     return theme_array;
@@ -1288,7 +1248,7 @@ function stealth() {
 }
 function navigate(direction) {
     var data = {
-        action: direction  // can be 'up', 'down', 'left', 'right', 'select', 'toggle'
+        action: direction
     };
 
     sendJSON("Fancygotchi/navmenu", data, function(response) {
@@ -1320,7 +1280,7 @@ function glitchEffect(amplify = false) {
         
         setTimeout(() => {
             line.classList.remove('glitch-line');
-            line.style.transform = '';  // Reset the transformation
+            line.style.transform = ''; 
         }, amplify ? 1000 : 300);
     });
 }
@@ -1483,7 +1443,6 @@ def show_boot_animation(display_driver, config):
                 frame_path = os.path.join(frames_path, frame)
 
                 if frame.lower().endswith('.gif'):
-                    # Handle GIF: extract and display each frame
                     logging.debug('Processing GIF: %s' % frame_path)
                     with Image.open(frame_path) as img:
                         for gif_frame in ImageSequence.Iterator(img):
@@ -1496,7 +1455,6 @@ def show_boot_animation(display_driver, config):
                             gif_frame = gif_frame.resize((width, height)).convert('{color_mode}')
                             logging.debug('Rendering frame: %s' % gif_frame)
                             display_driver.render(gif_frame)
-
                 else:
                     # Handle any other image formats (jpg, jpeg, bmp, png, etc.)
                     with Image.open(frame_path) as img:
@@ -1559,19 +1517,15 @@ if __name__ == "__main__":
             display_driver.config['enabled'] = False
 
             if hasattr(display_driver, 'displayImpl') and display_driver.config.get('enabled', False):
-                # Disable the display
                 display_driver.config['enabled'] = False
                 logging.debug('[Fancygotchi] Display has been disabled')
                 
-                # Optionally clear the display if there is a clear method
                 if hasattr(display_driver, 'clear'):
                     logging.debug('[Fancygotchi] Clearing the display')
                     display_driver.clear()
                 
-                # Reset the initialized flag
                 display_driver.is_initialized = False
 
-                # Optionally reset internal display reference to None
                 if hasattr(display_driver, '_display'):
                     logging.debug('[Fancygotchi] Resetting internal display reference')
                     display_driver._display = None
@@ -1623,8 +1577,6 @@ def main():
     parser.add_argument('-sc', '--screen-saver', choices=['next', 'previous'], help='Switch screen saver')
     parser.add_argument('-rb', '--run-bash', metavar='SCRIPT', help='Run a bash script')
     parser.add_argument('-rp', '--run-python', metavar='FILE', help='Run a Python script')
-    
-    
     
     args = parser.parse_args()
 
@@ -1704,7 +1656,6 @@ def main():
 
     if args.run_python:
         send_command({'action': 'run_python', 'file': args.run_python})
-
 
 def send_command(command_data):
     address = ('localhost', 3699)
@@ -1907,7 +1858,6 @@ class FancyDisplay:
         else: self.screen_data = {}
         self.set_mode(mode, sub_mode)
 
-
     def _start_loop(self):
         logging.warning("[FancyDisplay] Starting the asyncio event loop in a new thread.")
         asyncio.set_event_loop(self.loop)
@@ -1985,26 +1935,14 @@ class FancyDisplay:
     async def refacer(self):
         try: 
             fps = 1 / self.fps 
-            #if fps < 0.125:
-            #    fps = 0.125
             refresh_interval = 1
-            #logging.warning(refresh_interval)
             iteration = 0
-            #logging.warning('refacer is starting')
             while self.running:
-                #ogging.warning('refacer is running')
                 if iteration % refresh_interval == 0:
-                    # Get the image for the current mode (handles sub-modes too)
                     self.hijack_frame = self.get_mode_image()
 
                 if self.hijack_frame is not None:
-                    #logging.warning(f"[FancyDisplay] Running refacer in mode: {self.current_mode}, sub-mode: {self.current_screen_saver}")
-                    #if self.webui and webi >= self.webui_delay:
                     canvas = self.hijack_frame
-                    #logging.warning(f"[FancyDisplay] webUI: {self.webui}")
-                    #logging.warning(f"[FancyDisplay] webi: {webi}.")
-                    
-                    # Rotate canvas if needed
                     if self._rot == 90:
                         canvas = canvas.rotate(90, expand=True)
                     elif self._rot == 180:
@@ -2012,7 +1950,6 @@ class FancyDisplay:
                     elif self._rot == 270:
                         canvas = canvas.rotate(270, expand=True)
 
-                    # Resize and display the image
                     if self.enabled:
                         canvas = canvas.resize((self._res[0], self._res[1])).convert(self._col)
                         self.displayImpl.render(canvas)
@@ -2020,7 +1957,7 @@ class FancyDisplay:
                     logging.warning("[FancyDisplay] No image to display.")
                     
                 
-                await asyncio.sleep(fps)  # Control refresh rate
+                await asyncio.sleep(fps)
                 iteration += 1
 
         except asyncio.CancelledError:
@@ -2045,7 +1982,6 @@ class FancyDisplay:
             display = config['ui']['display']['enabled']
             self.displayImpl = None
 
-            #if self.enabled:
             displayImpl = getattr(self, 'displayImpl', None)
             if not displayImpl or not displayImpl.config.get('enabled', False):
                 self.displayImpl = display_for(config)
@@ -2068,21 +2004,18 @@ class FancyDisplay:
             logging.error(traceback.format_exc())
             
     def glitch_text_effect(self, text, glitch_chance=0.2, max_spaces=3):
-        # Split the text into lines
         lines = text.split('\n')
         glitched_lines = []
 
         for line in lines:
-            if random.random() < glitch_chance:  # Apply glitch randomly based on glitch_chance
-                # Insert random spaces at the beginning of the line
-                num_spaces = random.randint(1, max_spaces)  # Number of spaces to insert
-                line = ' ' * num_spaces + line  # Add spaces at the start of the line
+            if random.random() < glitch_chance: 
+                num_spaces = random.randint(1, max_spaces) 
+                line = ' ' * num_spaces + line 
 
             glitched_lines.append(line)
 
         return '\n'.join(glitched_lines)
 
-    # Method to change the mode (e.g., screen_save or auxiliary)
     def set_mode(self, mode, sub_mode=None, config={}):
         if mode in self.modes:
             logging.debug(f"[FancyDisplay] Switching to mode: {mode}")
@@ -2091,10 +2024,9 @@ class FancyDisplay:
                 self.set_screen_saver_mode(sub_mode)
                 self.screen_cdata = config
             elif mode == "auxiliary":
-                #self.set_auxiliary_mode(sub_mode)
                 self.screen_data = config
             elif mode == "terminal":
-                self.screen_data = config  # You can add terminal-specific config here if needed
+                self.screen_data = config 
         else:
             logging.warning(f"[FancyDisplay] Invalid mode: {mode}. Available modes are: {self.modes}")
     
@@ -2120,7 +2052,7 @@ class FancyDisplay:
         return next_mode
 
     def find_fb_device(self):
-        for i in range(10):  # Check for up to 10 framebuffer devices
+        for i in range(10): 
             fb_device = f"/dev/fb{i}"
             if os.path.exists(fb_device):
                 return fb_device
@@ -2133,11 +2065,10 @@ class FancyDisplay:
             if 'geometry' in line:
                 parts = line.split()
                 return int(parts[1]), int(parts[2])
-        return self._res[0], self._res[1]  # Fallback to display resolution if fbset fails
+        return self._res[0], self._res[1] 
 
     def read_fb(self, width, height):
         with open(self.fb, "rb") as fb:
-            # Use memoryview for better memory efficiency
                 return memoryview(fb.read(width * height * 2))
 
     def terminal_mode(self):
@@ -2147,11 +2078,9 @@ class FancyDisplay:
         fb_width, fb_height = self.get_fb_size()
         fb_data = self.read_fb(fb_width, fb_height)
         
-        # Direct framebuffer to RGB conversion
         rgb_image = self.convert_to_rgb(fb_data, fb_width, fb_height)
         image = Image.fromarray(rgb_image, mode='RGB')
         
-        # Use BILINEAR instead of LANCZOS for better performance while maintaining font clarity
         width, height = self._res
         resized_image = image.resize((width, height), Image.BILINEAR)
         
@@ -2161,7 +2090,6 @@ class FancyDisplay:
         rgb_array = np.zeros((height, width, 3), dtype=np.uint8)
         pixels = np.frombuffer(fb_data, dtype=np.uint16)
         
-        # Vectorized RGB conversion
         r = ((pixels >> 11) & 0x1F) << 3
         g = ((pixels >> 5) & 0x3F) << 2
         b = (pixels & 0x1F) << 3
@@ -2172,14 +2100,12 @@ class FancyDisplay:
         
         return rgb_array
 
-    # Method to change screen_saver sub-modes (show_logo, moving_shapes, etc.)
     def set_screen_saver_mode(self, sub_mode):
         if sub_mode is None:
             sub_mode = self.current_screen_saver
         if sub_mode in self.screen_saver_modes:
             logging.debug(f"[FancyDisplay] Switching screen_saver to: {sub_mode}")
             self.current_screen_saver = sub_mode
-            # set default config for each screen_saver sub-mode
             if sub_mode == 'show_logo':
                 options = {}
             elif sub_mode == 'moving_shapes':
@@ -2196,18 +2122,18 @@ class FancyDisplay:
                     "speed": 1,
                 }
             elif sub_mode == 'hyper_drive':
-                num_stars = 100  # Number of stars to simulate
+                num_stars = 100 
                 options = {
                     'stars': [
                         {
                             'position': [random.randint(-self._res[0]//2, self._res[0]//2), random.randint(-self._res[1]//2, self._res[1]//2)],
-                            'velocity': random.uniform(2, 5),  # Initial velocity (increase to simulate faster speeds)
+                            'velocity': random.uniform(2, 5),  
                             'size': random.uniform(1, 3),
                             'streak_length': random.uniform(5, 20),
                             'color': 'white'
                         } for _ in range(num_stars)
                     ],
-                    'speed': 1.0  # Speed multiplier, adjustable
+                    'speed': 1.0 
                 }
             elif sub_mode == 'show_animation':
                 options = {
@@ -2216,7 +2142,6 @@ class FancyDisplay:
                     'total_duration': 10,
                 }
             self.screen_data.update(options)
-            #logging.warning(f"[FancyDisplay] {sub_mode} Screen_saver options: {self.screen_data}")
         else:
             logging.warning(f"[FancyDisplay] Invalid screen_saver sub-mode: {sub_mode}. Available sub-modes are: {self.screen_saver_modes}")
 
@@ -2229,9 +2154,9 @@ class FancyDisplay:
         current_index = self.screen_saver_modes.index(self.current_screen_saver)
         
         if direction == 'next':
-            next_index = (current_index + 1) % len(self.screen_saver_modes)  # Move forward
+            next_index = (current_index + 1) % len(self.screen_saver_modes) 
         elif direction == 'previous':
-            next_index = (current_index - 1) % len(self.screen_saver_modes)  # Move backward (mod handles negative wrap-around)
+            next_index = (current_index - 1) % len(self.screen_saver_modes)  
         else:
             logging.error(f"[FancyDisplay] Invalid direction: {direction}. Must be 'next' or 'previous'.")
             return self.current_mode
@@ -2241,7 +2166,6 @@ class FancyDisplay:
         self.set_screen_saver_mode(next_submode)
         return next_submode
 
-    # Central method to get the appropriate image based on the mode and sub-mode
     def get_mode_image(self):
         logging.debug(f"[FancyDisplay] Getting mode image: {self.current_mode}")
         if self.current_mode == 'screen_saver':
@@ -2254,10 +2178,9 @@ class FancyDisplay:
             logging.warning(f"[FancyDisplay] Unknown mode: {self.current_mode}. Falling back to default.")
             return self.show_logo()
 
-    # Handle different screen_saver sub-modes
     def get_screen_saver_image(self):
         if self.current_screen_saver == 'show_logo':
-            return self.show_logo()  # This is your default logo mode
+            return self.show_logo() 
         elif self.current_screen_saver == 'moving_shapes':
             return self.moving_shapes_screen_saver()
         elif self.current_screen_saver == 'random_colors':
@@ -2280,14 +2203,10 @@ class FancyDisplay:
         text_color = (255, 0, 0) 
         image_width, image_height = image.size
         text_width, text_height = draw.textsize(text, font)
-        #position = ((image_width - text_width) // 2, (image_height - text_height) // 2)
         position = ((image_width - text_width) // 2, 10)
         draw.text(position, text, font=font, fill=text_color)
-        
         return image
 
-
-    # Screen Saver sub-modes
     def show_logo(self):
         try:
             width = self._res[0]
@@ -2327,9 +2246,8 @@ class FancyDisplay:
             if shape_type == "text":
                 shape_width, shape_height = font.getsize(text)
             else:
-                shape_width = shape_height = shape_size  # Circle's diameter
+                shape_width = shape_height = shape_size 
             
-            # Initialize position and velocity if not already stored
             if not hasattr(self, 'shape_position'):
                 self.shape_position = [random.randint(0, width - shape_width), random.randint(0, height - shape_height)]
                 self.shape_velocity = [random.choice([-1, 1]) * speed, random.choice([-1, 1]) * speed] 
@@ -2337,7 +2255,6 @@ class FancyDisplay:
             x, y = self.shape_position
             vx, vy = self.shape_velocity
 
-            # Check for screen boundaries and rebound
             if x + shape_width >= width or x <= 0:
                 vx = -vx
             if y + shape_height >= height or y <= 0:
@@ -2378,36 +2295,28 @@ class FancyDisplay:
         stars = self.screen_data['stars']
         
         for star in stars:
-            # Extract star attributes
             pos_x, pos_y = star['position']
-            velocity = star['velocity'] * speed  # Increase velocity with speed multiplier
+            velocity = star['velocity'] * speed 
             size = star['size']
             streak_length = star['streak_length']
             
-            # Move the star outwards from the center
             pos_x *= (1 + velocity / 100)
             pos_y *= (1 + velocity / 100)
             
-            # Calculate the new positions of the star's streak
             streak_end_x = pos_x * (1 + streak_length / 100)
             streak_end_y = pos_y * (1 + streak_length / 100)
 
-            # Recalculate size of the star as it moves (bigger near the center)
             size = min(size * (1 + velocity / 10), 10)
             
-            # Draw the star's streak (lines towards the center)
             draw.line([(center_x + streak_end_x, center_y + streak_end_y), 
                     (center_x + pos_x, center_y + pos_y)], fill=star['color'], width=int(size))
             
-            # Reset stars that move out of bounds and reinitialize them in this frame
             if abs(pos_x) > width // 2 or abs(pos_y) > height // 2:
-                # Reset the star to a new random position close to the center
                 star['position'] = [random.randint(-50, 50), random.randint(-50, 50)]
                 star['velocity'] = random.uniform(2, 5)
                 star['size'] = random.uniform(1, 3)
                 star['streak_length'] = random.uniform(5, 20)
                 
-                # Recalculate the reset star position and draw it immediately
                 pos_x, pos_y = star['position']
                 velocity = star['velocity'] * speed
                 pos_x *= (1 + velocity / 100)
@@ -2418,7 +2327,6 @@ class FancyDisplay:
                 draw.line([(center_x + streak_end_x, center_y + streak_end_y), 
                         (center_x + pos_x, center_y + pos_y)], fill=star['color'], width=int(star['size']))
 
-            # Update star position for next iteration
             star['position'] = [pos_x, pos_y]
         
         return canvas
@@ -2435,12 +2343,10 @@ class FancyDisplay:
             target_fps = 24
             frame_duration = 0.2
 
-            # Check if folder exists
             if not os.path.exists(frames_path):
                 image = self.show_logo()
                 return image
 
-            # Accept common image formats
             valid_extensions = ('.png', '.jpg', '.jpeg', '.bmp', '.gif')
             frames = sorted([f for f in os.listdir(frames_path) if f.lower().endswith(valid_extensions)])
             
@@ -2448,7 +2354,6 @@ class FancyDisplay:
                 logging.error("[FancyDisplay] No valid frames found in the specified directory")
                 return None
 
-            # Initialize animation state if not already present
             if not hasattr(self, 'animation_state'):
                 self.animation_state = {
                     'start_time': time.time(),
@@ -2459,14 +2364,11 @@ class FancyDisplay:
             current_time = time.time()
             elapsed_time = current_time - self.animation_state['start_time']
 
-            # Reset animation if needed
-            #if (elapsed_time >= total_duration) or (self.animation_state['loop_count'] >= max_loops):
             if (self.animation_state['loop_count'] >= max_loops):
                 self.animation_state['start_time'] = current_time
                 self.animation_state['loop_count'] = 0
                 self.animation_state['extracted_frames'] = []
 
-            # If we haven't extracted frames yet, do it now
             if not self.animation_state['extracted_frames']:
                 for frame in frames:
                     frame_path = os.path.join(frames_path, frame)
@@ -2479,18 +2381,14 @@ class FancyDisplay:
                 
                 logging.debug(f"[FancyDisplay] Extracted {len(self.animation_state['extracted_frames'])} frames")
 
-            # Calculate the current frame based on elapsed time and FPS
             total_frames = len(self.animation_state['extracted_frames'])
             current_frame_index = int((elapsed_time / frame_duration) % total_frames)
 
-            # Get the current frame
             current_frame = self.animation_state['extracted_frames'][current_frame_index]
 
-            # Resize and convert
             image = current_frame.resize((self._res[0], self._res[1])).convert(self._col)
 
-            # Update loop count if we've cycled through all frames
-            if current_frame_index == 0 and elapsed_time > 0:  # Make sure it's not the first frame of the first loop
+            if current_frame_index == 0 and elapsed_time > 0: 
                 self.animation_state['loop_count'] += 1
 
             if image is None:
@@ -2593,9 +2491,7 @@ class FancyServer:
     async def process_command(self, command):
         try:
             logging.debug(f"[FancyServer] Received command: {command}")
-            #for item in command:
             action = command.get('action')
-            #self.last_command = command
             if action == 'plugin':
                 name = command.get('plugin')
                 state = command.get('enable')
@@ -2629,7 +2525,7 @@ class FancyServer:
 
         async with self.server:
             while self.running:
-                await asyncio.sleep(1)  # Keep the loop alive
+                await asyncio.sleep(1) 
             logging.debug('[FancyServer] loop finished')
 
     def get_last_command(self):
@@ -2659,7 +2555,7 @@ class FancyMenu:
         self.reset_menus(custom_menus)
 
     def reset_menus(self, custom_menus={}):
-        self.menus = copy.deepcopy(MENUS)  # Reset to default menus
+        self.menus = copy.deepcopy(MENUS) 
         self.menu_stack = [self.menus['Main menu']]
         self.populate_plugins_menu(self.plugin_names)
         self.populate_themes_menu()
@@ -2670,7 +2566,6 @@ class FancyMenu:
         menus = {}
         main = {}
         issues = []
-        #logging.warning(f'custom_menus: {config}')
         for menu_key, menu_data in config.items():
             if not isinstance(menu_data, dict):
                 issues.append(f"[FancyMenu] Menu data for '{menu_key}' is not a dictionary.")
@@ -2688,10 +2583,6 @@ class FancyMenu:
                         issues.append(f"[FancyMenu] Button data for '{btn_key}' in menu '{menu_key}' is not a dictionary.")
                         continue
                     title = btn_data.get("title", f"Button {btn_key[-1]}")
-                    #action = btn_data.get("action", "")
-                    #command = btn_data.get("command", "")
-                    #enable = btn_data.get("enable", False)
-                    #buttons.append((title, {"action": action, "command": command, "enable": enable}))
                     buttons.append((title, btn_data))
             menus[menu_title] = Menu(menu_title, buttons, back_reference=back_menu)
             self.menus.update(menus)
@@ -2773,12 +2664,10 @@ class FancyMenu:
                 if self.check_timeout():
                     return
 
-                # Ensure self.loaded_images exists to store images
                 if not hasattr(self, 'loaded_images'):
                     self.loaded_images = {}
 
                 current_menu = self.menu_stack[-1]
-                #canvas_width, canvas_height = self._fancygotchi._res
                 rot = self._fancygotchi._config['main']['plugins']['Fancygotchi']['rotation']
                 if rot == 0 or rot == 180:
                     canvas_width, canvas_height = self._fancygotchi._res
@@ -2809,10 +2698,8 @@ class FancyMenu:
                 menu_image = Image.new("RGBA", (menu_width, menu_height), bg_color)
                 draw = ImageDraw.Draw(menu_image)
 
-                # Draw background color
                 draw.rectangle([0, 0, menu_width, menu_height], fill=bg_color)
 
-                # Handle background image loading and caching
                 bg_image_path = None
                 if self.menu_theme.get('bg_image', None):
                     bg_image_path = os.path.join(self._fancygotchi._th_path, 'img', 'menu', self.menu_theme.get('bg_image'))
@@ -2821,11 +2708,10 @@ class FancyMenu:
                         if os.path.exists(bg_image_path):
                             try:
                                 bg_image = Image.open(bg_image_path)
-                                #bg_image = bg_image.resize((menu_width, menu_height), Image.ANTIALIAS)
                                 self.loaded_images[bg_image_path] = bg_image
                             except Exception as e:
                                 logging.warning(f"Failed to load background image: {e}")
-                                self.loaded_images[bg_image_path] = None  # Mark it as failed
+                                self.loaded_images[bg_image_path] = None 
                         else:
                             logging.warning(f"Background image not found: {bg_image_path}")
                             self.loaded_images[bg_image_path] = None
@@ -2833,9 +2719,7 @@ class FancyMenu:
                     if self.loaded_images[bg_image_path]:
                         bg_mode = self.menu_theme.get('bg_mode', 'normal')
                         bg_tmp = image_mode(menu_image, self.loaded_images[bg_image_path], bg_mode)
-                        #menu_image.paste(bg_tmp, (0, 0))
 
-                # Handle title rendering
                 title_font_size = self.menu_theme.get('title_font_size', 'Medium')
                 title_font = getattr(self._fancygotchi, title_font_size)
                 title_color = self.menu_theme.get('title_color', 'black')
@@ -2861,7 +2745,6 @@ class FancyMenu:
                     else:
                         draw.text((title_x, title_y), title_text, font=title_font, fill=title_color)
 
-                # Handle buttons rendering
                 btn_height = self.menu_theme.get('button_height', 15)
                 btns_width = self.menu_theme.get('buttons_width', '90%')
                 btns_height = self.menu_theme.get('buttons_height', '90%')
@@ -2896,7 +2779,6 @@ class FancyMenu:
                 visible_buttons = (menu_height - title_height - title_y) // (btn_height + button_spacing)
                 scroll_offset = max(0, current_menu.current_index - visible_buttons + 1)
 
-                # Render each button
                 for i, (item_name, item_action) in enumerate(current_menu.items[scroll_offset:scroll_offset + visible_buttons]):
                     button_y = title_height + title_y + i * (btn_height + button_spacing)
 
@@ -2922,19 +2804,15 @@ class FancyMenu:
                     if self.menu_theme.get('button_bg_color', (0,0,0,0)) == '': button_bg_color = (0,0,0,0)
                     else: button_bg_color = self.menu_theme.get('button_bg_color', 'white')
 
-                    # Cache button background image
                     button_bg_image_path = None
                     highlight_button_bg_image_path = None
 
-                    # Step 1: Load button background image path
                     if self.menu_theme.get('button_bg_image', ''):
                         button_bg_image_path = os.path.join(self._fancygotchi._th_path, 'img', 'menu', self.menu_theme.get('button_bg_image'))
 
-                    # Step 2: Load highlight button background image path (if available)
                     if self.menu_theme.get('highlight_button_bg_image', ''):
                         highlight_button_bg_image_path = os.path.join(self._fancygotchi._th_path, 'img', 'menu', self.menu_theme.get('highlight_button_bg_image'))
 
-                    # Step 3: Load and cache button background image (normal button)
                     if button_bg_image_path and button_bg_image_path not in self.loaded_images:
                         if os.path.exists(button_bg_image_path):
                             try:
@@ -2949,7 +2827,6 @@ class FancyMenu:
                             logging.warning(f"Button background image not found: {button_bg_image_path}")
                             self.loaded_images[button_bg_image_path] = None
 
-                    # Step 4: Load and cache highlight background image (highlighted button)
                     if highlight_button_bg_image_path and highlight_button_bg_image_path not in self.loaded_images:
                         if os.path.exists(highlight_button_bg_image_path):
                             try:
@@ -2964,26 +2841,22 @@ class FancyMenu:
                             logging.warning(f"Highlight button background image not found: {highlight_button_bg_image_path}")
                             self.loaded_images[highlight_button_bg_image_path] = None
 
-                    # Apply background and text for highlighted button
                     if i + scroll_offset == current_menu.current_index:
                         highlight_color = self.menu_theme.get('highlight_color', 'black')
                         highlight_text_color = self.menu_theme.get('highlight_text_color', 'white')
                         
                         button_draw.rectangle([0, 0, btns_menu_width, btn_height], fill=highlight_color)
 
-                        # Use highlight background image if available, otherwise fallback to normal background image
                         image_to_use_path = highlight_button_bg_image_path if self.loaded_images.get(highlight_button_bg_image_path) else button_bg_image_path
                         if self.loaded_images.get(image_to_use_path):
                             button_image.paste(self.loaded_images[image_to_use_path], (0, 0), self.loaded_images[image_to_use_path].split()[3])
 
-                        #button_draw.text((text_x, text_y), button_text, fill=highlight_text_color)
                         button_size = button_draw.textsize(button_text, font=button_font)
                         if button_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                             self.scroll_text(button_draw, button_text, highlight_text_color, button_text, button_font, menu_width, text_speed)
                         else:
                             button_draw.text((text_x, text_y), button_text, font=button_font, fill=highlight_text_color)
 
-                    # Apply background and text for non-highlighted button
                     else:
                         button_text_color = self.menu_theme.get('button_text_color', 'black')
                         button_draw.rectangle([0, 0, btns_menu_width, btn_height], fill=button_bg_color)
@@ -2991,19 +2864,15 @@ class FancyMenu:
                         if self.loaded_images.get(button_bg_image_path):
                             button_image.paste(self.loaded_images[button_bg_image_path], (0, 0), self.loaded_images[button_bg_image_path].split()[3])
 
-                        #button_draw.text((text_x, text_y), button_text, fill=self.menu_theme.get('button_text_color', 'black'))
                         button_size = button_draw.textsize(button_text, font=button_font)
                         if button_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                             self.scroll_text(button_draw, button_text, button_text_color, button_text, button_font, menu_width, text_speed)
                         else:
                             button_draw.text((text_x, text_y), button_text, font=button_font, fill=button_text_color)
-                    # Paste button image onto menu image
                     menu_image.paste(button_image, (buttons_x, button_y), button_image.split()[3])
 
-                    # Draw border around the menu
                     draw.rectangle([0, 0, menu_width - 1, menu_height - 1], outline=self.menu_theme.get('border_color', 'black'))
 
-                    # Create the final canvas
                     canvas = Image.new("RGBA", (canvas_width, canvas_height), (0, 0, 0, 0))
                     canvas.paste(menu_image, (menu_x, menu_y))
 
@@ -3044,7 +2913,6 @@ class Menu:
         self.back_reference = back_reference
         self.current_index = 0
 
-        # Automatically add "Back" and "Home" if the parent is "Main menu"
         if not name == 'Main menu':
             if self.back_reference == "Main menu":
                 self.items = [
@@ -3063,12 +2931,10 @@ class Menu:
             self.current_index = (self.current_index + (1 if direction == 'down' else -1)) % len(self.items)
 
     def add_button(self, title, action):
-        self.items.insert(0, (title, action))  # Adding at the beginning instead of end
+        self.items.insert(0, (title, action))  
 
 def menu_contains_button(menu, button_name):
-    # Loop through the items (buttons) in the menu
     for item in menu.items:
-        # item[0] is assumed to be the button name (first element of the tuple)
         if item[0] == button_name:
             return True
     return False
@@ -3104,18 +2970,10 @@ MENUS = {
 }
 
 def get_all_plugin_names(fancygotchi):
-    # Ensure fancygotchi has the config dictionary
-    config_dict = fancygotchi._config  # Access the correct attribute holding the configuration
-    
-    # Get plugin names from 'plugins'
+    config_dict = fancygotchi._config 
     plugins = list(config_dict['main'].get('plugins', {}).keys())
-    
-    # Get custom plugins path, assuming it's a string
     custom_plugins_path = config_dict['main'].get('custom_plugins', '')
-    
-    # Combine the plugin names into a single list
     all_plugins = plugins
-    
     return all_plugins
 
 def is_int(s):
@@ -3126,11 +2984,9 @@ def is_int(s):
         return False
 
 def box_to_xywh(position):
-    # Calculate distances to (0, 0)
     dist_1 = math.sqrt(position[0]**2 + position[1]**2)
     dist_2 = math.sqrt(position[2]**2 + position[3]**2)
     
-    # Select the closer point to (0, 0)
     if dist_1 <= dist_2:
         x, y = position[0], position[1]
         x2, y2 = position[2], position[3]
@@ -3138,36 +2994,28 @@ def box_to_xywh(position):
         x, y = position[2], position[3]
         x2, y2 = position[0], position[1]
 
-    # Calculate width and height
     w = abs(x - x2)
     h = abs(y - y2)
     
-    # Return the new position tuple
     return [x, y, w, h]
 
 def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=False):
     try:
         if isinstance(image_path, str):
             try:
-                # Open the image from the file path
                 image = Image.open(image_path)
             except Exception as e:
                 logging.error(f"Error opening image: {e}")
                 return None
         elif isinstance(image_path, Image.Image):
-            # If it's already an image, use it directly
             image = image_path
-        #image.save('/home/pi/original.png')
         if invert:
             image = invert_pixels(image)
         image = image.convert('RGBA') 
         
-        # Get the original width and height
         original_width, original_height = image.size
-        # Calculate the new dimensions based on the zoom factor
         new_width = int(original_width * zoom)
         new_height = int(original_height * zoom)
-        # Resize the image while maintaining the aspect ratio
 
         adjusted_image = image.resize((new_width, new_height))
         if mask:
@@ -3189,20 +3037,17 @@ def invert_pixels(image):
         inverted_data = [(255-r, 255-g, 255-b, a) for r, g, b, a in data]
         inverted_image = Image.new('RGBA', image.size)
         inverted_image.putdata(inverted_data)
-        #inverted_image.save('/home/pi/inverted.png')
         return inverted_image
     except Exception as e:
         logging.error(f"Error in invert_pixels: {str(e)}")
         logging.error(traceback.format_exc())
-        return image  # Return original image if inversion fails
+        return image  
 
 def alphamask(src_image):
     src_image = src_image.convert('RGBA')
     data = src_image.getdata()
     newData = []
     for item in data:
-        # Change all white (also shades of whites)
-        # pixels to transparent
         if item[0] in range(240, 256) and item[1] in range(240, 256) and item[2] in range(240, 256):
             newData.append((255, 255, 255, 0))
         else:
@@ -3218,14 +3063,11 @@ def masking(src_image, refine):
     new_pixels = []
     for pixel in pixels:
         r, g, b, a = pixel
-        # If pixel is not fully transparent (alpha is not 0), convert it to black
-        #if a > 50:
         if a > refine:
             new_pixel = (0, 0, 0, 255)
         else:
             new_pixel = (0, 0, 0, 0)
         new_pixels.append(new_pixel)
-    # Create a new image with the modified pixel data
     new_img = Image.new("RGBA", image.size)
     new_img.putdata(new_pixels)
     adjusted_image = new_img
@@ -3238,60 +3080,47 @@ def image_mode(canvas, image, mode):
     logging.debug(f"Image size: {width}x{height}")
     logging.debug(f"Canvas size: {w}x{h}")
     if mode == 'normal':
-        # Paste the image at its original size
         image = image.convert('RGBA')
         canvas.paste(image, (0,0,width, height), image.split()[3])
     elif mode == 'stretch':
-        # Stretch image to fill the entire canvas
         img_resized = image.resize((w,h))
         canvas.paste(img_resized, (0, 0), img_resized)
     elif mode == 'tile':
-        # Tile the image across the canvas
         for x in range(0, w, image.width):
             for y in range(0, h, image.height):
                 canvas.paste(image, (x, y), image)
     elif mode == 'center':
-        # Center the image on the canvas
         x = (w - image.width) // 2
         y = (h - image.height) // 2
         canvas.paste(image, (x, y), image)
     elif mode == 'fit':
-        # Get original dimensions
         original_width, original_height = image.size
         canvas_width, canvas_height = canvas.size
 
-        # Calculate aspect ratios
         original_aspect = original_width / original_height
         canvas_aspect = canvas_width / canvas_height
 
         if original_aspect > canvas_aspect:
-            # Image is wider relative to the canvas
             new_width = canvas_width
             new_height = int(canvas_width / original_aspect)
         else:
-            # Image is taller or square relative to the canvas
             new_height = canvas_height
             new_width = int(canvas_height * original_aspect)
 
-        # Resize the image
         image_resized = image.resize((new_width, new_height), Image.ANTIALIAS)
 
-        # Center the image on the canvas
         x = (canvas_width - new_width) // 2
         y = (canvas_height - new_height) // 2
 
-        # Paste the resized image onto the canvas
-        canvas.paste(image_resized, (x, y), image_resized)  # Use the image as a mask
+        canvas.paste(image_resized, (x, y), image_resized) 
 
     elif mode == 'fill':
-        # Fill the canvas with the image, cutting off parts if necessary
         img_resized = ImageOps.fit(image, (w,h))
         canvas.paste(img_resized, (0, 0), img_resized)
     return canvas
 
 
 def verify_font_info(ft):
-    # font size list: Bold, BoldSmall, Medium, Huge, BoldBig, Small
     font_list = [fonts.Bold, fonts.BoldSmall, fonts.Medium, fonts.Huge, fonts.BoldBig, fonts.Small]
 
     font_info = {
@@ -3322,68 +3151,10 @@ def serializer(obj):
         return list(obj)
     raise TypeError
 
-def check_and_fix_fb():
-    config_paths = [
-        "/boot/firmware/config.txt",
-        "/boot/config.txt"
-    ]
-    correct_overlay = "dtoverlay=vc4-fkms-v3d"
-    wrong_overlay = "dtoverlay=vc4-kms-v3d"
-
-    # Check if at least one framebuffer device exists
-    fb_device_exists = any(os.path.exists(f"/dev/fb{i}") for i in range(10))
-    logging.info(f"[Fancygotchi] Framebuffer device exists: {fb_device_exists}")
-    config_file = None
-    for path in config_paths:
-        if os.path.exists(path):
-            config_file = path
-            break
-
-    if not config_file:
-        return
-
-    with open(config_file, 'r') as file:
-        lines = file.readlines()
-
-    found_correct_overlay = any(correct_overlay in line for line in lines)
-
-    if fb_device_exists:
-        logging.info("[Fancygotchi] Framebuffer device exists. No reboot needed.")
-        return
-    elif found_correct_overlay:
-        logging.info("[Fancygotchi] config.txt already contains the correct overlay. No reboot needed.")
-        return
-    else:
-        logging.info("[Fancygotchi] Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
-
-    backup_path = config_file + ".bak"
-    shutil.copy(config_file, backup_path)
-    with open(config_file, 'r') as file:
-        lines = file.readlines()
-    found_wrong_overlay = False
-    found_correct_overlay = False
-    new_lines = []
-    for line in lines:
-        if wrong_overlay in line:
-            found_wrong_overlay = True
-            new_lines.append(line.replace(wrong_overlay, correct_overlay))
-        elif correct_overlay in line:
-            found_correct_overlay = True
-            new_lines.append(line)
-        else:
-            new_lines.append(line)
-    if not found_correct_overlay:
-        new_lines.append(f"\n{correct_overlay}\n")
-        logging.debug(f"{correct_overlay} added to {config_file}")
-    with open(config_file, 'w') as file:
-        file.writelines(new_lines)
-    logging.debug("Rebooting system to apply changes...")
-    subprocess.run(["sudo", "reboot"])
-
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.0'
+    __version__ = '2.0.1'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3393,10 +3164,8 @@ class Fancygotchi(plugins.Plugin):
         self.running = False
         self.fancy_menu = None
         self.actions_log = []
-        #self.fancy_server = FancyServer()
-
+        self.second_screen = Image.new('RGBA', (1,1), 'black')
         self.fancy_menu_img = None
-        #self.display_controller = FancyDisplay()
         self.display_config = {'mode': 'screen_saver', 'sub_mode': 'show_logo'}
         self.screen_modes = ['screen_saver', 'auxiliary', 'terminal']
         self.screen_saver_modes = ['show_logo', 'moving_shapes', 'random_colors', 'hyper_drive', 'show_animation']
@@ -3420,7 +3189,6 @@ class Fancygotchi(plugins.Plugin):
         logging.info(f'[Fancygotchi]{20*self.star}[Fancygotchi]{20*self.star}')
         self._pwny_root = os.path.dirname(pwnagotchi.__file__)
         self._plug_root = os.path.dirname(os.path.realpath(__file__))
-        # Theme variables
         self._default = {
             'theme': {
                 'options': {
@@ -3572,15 +3340,12 @@ class Fancygotchi(plugins.Plugin):
         self._th_path = None
         self._res = []
         self._color_mode = ['P', 'P']
-        # Background and foreground images variables
         self._bg = ''
         self._fg = ''
-        # Loop and animated background variables
         self._i = 0
         self._imax = None
         self._frames = []
         self._icolor = 0
-        # Font variables
         self.font_name = 'DejaVuSansMono'
         self.font_bold_name = 'DejaVuSansMono-Bold'
         self.f_awesome_name = ''
@@ -3590,7 +3355,6 @@ class Fancygotchi(plugins.Plugin):
         self.Medium = None
         self.Small = None
         self.Huge = None
-        # Components status dict
         self._state = {}
         self._state_default = {}
 
@@ -3654,7 +3418,6 @@ class Fancygotchi(plugins.Plugin):
 if [ -f "/usr/local/bin/boot_animation.py" ]; then
     {self.pyenv} /usr/local/bin/boot_animation.py
 fi"""}]
-        self.log('[Fancygotchi] Initiated')
         v_f = os.path.join(self._pwny_root, 'ui', 'view.py')
         s_f = os.path.join(self._pwny_root, 'ui', 'state.py')
         i_f = os.path.join(self._pwny_root, 'identity.py')
@@ -3664,15 +3427,16 @@ fi"""}]
         if self.adjust_code(s_f, s_code): rst = 1
         if self.adjust_code(i_f, i_code): rst = 1
         if self.adjust_code(p_f, p_code): rst = 1
-        rst = self.zram_check()
-        check_and_fix_fb()
+        if self.zram_check(): rst = 1
+        self.check_and_fix_fb()
         if rst:
-            self.log('[Fancygotchi] The pwnagotchi need to restart.')
-            os.system('service pwnagotchi restart')
-        logging.info('[Fancygotchi] Initiated')
+            self.log('The pwnagotchi need to restart.')
+            os.system('sudo systemctl restart pwnagotchi.service')
+            os.system('sudo service pwnagotchi restart')
+        self.log('Initiated')
 
-    # System section
     def adjust_code(self, file_path, changes):
+        self.log(f'Adjusting code in {file_path}')
         rst = 0
         with open(file_path, 'r') as file:
             lines = file.readlines()
@@ -3689,48 +3453,88 @@ fi"""}]
                         reference_index += 1
                     else:
                         reference_index = 0
-                    
                     if reference_index == len(reference_lines):
-                        # Reference code found, apply modification
                         if replace_flag:
-                            # Replace the code block
                             lines[i - len(reference_lines) + 1:i + 1] = [paste_code + '\n']
                         else:
-                            # Insert the code block after the reference lines
                             lines[i] = lines[i].rstrip() + '\n' + paste_code + '\n'
-
                         rst = 1
-
-        #if lines[-1].strip() != '':  # If the last line is not empty
-        #    lines.append('\n')  # Add an empty line
-
-        # Add the tag at the end (outside the loop)
         if rst:
             lines.append(self.Tag + '\n')
-
-        # Write the modified lines back to the file
         with open(file_path, 'w') as file:
             file.writelines(lines)
         
         return rst
 
+    def check_and_fix_fb(self):
+        config_paths = [
+            "/boot/firmware/config.txt",
+            "/boot/config.txt"
+        ]
+        correct_overlay = "dtoverlay=vc4-fkms-v3d"
+        wrong_overlay = "dtoverlay=vc4-kms-v3d"
+
+        fb_device_exists = any(os.path.exists(f"/dev/fb{i}") for i in range(10))
+        self.log(f"[Fancygotchi] Framebuffer device exists: {fb_device_exists}")
+        config_file = None
+        for path in config_paths:
+            if os.path.exists(path):
+                config_file = path
+                break
+
+        if not config_file:
+            return
+
+        with open(config_file, 'r') as file:
+            lines = file.readlines()
+
+        found_correct_overlay = any(correct_overlay in line for line in lines)
+
+        if fb_device_exists:
+            self.log("[Fancygotchi] Framebuffer device exists. No reboot needed.")
+            return
+        elif found_correct_overlay:
+            self.log("[Fancygotchi] config.txt already contains the correct overlay. No reboot needed.")
+            return
+        else:
+            self.log("[Fancygotchi] Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
+
+        backup_path = config_file + ".bak"
+        shutil.copy(config_file, backup_path)
+        with open(config_file, 'r') as file:
+            lines = file.readlines()
+        found_wrong_overlay = False
+        found_correct_overlay = False
+        new_lines = []
+        for line in lines:
+            if wrong_overlay in line:
+                found_wrong_overlay = True
+                new_lines.append(line.replace(wrong_overlay, correct_overlay))
+            elif correct_overlay in line:
+                found_correct_overlay = True
+                new_lines.append(line)
+            else:
+                new_lines.append(line)
+        if not found_correct_overlay:
+            new_lines.append(f"\n{correct_overlay}\n")
+            self.log(f"{correct_overlay} added to {config_file}")
+        with open(config_file, 'w') as file:
+            file.writelines(new_lines)
+        self.log("Rebooting system to apply changes...")
+        subprocess.run(["sudo", "reboot"])
+
     def zram_check(self):
         rst = 0
-        # verify if fs.memory.mounts.data exist in the config
         if 'fs' in self._config and 'memory' in self._config['fs'] and 'mounts' in self._config['fs']['memory'] and 'data' in self._config['fs']['memory']['mounts']:
             fs_data = self._config['fs']['memory']['mounts']['data']
-            # if data exist and is enabled
             if 'enabled' in fs_data and fs_data['enabled']:
-                # verify is the mount path is set
                 if 'mount' != '': mount = fs_data['mount']
-                else: self._config['fs']['memory']['mounts']['data']['mount'] = "/var/tmp/pwnagotchi" # allocate the default path
-                # verify if zram is enabled
+                else: self._config['fs']['memory']['mounts']['data']['mount'] = "/var/tmp/pwnagotchi"
                 if 'zram' in fs_data and fs_data['zram']:
                     if 'size' in fs_data:
                         size = num_size = int(re.search(r'\d+', fs_data['size']).group())
-                        # verify if allocated size is under 50M
                         if num_size < 50:
-                            self._config['fs']['memory']['mounts']['data']['size'] = '50M' # if under 50M allocate 50M
+                            self._config['fs']['memory']['mounts']['data']['size'] = '50M' 
                             save_config(self._config, '/etc/pwnagotchi/config.toml')
                             rst= 1
         return rst
@@ -3740,8 +3544,8 @@ fi"""}]
             # working state
             # log = False
             # debug = True
-            log = True
-            debug = False
+            log = False
+            debug = True
 
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'log' in self._theme['theme']['dev']:
                 log = self._theme['theme']['dev']['log']
@@ -3755,7 +3559,6 @@ fi"""}]
         except Exception as ex:
             logging.error(ex)
 
-    # Plugin section
     def on_ready(self, agent):
         self._agent = agent
         self.mode = 'MANU' if agent.mode == 'manual' else 'AUTO'
@@ -3771,11 +3574,9 @@ fi"""}]
             if not self.dispHijack:
                 if hasattr(self, 'display_controller') and self.display_controller:
                     self.display_controller.stop()
-                    #self.display_controller = None
                 logging.warning(ui._enabled)
                 if hasattr(ui, '_enabled') and not ui._enabled:
                     ui._enabled = True
-                    #ui.init_display()
                     logging.warning("[Fancygotchi] Switched back to the original display.")
         if self._config['ui']['display']['enabled']:
             ui._enabled = True
@@ -3795,47 +3596,39 @@ fi"""}]
             del ui._web_mode
         if hasattr(ui, '_hw_mode'):
             del ui._hw_mode
-        # remove screenshots folder
         screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/screenshots')
         if os.path.exists(screenshots_path):
             os.system(f'rm -r {screenshots_path}')
-        # Put back the style.css backup and delete it
         css_dst = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
         css_backup = css_dst + '.backup'
         if os.path.exists(css_backup):
             copyfile(css_backup, css_dst)
             os.remove(css_backup)
-        # Unlink the img folder from the web server
         img_dst = os.path.join(self._pwny_root, 'ui/web/static/img')
         if os.path.islink(img_dst):
             os.unlink(img_dst)
         font_dst = '/usr/share/fonts/truetype/theme_fonts'
         os.system('rm %s' % (font_dst))
-        # remove custom icon
         icon_dst = os.path.join(self._pwny_root, 'ui/web/static/images/pwnagotchi.png')
         icon_bkup = icon_dst + '.backup'
         if os.path.exists(icon_bkup):
             copyfile(icon_bkup, icon_dst)
             os.remove(icon_bkup)
-        # remove fancytools if exist
         fancytools_path = "/usr/local/bin/fancytools"
         if os.path.exists(fancytools_path):
             os.remove(fancytools_path)
-        # remove diagnostic.sh if exist
         diagnostic_path = "/usr/local/bin/diagnostic.sh"
         if os.path.exists(diagnostic_path):
             os.remove(diagnostic_path)
 
         logging.info('[Fancygotchi] Unloaded')
 
-    # UI section
     def on_ui_setup(self, ui):
         logging.info('[Fancygotchi] UI setup start')
         setattr(ui, '_pwncanvas_tmp', None)
         setattr(ui, '_pwncanvas', None)
         setattr(ui, '_web_mode', self._color_mode[0])
         setattr(ui, '_hw_mode', self._color_mode[1])
-        # Partial refresh and dict
         setattr(ui, '_update', {
             'update': True,
             'partial': False,
@@ -3845,7 +3638,6 @@ fi"""}]
         self.theme_update(ui, True)
         self.pwncanvas_creation(self._res)
         self.display_controller = FancyDisplay(self._config['ui']['display']['enabled'], self.fps, self._th_path, )
-        #self.display_controller.set_mode(mode, 'show_logo', {})
         self.log('UI setup finished')
 
     def cleanup_display(self):
@@ -3855,47 +3647,44 @@ fi"""}]
                 self.display_controller.stop()
             self.display_controller = None
             del self.display_controller
-        #if hasattr(self.display_controller, 'displayImpl'):
-        #    del self.displayImpl
 
     def cleanup_fancyserver(self):
-        # Check if 'fancy_server' exists and clean it up
         if hasattr(self, 'fancy_server'):
             if self.fancy_server and self.fancy_server.running:
                 self.fancy_server.stop()
             
-            # Set fancy_server to None after stopping
             self.fancy_server = None
 
-        # If there is a fancy_menu, clean it up too
         if hasattr(self, 'fancy_menu'):
             del self.fancy_menu
         
-        # Optional: Only if fancyserver is a flag you use elsewhere
         if hasattr(self, 'fancyserver'):
             self.fancyserver = False
 
 
     def navigate_fancymenu(self, cmd=None):
-        if self.fancyserver and hasattr(self, 'fancy_menu'):
-            if cmd:
-                menu_command = cmd
-            else:
-                menu_command = self.check_menu_command()
-            if menu_command:
-                cmd = menu_command['action']
-                #cmd = action["action"]
-                self.log(f'menu_command: {cmd}')
-                if cmd == 'menu_toggle':
-                    self.fancy_menu.toggle()
-                    self.log('toggle menu')
-                elif cmd in ['menu_up', 'menu_down', 'menu_left', 'menu_right']:
-                    direction = cmd.split('_')[1]
-                    self.fancy_menu.navigate(direction)
-                    self.log(direction)
-                elif cmd == 'menu_select':
-                    self.fancy_menu.select()
-                    self.log('select')
+        try:
+            if hasattr(self, 'fancy_menu'):
+                if cmd:
+                    menu_command = cmd
+                else:
+                    menu_command = self.check_menu_command()
+                if menu_command:
+                    cmd = menu_command['action']
+                    self.log(f'menu_command: {cmd}')
+                    if cmd == 'menu_toggle':
+                        self.fancy_menu.toggle()
+                        self.log('toggle menu')
+                    elif cmd in ['menu_up', 'menu_down', 'menu_left', 'menu_right']:
+                        direction = cmd.split('_')[1]
+                        self.fancy_menu.navigate(direction)
+                        self.log(direction)
+                    elif cmd == 'menu_select':
+                        self.fancy_menu.select()
+                        self.log('select')
+        except Exception as e:
+            logging.error(f"Error in navigate_fancymenu: {e}")
+            logging.error(traceback.format_exc())
 
     def on_ui_update(self, ui):
         try:
@@ -3926,49 +3715,38 @@ fi"""}]
             self.second_screen = Image.new('RGBA', self._res, 'black')
             if hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('update', {'update': False, 'partial': False, 'dict_part':[]}) or self.refresh:
                 self.theme_update(ui)
-                # Safely reset the trigger if _update exists
                 if hasattr(ui, '_update'):
                     ui._update['update'] = False
                     ui._update['partial'] = False
                     ui._update['dict_part'] = {}
                 self.refresh = False
-            # Theme components configuration load
             th = self._theme['theme']
             th_opt = th['options']
             th_widget = th['widget']
             rot = self.options['rotation']
             self.pwncanvas_creation(self._res)
             self.remove_widgets(ui)
-            # Loop to gather data for convas composition
-            # ui_state = ui._state.items()
             ui_state = list(ui._state.items())
             for key, state in ui_state:
                 widget_type = type(state).__name__
                 if widget_type in self.bitmap_widget:
                     widget_type = 'Bitmap'
-                # Adding the missing widget to the state dict
                 self.add_widget(ui, key, widget_type, th_widget)
-                # Refreshing of the Text and LabeledValue value
                 if  widget_type == 'Text' or widget_type == 'LabeledValue':
                     if not 'value' in self._state[key]:
                         self._state[key].update({'value': None})
                     self._state[key]['value'] = ui._state.get(key)
                     
-                    # Replacing the original cursor by the custom cursor
                     if key == 'name':
-                        #if '█' or '-' in ui._state.get(key) :
                         custom_char = th_opt["cursor"]
 
-                        # Get the current value from state
                         name_value = ui._state.get(key)
 
-                        # Check and replace special characters at the end
                         for char in self.cursor_list:
                             if name_value.endswith(char):
                                 name_value = name_value.rstrip(char) + f' {custom_char}'
-                                break  # Stop checking after the first match
+                                break 
 
-                        # Update the state with the modified name value
                         self._state[key]['value'] = name_value
 
                     if key == 'friend_name' and ui._state.get(key) != None:
@@ -3986,50 +3764,39 @@ fi"""}]
                             for id_number, (img_a, img_b) in img_map.items():
                                 if ImageChops.difference(img_a, img_ref).getbbox() is None:
                                     matched_custom_image = img_b
-                                    break  # Exit the loop once a match is found
-                            # Update the state if a matching custom image was found
+                                    break  
                             if matched_custom_image:
                                 self._state[key].update({'image': matched_custom_image})
                             else:
                                 self.log('No matching image found.')
                     else:
-                        # Initialize image_dict if it doesn't exist
                         if 'image_dict' not in self._state[key]:
                             self._state[key]['image_dict'] = {}
 
                         image_dict = self._state[key]['image_dict']
                         original_img = ui._state.get_attr(key, 'image')
 
-                        # Variable to store the corresponding adj_img
                         corresponding_adj_img = None
 
-                        # Check if the original image is already in image_dict
                         for i, (orig, adj) in image_dict.items():
                             try:
                                 if orig == original_img:
                                     corresponding_adj_img = adj
                                     break
                             except AttributeError:
-                                # If there's an issue with the image, skip it
                                 continue
 
-                        # If the image doesn't exist, add it to image_dict
                         if corresponding_adj_img is None:
-                            i = len(image_dict)  # Get the next index
+                            i = len(image_dict)
                             try:
                                 corresponding_adj_img = adjust_image(original_img, self._state[key]['zoom'], False, self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])
                                 image_dict[i] = [original_img, corresponding_adj_img]
                             except AttributeError:
-                                # If there's an issue adjusting the image, use the original
                                 corresponding_adj_img = original_img
 
-                        # Update the state with the new image_dict
                         self._state[key].update({'image_dict': image_dict})
 
-                        # Update the state with the corresponding adj_img
                         self._state[key].update({'image': corresponding_adj_img})
-
-            #self._pwncanvas = self._pwncanvas.rotate(rot, expand=True)
 
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'refresh' in self._theme['theme']['dev']:
                 self.refresh_trigger = self._theme['theme']['dev']['refresh']
@@ -4039,12 +3806,9 @@ fi"""}]
                 if menu_command:
                     cmd = menu_command['action']
                     if self.dispHijack:
-                        # Controls when the display is hijacked
-                        # Verify the current display mode
                         if cmd == 'menu_toggle':
                                 self.dispHijack = False
                         elif self.display_config['mode'] == 'screen_saver':
-                            # Controls if the screen saver mode is active
                             if cmd == 'menu_up':
                                 logging.warning('switch screen saver mode')
                                 self.process_actions({'action': 'next_screen_saver'})
@@ -4054,22 +3818,14 @@ fi"""}]
                             else:
                                 self.process_actions(menu_command)
                         elif self.display_config['mode'] == 'auxiliary':
-                            # Controls if the sauxiliary mode is active
                             logging.warning('enable auxiliary mode')
                             self.process_actions(menu_command)
                         elif self.display_config['mode'] == 'terminal':
                             self.process_actions(menu_command)
-                            # Controls if the screen saver mode is active
-                            #if cmd == 'menu_toggle':
-                            #    self.dispHijack = False
-                            #    #self.process_actions({'action': 'disable_second_screen'})
-                            #else:
-                            #    self.process_actions(menu_command)
                         else:
                             self.process_actions(menu_command)
                         
                     elif self.fancy_menu.active:
-                        # Controls when the menu is active
                         self.log(f'menu_command: {menu_command}')
                         self.log(f'menu_command: {cmd}')
                         if cmd == 'menu_toggle':
@@ -4088,8 +3844,6 @@ fi"""}]
                         else:
                             self.process_actions(menu_command)
                     else:
-                        # General controls
-                        # The  command's actions can be processed normally
                         self.process_actions(menu_command)
 
             if self._i == self.refresh_trigger:
@@ -4099,9 +3853,6 @@ fi"""}]
 
             if rot == 90 or rot == 270:
                 self._pwncanvas = self._pwncanvas.rotate(90, expand=True)
-
-            #if rot == 180 or rot == 270:
-            #    self._pwncanvas = self._pwncanvas.rotate(180)
 
             if hasattr(ui, '_pwncanvas_tmp') and ui._pwncanvas_tmp == None:
                 setattr(ui, '_pwncanvas_tmp', self._pwncanvas)
@@ -4136,19 +3887,14 @@ fi"""}]
                 widget_type = 'Bitmap'
             default_widget_config = self.widget_defaults.get(widget_type, {})
             
-            # Copy default widget config to the specific widget in default_config
             default_config['theme']['widget'][widget_name] = copy.deepcopy(default_widget_config)
 
-        # Update the default_config with self._state_default
         for widget_name, state in self._state_default.items():
             if widget_name in default_config['theme']['widget']:
-                # Update the widget config, excluding 'widget_type'
                 default_config['theme']['widget'][widget_name].update(state)
 
-                # Ensure 'widget_type' is excluded
                 if 'widget_type' in default_config['theme']['widget'][widget_name]:
                     del default_config['theme']['widget'][widget_name]['widget_type']
-
 
         with open(config_path, 'w') as f:
             toml.dump(default_config, f)
@@ -4163,7 +3909,6 @@ fi"""}]
         return None
 
     def refresh_plugins(self):
-        # refresh from custom directory to see if new plugins
         new_plugs = ''
         if 'custom_plugins' in self._agent._config['main']:
             path = self._agent._config['main']['custom_plugins']
@@ -4179,25 +3924,21 @@ fi"""}]
 
 
     def load_and_run_module(self, module_path):
-        # Check if the path is absolute or relative
         if module_path.startswith('/'): module_file_path = module_path
         else: module_file_path = os.path.join(self._th_path, 'scripts', module_path)
         
-        # Check if the file exists
         if not os.path.exists(module_file_path):
             self.log(f"Module file {module_file_path} does not exist.")
             return
         
         try:
-            # Load the module dynamically
-            module_name = os.path.splitext(os.path.basename(module_file_path))[0]  # Extract the module name from the path
+            module_name = os.path.splitext(os.path.basename(module_file_path))[0] 
             spec = importlib.util.spec_from_file_location(module_name, module_file_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             
-            # Optionally, run a specific function or access any attribute from the module
-            if hasattr(module, 'main'):  # Assuming the module has a 'main' function
-                module.main()  # Call the 'main' function
+            if hasattr(module, 'main'): 
+                module.main()
             else:
                 self.log(f"Module {module_name} imported successfully, but no 'main' function found.")
         
@@ -4216,14 +3957,11 @@ fi"""}]
             self.actions_log = self.actions_log[-12:]
             self.log(f'Action: {action}')
 
-            # Menu actions
             if action == 'submenu':
                 self.fancy_menu.navigate("right")
             elif action == 'menu_toggle':
                 self.fancy_menu.toggle()
-            # Plugin actions
             elif action == 'menu_plugin':
-                # toggle plugin
                 name = command.get('name')
                 state = command.get('enable')
                 if name != 'None' and name is not None:
@@ -4231,70 +3969,51 @@ fi"""}]
                     is_change = toggle_plugin(name, enable=state)
                     self.log(f'{name} {"changed state" if is_change else "did not change state"}')
             elif action == 'refresh_plugins':
-                # refresh installed plugins list
                 self.refresh_plugins()
-            # Systems actions
             elif action == 'shutdown':
-                # Shutdown system
                 pwnagotchi.shutdown()
             elif action == 'restart':
-                # restart pwnagotchi in auto or manual mode
                 pwnagotchi.restart(mode)
             elif action == 'reboot':
-                # reboot pwnagotchi in auto or manual mode
                 pwnagotchi.reboot(mode)
-            # Theme actions
             elif action == 'theme_select':
-                # select theme
                 name = command.get('name')
                 rotation = command.get('rotation')
                 self.theme_save_config(name, rotation, True)
                 self.refresh = True
             elif action == 'theme_refresh':
-                # refresh theme
                 self.refresh = True
-            # Undercover actions
             elif action == 'stealth_mode':
-                # toggle stealth mode
                 self.stealth_mode = not self.stealth_mode
                 self.refresh = True
-            # Second Screen actions
             elif action == 'switch_screen_mode':
-                # next screen mode
                 try:
                     self.display_config['mode'] = self.display_controller.switch_mode()
                 except:
                     self.display_config['mode'] = self.screen_modes[(self.screen_modes.index(self.display_config['mode']) + 1) % len(self.screen_modes)]
             elif action == 'switch_screen_mode_reverse':
-                # previous screen mode
                 try:
                     self.display_config['mode'] = self.display_controller.switch_mode('previous')
                 except:
                     self.display_config['mode'] = self.screen_modes[(self.screen_modes.index(self.display_config['mode']) - 1) % len(self.screen_modes)]
             elif action == 'enable_second_screen':
-                # enable second screen
                 self.dispHijack = True
                 self.fancy_menu.active = False
             elif action == 'disable_second_screen':
-                # disable second screen 
                 logging.warning('disable second screen')
                 self.dispHijack = False
-            # Screen Saver actions
             elif action == 'next_screen_saver':
-                # next screen saver
                 logging.warning('next screen saver')
                 try:
                     self.display_config['sub_mode'] = self.display_controller.switch_screen_saver_submode('next')
                 except:
                     self.display_config['sub_mode'] = self.screen_saver_modes[(self.screen_saver_modes.index(self.display_config['sub_mode']) + 1) % len(self.screen_saver_modes)]
             elif action == 'previous_screen_saver':
-                # previous screen saver
                 logging.warning('previous screen saver')
                 try:
                     self.display_config['sub_mode'] =  self.display_controller.switch_screen_saver_submode('previous')
                 except:
                     self.display_config['sub_mode'] = self.screen_saver_modes[(self.screen_saver_modes.index(self.display_config['sub_mode']) + 1) % len(self.screen_saver_modes)]
-            # Script actions
             elif action == 'run_bash':
                 script = command.get('file')
                 if script.startswith('/'): script_path = script
@@ -4324,15 +4043,12 @@ fi"""}]
             self.log(f"Theme '{theme_name}' already exists. Skipping creation.")
             return False
 
-        # Create the main theme folder
         os.makedirs(new_theme_folder, exist_ok=True)
 
-        # Create subfolders
         folders = ['config', 'img', 'fonts']
         for folder in folders:
             os.makedirs(os.path.join(new_theme_folder, folder), exist_ok=True)
 
-        # Create img subfolders
         img_subfolders = ['bg', 'face', 'friend_face', 'widgets', 'icons']
         for subfolder in img_subfolders:
             os.makedirs(os.path.join(new_theme_folder, 'img', subfolder), exist_ok=True)
@@ -4341,7 +4057,6 @@ fi"""}]
             res = f'{self._res[0]}x{self._res[1]}'
             os.makedirs(os.path.join(new_theme_folder, 'config', res), exist_ok=True)
 
-        # Create info.json file
         info_json = {
             "author": "",
             "version": "1.0.0",
@@ -4353,7 +4068,6 @@ fi"""}]
         with open(os.path.join(new_theme_folder, 'info.json'), 'w') as f:
             json.dump(info_json, f, indent=2)
 
-        # Copy original pwnagotchi CSS file
         original_css_backup = os.path.join(self._pwny_root, 'ui/web/static/css/style.css.backup')
         original_css_path = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
         new_css_path = os.path.join(new_theme_folder, 'style.css')
@@ -4361,7 +4075,6 @@ fi"""}]
         with open(new_css_path, 'w+') as f:
             f.write(CSS)
 
-        # Generate and save the default configuration
         config_path = os.path.join(new_theme_folder, 'config')
         if resolution:
             config_path_res = os.path.join(config_path, res)
@@ -4384,7 +4097,6 @@ fi"""}]
                 config_path = os.path.join(config_path, 'config.toml')
                 self.generate_default_config(config_path, state)
 
-        #return new_theme_folder
         return True
 
     def theme_selector(self, config, boot=False):
@@ -4394,7 +4106,7 @@ fi"""}]
         self.fancyserver = False
         try:
             if not boot: self.log('Theme selector')
-            self._theme = copy.deepcopy(self._default) # self._default
+            self._theme = copy.deepcopy(self._default)
             fancy_opt = config['main']['plugins']['Fancygotchi']
             self.options['rotation'] = fancy_opt.get('rotation', 0)
 
@@ -4408,49 +4120,38 @@ fi"""}]
 
                 cfg_path = os.path.join(th_path, "config")
 
-                # Check if config folder exists
                 if not os.path.exists(cfg_path):
                     self.log(f"Warning: Theme config folder {cfg_path} does not exist, loading default theme.")
                     self._theme = copy.deepcopy(self._default)
                     return
 
-                # Verify for the Universal config
                 toml_files = [f for f in os.listdir(cfg_path) if f.endswith('.toml')]
                 
                 if len(toml_files) == 1:
-                    # Use the single toml file for both orientations
                     cfg_file = toml_files[0]
                 elif 'config-v.toml' in toml_files and 'config-h.toml' in toml_files:
-                    # Use the appropriate file for the orientation
                     cfg_file = 'config-v.toml' if rot in [90, 270] else 'config-h.toml'
                 else:
-                    # Check the size-specific folder
                     size_folder = os.path.join(cfg_path, size)
                     if os.path.exists(size_folder):
                         size_toml_files = [f for f in os.listdir(size_folder) if f.endswith('.toml')]
                         if len(size_toml_files) == 1:
-                            # Use the single toml file in the size folder for both orientations
                             cfg_file = os.path.join(size, size_toml_files[0])
                         else:
-                            # Use the orientation-specific file in the size folder
                             cfg_file = os.path.join(size, 'config-v.toml' if rot in [90, 270] else 'config-h.toml')
                     else:
-                        # Fallback to default
                         cfg_file = 'config-h.toml'
 
                 self.cfg_path = os.path.join(cfg_path, cfg_file)
 
-                # Check if the config file exists
                 if os.path.exists(self.cfg_path):
                     with open(self.cfg_path, 'r') as f:
                         self._theme = toml.load(f)
                 else:
-                #    self.log(f"Warning: Theme config file {self.cfg_path} does not exist, loading default theme.")
                     self._theme = copy.deepcopy(self._default)
 
             else:
                 self._theme = copy.deepcopy(self._default)
-            # Backup and symlink handling for CSS and images
             if th_path:
                 css_src = os.path.join(th_path, 'style.css')
                 css_dst = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
@@ -4496,7 +4197,6 @@ fi"""}]
                     copyfile(icon_bkup, icon_dst)
                     os.remove(icon_bkup)
 
-            #****Fancyserver****
             if 'fancyserver' in fancy_opt:
                 self.fancyserver = self._config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('fancyserver', False)
             else:
@@ -4544,43 +4244,28 @@ fi"""}]
         if hasattr(self, 'fancy_menu'):
             
             del self.fancy_menu
-        #menu_theme = self._default_menu.copy()
         menu_theme = copy.deepcopy(self._default_menu)
         menu_opt = th_menu.get('options', {})
         menu_theme.update(menu_opt)
-        #logging.warning(f'[Fancygotchi] Menu Theme: {menu_theme}')
         custom_menus = {}
-        #logging.warning(custom_menus)
         if self.fancyserver:      
             custom_menu = {}
                 
             if 'menu' in self._theme.get('theme', {}):
                 custom_menus = self._theme.get("theme", {}).get("menu", {})
                 custom_menus.pop('options', None)
-            #    logging.warning(f"[Fancygotchi] 'menu' found in theme. {custom_menus}.")
-            #lse:
-            #    logging.warning("[Fancygotchi] No 'menu' found in theme. Skipping.")
-
-            
-
-            # If FancyServer instance doesn't exist, create it
             if not hasattr(self, 'fancy_server') or (hasattr(self, 'fancy_server') and getattr(self, 'fancy_server', None) is None):
-                # Initialize FancyServer
                 self.fancy_server = FancyServer()
 
                 try:
                     self.fancy_server.start()
-                #    asyncio.run(self.fancy_server.start())  # Start the server
                 except OSError as e:
-                    if e.errno == 98:  # Address already in use
+                    if e.errno == 98: 
                         logging.warning("[Fancygotchi] Address already in use. FancyServer could not start.")
                     else:
                         logging.error(f"[Fancygotchi] Error starting FancyServer: {e}")
-                #self.refresh = True
 
-        # If fancyserver is disabled
         else:
-            # If FancyServer instance exists, stop and delete it
             if hasattr(self, 'fancy_server'):
                 self.running = False
                 self.log("[Fancygotchi] Stopping FancyServer.")
@@ -4595,16 +4280,17 @@ fi"""}]
                 logging.debug("[Fancygotchi] FancyServer instance deleted.")
             else:
                 logging.debug("[Fancygotchi] FancyServer is disabled and no instance exists.")
-        #self.log(pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}))
-        #if pwnagotchi.config['main']['plugins']['Fancygotchi']['fancyserver']:
         fancygotchi_config = pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {})
+        diagnostic_path = "/usr/local/bin/diagnostic.sh"
+        if os.path.exists(diagnostic_path):
+            os.remove(diagnostic_path)
+        with open(diagnostic_path, "w") as diagnostic_file:
+            diagnostic_file.write(DIAGNOSTIC)
+        os.system(f'chmod +x {diagnostic_path}')
+        self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
         if fancygotchi_config.get('fancyserver', False):
-            # Create FancyMenu instance with the updated theme
-            self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
-            #self.log("Fancyserver detected, adding /usr/local/bin/fancytools and /usr/local/bin/diagnostic.sh")
             try:
                 fancytools_content = FANCYTOOLS.replace("{pyenv}", self.pyenv)
-                # Write the content to /usr/local/bin/fancytools
                 fancytools_path = "/usr/local/bin/fancytools"
                 logging.debug(f"Writing content to {fancytools_path}")
                 if os.path.exists(fancytools_path):
@@ -4613,33 +4299,20 @@ fi"""}]
                 with open(fancytools_path, "w") as fancytools_file:
                     fancytools_file.write(fancytools_content)
 
-                diagnostic_path = "/usr/local/bin/diagnostic.sh"
-                if os.path.exists(diagnostic_path):
-                    os.remove(diagnostic_path)
-                with open(diagnostic_path, "w") as diagnostic_file:
-                    diagnostic_file.write(DIAGNOSTIC)
-
-                # Change permissions to make the file executable
                 os.system(f'chmod +x {fancytools_path}')
-                os.system(f'chmod +x {diagnostic_path}')
                 self.running = True
-                #self.on_loaded()
             except Exception as e:
                 logging.error(f"An unexpected error occurred: {e}")
 
     def theme_update(self, ui, boot=False):
-        #th_opt = self._default['theme']['options'].copy()
         th_opt = copy.deepcopy(self._default['theme']['options'])
         self._i = 0
-        #th_opt = self._theme['theme']['options']
         if not boot:self.log('Theme update')
         if hasattr(ui, '_update') and ui.update:
             if not ui._update['partial']:
                 self._state = {}
-                # loading pwnagotchi config.toml
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
-                    #self.log(f"f_toml['main']['plugins']['Fancygotchi'] = {f_toml['main']['plugins']['Fancygotchi']}")
                     try:
                         self.options['rotation'] = f_toml['main']['plugins']['Fancygotchi']['rotation']
                     except:
@@ -4664,22 +4337,17 @@ fi"""}]
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation'] = rot
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['fancyserver'] = fancys
-                # Merge and Save config
                 pwnagotchi.config = merge_config(f_toml, pwnagotchi.config)
                 if self._agent:
                     self._agent._config = merge_config(f_toml, pwnagotchi.config)
                 save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
-                # Select the theme
                 self.theme_selector(f_toml, boot)
 
                 th = self._theme['theme']
                 th_opt = th['options']
                 th_widget = th['widget']
                 th_menu = th.get('menu', {})
-                #logging.warning(f"th_menu = {th_menu}")
             else:
-                # Delete widget info from the self.dict_part
-                # To refresh them with the add_widget function
                 self.log('Partial update')
                 if 'options' in ui._update['dict_part']:
                     th_opt = ui._update['dict_part']['options']
@@ -4689,30 +4357,25 @@ fi"""}]
                     th_widget = th['widget']
                 
             if th_opt:
-                # Setting up the font sizes
                 if 'font' in th_opt and th_opt['font'] != '':
                     ft = th_opt['font_sizes']
                     self.font_name  = th_opt['font']
                     self.setup_font(ft[0], ft[1], ft[2], ft[3], ft[4], ft[5])
-                # Attributing the font awesome font name
                 if 'font_awesome' in th_opt and th_opt['font_awesome'] != '':
                     self.f_awesome_name = th_opt['font_awesome']
-                # Color mode for the image export
                 if 'color_mode' in th_opt and th_opt['color_mode'] != '':
                     self._color_mode = th_opt['color_mode']
                     setattr(ui, '_web_mode', self._color_mode[0])
                     setattr(ui, '_hw_mode', self._color_mode[1])
                 if hasattr(th_opt, 'main_text_color') and th_opt.get('main_text_color', []) != []:
                     self._icolor = 0
-                # Adjust second screen fps
                 self.fps = th_opt.get('second_screen_fps', 1)
-                # Adjust resolution based on rotation
                 if rot in (90, 270):
-                    startname = f'{self._res[1]}x{self._res[0]}'  # Use current resolution for naming(self._res[1], self._res[0])  # Swap width and height for rotation
+                    startname = f'{self._res[1]}x{self._res[0]}' 
                     w = self._res[1]
                     h = self._res[0]
                 elif rot in (0, 180):
-                    startname = f'{self._res[0]}x{self._res[1]}'  # Use current resolution for naming
+                    startname = f'{self._res[0]}x{self._res[1]}' 
                     w = self._res[0]
                     h = self._res[1]
                 if  th_opt.get('bg_fg_select', 'manu') not in ('auto', 'manu'):
@@ -4723,9 +4386,7 @@ fi"""}]
                 screen_saver = th_opt.get('screen_saver', 'show_logo')
                 if screen_saver in self.screen_saver_modes:
                     self.display_config['sub_mode'] = screen_saver
-                # Adjust second screen web UI
                 self.display_config['second_screen_webui'] = th_opt.get('second_screen_webui', False)
-                # Adjust second screen web UI delay
                 bgfg_mode = th_opt.get('bg_fg_select', 'manu')
                 if self._th_path is not None:
                     bg_folder_path = os.path.join(self._th_path, 'img', 'bg')
@@ -4736,19 +4397,14 @@ fi"""}]
                         bg_path = os.path.join(bg_folder_path, bg_name)
                         fg_name = th_opt.get('fg_image', '')
                         fg_path = os.path.join(bg_folder_path, fg_name)
-                        #logging.warning(f"bg_path = {bg_path}")
-                        #logging.warning(f"fg_path = {fg_path}")
-                        #logging.warning(f"bga_path = {bga_path}")
                     elif bgfg_mode == 'auto':
                         valid_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
                         valid_anim_extensions = ('.gif')
 
-                        # Generate filenames based on the resolution
                         bga_fname = f'{startname}bga'
                         bg_fname = f'{startname}bg'
                         fg_fname = f'{startname}fg'
 
-                        # Search for specific resolution images
                         bga_path = next((os.path.join(bg_folder_path, f) for f in os.listdir(bg_folder_path) 
                                         if f.lower().startswith(bga_fname) and f.lower().endswith(valid_anim_extensions)), None)
                         
@@ -4758,7 +4414,6 @@ fi"""}]
                         fg_path = next((os.path.join(bg_folder_path, f) for f in os.listdir(bg_folder_path) 
                                         if f.lower().startswith(fg_fname) and f.lower().endswith(valid_extensions)), None)
 
-                        # If no specific file is found, try searching just with base names (without resolution)
                         if not bga_path:
                             bga_path = next((os.path.join(bg_folder_path, f) for f in os.listdir(bg_folder_path) 
                                             if f.lower().startswith('bga') and f.lower().endswith(valid_anim_extensions)), None)
@@ -4771,11 +4426,9 @@ fi"""}]
                             fg_path = next((os.path.join(bg_folder_path, f) for f in os.listdir(bg_folder_path) 
                                             if f.lower().startswith('fg') and f.lower().endswith(valid_extensions)), None)
 
-                    # Animated Gif
                     self._frames = []
                     self._i = 0
                     if ('bg_anim_image' in th_opt and th_opt['bg_anim_image'] != '') or bga_path is not None:
-                        # Ensure bga_path is not None before checking if the file exists
                         if bga_path and os.path.exists(bga_path) and not os.path.isdir(bga_path):
                             gif = Image.open(bga_path)
                             self._i = 0
@@ -4788,24 +4441,22 @@ fi"""}]
                                 self._frames.append(frame)
                             self._imax = len(self._frames)
 
-                    # Background image
                     if ('bg_image' in th_opt and th_opt['bg_image'] != '') or bg_path is not None:
                         canvas = Image.new('RGBA', (w, h), (0, 0, 0, 0))
 
                         if bg_path and os.path.exists(bg_path) and not os.path.isdir(bg_path):
                             bg_tmp = Image.open(bg_path)
                             bg_tmp = bg_tmp.convert("RGBA")
-                            self._bg = image_mode(canvas, bg_tmp, th_opt.get('bg_mode', 'normal'))  # Process the background image
+                            self._bg = image_mode(canvas, bg_tmp, th_opt.get('bg_mode', 'normal'))
                         else:
                             self._bg = ''
                     else:
                         self._bg = ''
 
-                    # Foreground image
                     if ('fg_image' in th_opt and th_opt['fg_image'] != '') or fg_path is not None:
                         canvas = Image.new('RGBA', (w, h), (0, 0, 0, 0))
                         if fg_path and os.path.exists(fg_path) and not os.path.isdir(fg_path):
-                            fg_tmp = Image.open(fg_path)  # Process the foreground image
+                            fg_tmp = Image.open(fg_path) 
                             fg_tmp = fg_tmp.convert("RGBA")
                             self._fg = image_mode(canvas, fg_tmp, th_opt.get('fg_mode', 'normal'))
                         else:
@@ -4813,7 +4464,6 @@ fi"""}]
                     else:
                         self._fg = ''
 
-                    # Boot animation
                     if 'boot_max_loops' in th_opt and th_opt['boot_max_loops'] != 0:
                         th_opt['boot_max_loops'] = int(th_opt['boot_max_loops'])
                     else:
@@ -4841,7 +4491,6 @@ fi"""}]
             os.makedirs(themes_path)
         items = os.listdir(themes_path)
         screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/screenshots')
-        #logging.warning(f'theme screenshots folder: {screenshots_path}')
         if os.path.exists(screenshots_path):
             os.system(f'rm -r {screenshots_path}')
         if not os.path.exists(screenshots_path):
@@ -4852,31 +4501,22 @@ fi"""}]
         for item in items:
             if os.path.isdir(os.path.join(themes_path, item)):
                 themes.append(item)
-                # creating a /screenshots folder is not, and fillit with every theme screenshot from the /img/screenshot.png by filling the folder with /themename/screenshot.png
                 screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/screenshots')
-                #logging.warning(f'{item} theme screenshot path: {screenshots_path}')
                 screenshot_path = os.path.join(themes_path, item, 'img', 'screenshot.png')
-                #logging.warning(f'{item} theme screenshot: {screenshot_path}')
                 subfolder = os.path.join(screenshots_path, item)
                 
-                #creating the screenshots folder if it doesn't exist
-                #if not os.path.exists(screenshots_path):
-                 #   os.makedirs(screenshots_path)
                 if os.path.exists(screenshot_path):
                     if not os.path.exists(subfolder):
                         os.makedirs(subfolder, exist_ok=True)
-                    #logging.warning(f'{item} copying screenshot')
                     os.system(f'cp {screenshot_path} {subfolder}')
 
         return sorted(themes, key=lambda x: x.lower())
 
-    # Font and text section
     def change_font(self, old_font, new_font=None, size_offset=None):
         if new_font == None:
             new_font = self._theme['theme']['options']['status_font']
         if size_offset == None:
             size_offset = self._theme['theme']['options']['size_offset']
-        #self.log(self.get_font_path(new_font))
         return ImageFont.truetype(self.get_font_path(new_font), size=old_font.size + size_offset)
 
     def theme_export(self, theme_name):
@@ -4939,13 +4579,10 @@ fi"""}]
                 dt.text((0,0), text, font=tfont, fill=0x00)
                 if color == 0: color = 'black'
                 imgtext = ImageOps.colorize(imgtext.convert('L'), black = color, white = 'white')
-                # Convert white pixels to transparent
                 imgtext = imgtext.convert("RGBA")
                 data = imgtext.getdata()
                 newData = []
                 for item in data:
-                    # Change all white (also shades of whites)
-                    # pixels to transparent
                     if item[0] in range(250, 256) and item[1] in range(250, 256) and item[2] in range(250, 256):
                         newData.append((255, 255, 255, 0))
                     else:
@@ -4957,7 +4594,7 @@ fi"""}]
             self.log(f"Error while rgba_text ({text}; {tfont}; {color}; {width}; {height}): {str(e)}")
             self.log(traceback.format_exc())
             return None
-    # Widget section
+
     def add_widget(self, ui, key, widget_type, th_widget):
         conf = 0
         th_opt = self._theme['theme']['options']
@@ -5002,7 +4639,6 @@ fi"""}]
             if key in th_widget and th_widget[key].get('position'):
                 self._state[key].update({'position': tuple(th_widget[key]['position'])})
 
-            # Color cycle and incremental value
             self._state_default[key].update({'color': [ui._state.get_attr(key, 'color')]})
             if key in th_widget and th_widget[key].get('color'):
                 self._state[key].update({'color': th_widget[key]['color']})
@@ -5010,18 +4646,14 @@ fi"""}]
             else:
                 self._state[key].update({'color': [ui._state.get_attr(key, 'color')]})
                 self._state[key].update({'icolor': 0})
-            # Z-axis
             if key in th_widget and 'z_axis' in th_widget[key]:
                 self._state[key].update({'z_axis': th_widget[key]['z_axis']})
-            #else:
             if widget_type == 'Text' or widget_type == 'LabeledValue':
-                # Text_font
                 if key in th_widget and th_widget[key].get('text_font'):
                     if th_widget[key].get('text_font') == '' or th_widget[key].get('text_font') == None:
                         self._state[key].pop('text_font', None)
                     else:
                         self._state[key].update({'text_font': th_widget[key]['text_font']})
-                # Text_font_size
                 if widget_type == 'Text':
                     self._state_default[key].update({'text_font_size': verify_font_info(ui._state.get_attr(key, 'font'))})
                 if widget_type == 'LabeledValue':
@@ -5033,42 +4665,30 @@ fi"""}]
                         self._state[key].update({'text_font_size': verify_font_info(ui._state.get_attr(key, 'font'))})
                     if widget_type == 'LabeledValue':
                         self._state[key].update({'text_font_size': verify_font_info(ui._state.get_attr(key, 'text_font'))})
-                # Size_offset
                 if key in th_widget and th_widget[key].get('size_offset'):
                     self._state[key].update({'size_offset': th_widget[key]['size_offset']})
-                # Icon
                 if key in th_widget and th_widget[key].get('icon'):
                     self._state[key].update({'icon': th_widget[key]['icon']})
-                # Icon_color
                 if key in th_widget and th_widget[key].get('icon_color'):
                     self._state[key].update({'icon_color': th_widget[key]['icon_color']})
-                # invert
                 if key in th_widget and th_widget[key].get('invert'):
                     self._state[key].update({'invert': th_widget[key]['invert']})
-                # alpha
                 if key in th_widget and th_widget[key].get('alpha'):
                     self._state[key].update({'alpha': th_widget[key]['alpha']})
-                # Mask
                 if key in th_widget and th_widget[key].get('mask'):
                     self._state[key].update({'mask': th_widget[key]['mask']})
-                # Refine
                 if key in th_widget and th_widget[key].get('refine'):
                     self._state[key].update({'refine': th_widget[key]['refine']})
-                # Zoom
                 if key in th_widget and th_widget[key].get('zoom'):
                     self._state[key].update({'zoom': th_widget[key]['zoom']})
-                # Image_type 
                 if key in th_widget and th_widget[key].get('image_type'):
                     self._state[key].update({'image_type': th_widget[key]['image_type']})
-            # Attributes associated with Text
             if widget_type == 'Text':
-                # Wrap
                 self._state_default[key].update({'wrap': ui._state.get_attr(key, 'wrap')})
                 if key in th_widget and th_widget[key].get('wrap'):
                     self._state[key].update({'wrap': th_widget[key]['wrap']})
                 else:
                     self._state[key].update({'wrap': ui._state.get_attr(key, 'wrap')})
-                # Max_length
                 self._state[key].update({'max_length': ui._state.get_attr(key, 'max_length')})
                 if key in th_widget and th_widget[key].get('max_length'):
                     self._state[key].update({'max_length': th_widget[key]['max_length']})
@@ -5076,23 +4696,18 @@ fi"""}]
                     self._state[key].update({'max_length': ui._state.get_attr(key, 'max_length')})
                 if key in th_widget and th_widget[key].get('face'):
                     self._state[key].update({'max_length': th_widget[key]['max_length']})
-            # Attributes associated with LabeledValue
             if widget_type == 'LabeledValue':
-                # Label
                 self._state_default[key].update({'label': ui._state.get_attr(key, 'label')})
                 if key in th_widget and 'label' in th_widget[key]:
                     self._state[key].update({'label': th_widget[key]['label']})
                 else:
                     self._state[key].update({'label': ui._state.get_attr(key, 'label')})
-                # Label_font
                 if key in th_widget and th_widget[key].get('label_font'):
                     self._state[key].update({'label_font': th_widget[key]['label_font']})
-                # Label_font_size
                 if key in th_widget and th_widget[key].get('label_font_size'):
                     self._state[key].update({'label_font_size': th_widget[key]['label_font_size']})
                 else:
                     self._state[key].update({'label_font_size': verify_font_info(ui._state.get_attr(key, 'label_font'))})
-                # Label_spacing
                 self._state_default[key].update({'label_spacing': ui._state.get_attr(key, 'label_spacing')})
                 if key in th_widget and th_widget[key].get('label_spacing'):
                     self._state[key].update({'label_spacing': th_widget[key]['label_spacing']})
@@ -5100,90 +4715,69 @@ fi"""}]
                     self._state[key].update({'label_spacing': th_opt['label_spacing']})
                 else:
                     self._state[key].update({'label_spacing': ui._state.get_attr(key, 'label_spacing')})
-                # Label_line_spacing
                 if key in th_widget and th_widget[key].get('label_line_spacing', 0):
                     
                     self._state[key].update({'label_line_spacing': th_widget[key]['label_line_spacing']})
                 else:
                     self._state[key].update({'label_line_spacing': 0})
-                #logging.warning(f'line spacing of {key} label_line_spacing {self._state[key]["label_line_spacing"]}')
 
-                # F_awesome
                 if key in th_widget and th_widget[key].get('f_awesome'):
                     self._state[key].update({'f_awesome': th_widget[key]['f_awesome']})
-                # F_awesome_size
                 if key in th_widget and th_widget[key].get('f_awesome_size'):
                     self._state[key].update({'f_awesome_size': th_widget[key]['f_awesome_size']})
-            # Attributes associated with Line
             if widget_type == 'Line':
                 self._state_default[key].update({'width': ui._state.get_attr(key, 'width')})
                 if key in th_widget and th_widget[key].get('width'):
                     self._state[key].update({'width': th_widget[key]['width']})
                 else:
                     self._state[key].update({'width': ui._state.get_attr(key, 'width')})
-            # Attributes associated with Bitmap
             if widget_type == 'Bitmap':
-                # Path/Image
                 self._state[key].update({'f_awesome': False})
-                # Icon
                 if key in th_widget and th_widget[key].get('icon'):
                     self._state[key].update({'icon': th_widget[key]['icon']})
-                # invert
                 if key in th_widget and th_widget[key].get('invert'):
                     self._state[key].update({'invert': th_widget[key]['invert']})
-                # alpha
                 if key in th_widget and th_widget[key].get('alpha'):
                     self._state[key].update({'alpha': th_widget[key]['alpha']})
-                # Mask
                 if key in th_widget and th_widget[key].get('mask'):
                     self._state[key].update({'mask': th_widget[key]['mask']})
-                # Refine
                 if key in th_widget and th_widget[key].get('refine'):
                     self._state[key].update({'refine': th_widget[key]['refine']})
-                # Zoom
                 if key in th_widget and th_widget[key].get('zoom'):
                     self._state[key].update({'zoom': th_widget[key]['zoom']})
-                # Icon_color
                 if key in th_widget and th_widget[key].get('icon_color'):
                     self._state[key].update({'icon_color': th_widget[key]['icon_color']})
-                #self._state[key].update({'image': ui._state.get_attr(key, 'image')})
 
         if conf:
             self.configure_widget(ui, key, widget_type)
     
     def get_face_path(self, img_path, face, image_type):
-        # Generate potential variations of the face string
         variations = [
-            face,                                   # original
-            face.upper(),                           # upper case
-            face.lower(),                           # lower case
-            face.capitalize(),                      # capitalized
-            face.replace('-', '_'),                 # hyphen to underscore
-            face.replace('_', '-'),                 # underscore to hyphen
-            face.replace('-', '_').upper(),         # hyphen to underscore, upper case
-            face.replace('_', '-').upper(),         # underscore to hyphen, upper case
-            face.replace('-', '_').lower(),         # hyphen to underscore, lower case
-            face.replace('_', '-').lower()          # underscore to hyphen, lower case
+            face, 
+            face.upper(),
+            face.lower(),
+            face.capitalize(),
+            face.replace('-', '_'),
+            face.replace('_', '-'),
+            face.replace('-', '_').upper(),
+            face.replace('_', '-').upper(),
+            face.replace('-', '_').lower(),
+            face.replace('_', '-').lower()
         ]
 
-        # Iterate through the variations and check if the path exists
         for variation in variations:
             face_path = os.path.join(img_path, f'{variation}.{image_type}')
             if os.path.exists(face_path):
                 return face_path
 
-        # If no variations work, return None or raise an exception if appropriate
         return None
 
     def configure_widget(self, ui, key, widget_type):
         try:
-            # Attribution with combined options
-            # Detecting face and friend face to allocate the face_map
             if key == 'face':
                 self._state[key].update({'face': True})
                 self._state[key].update({'f_awesome': False})
                 if self._state[key]['icon']:
-                    # face_map attribution
                     face_dict = self._config['ui']['faces']
                     img_path = os.path.join(self._th_path, 'img', 'face')
                     for face in face_dict:
@@ -5207,7 +4801,6 @@ fi"""}]
                 face_dict = self._config['ui']['faces']
                 self._state[key].update({'f_awesome': False})
                 if self._state[key]['icon']:
-                    # face_map attribution
                     face_dict = self._config['ui']['faces']
                     img_path = os.path.join(self._th_path, 'img', 'friend_face')
                     for face in face_dict:
@@ -5233,7 +4826,6 @@ fi"""}]
                         if widget_type == 'LabeledValue' and not self._state[key]['f_awesome']:
                             
                             icon_path = os.path.join(self._th_path, 'img', 'widgets', key, self._state[key][source])
-                            #self._state[key].update({'icon_image': icon_path})
                             self._state[key].update({'icon_image': adjust_image(Image.open(icon_path), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])})
                         if not self._state[key]['f_awesome']:
                             if widget_type == 'Bitmap':
@@ -5246,22 +4838,20 @@ fi"""}]
 
                                 elif file_count > 3 and file_count % 2 == 0:
                                     image_dict = {}
-                                    file_names = [os.path.splitext(f)[0] for f in files]  # Get file names without extensions
+                                    file_names = [os.path.splitext(f)[0] for f in files] 
 
                                     for file in file_names:
                                         if file.endswith('A'):
-                                            id_number = file[:-1]  # Extract the number before 'A'
-                                            corresponding_b = id_number + 'B'  # Create the corresponding 'B' file name
+                                            id_number = file[:-1] 
+                                            corresponding_b = id_number + 'B' 
                                             
                                             if corresponding_b in file_names:
                                                 original_a = [f for f in files if os.path.splitext(f)[0] == file][0]
                                                 original_b = [f for f in files if os.path.splitext(f)[0] == corresponding_b][0]
                                                 
-                                                # Load the images using PIL
                                                 img_a = Image.open(os.path.join(img_path, original_a))
                                                 img_b = adjust_image(Image.open(os.path.join(img_path, original_b)), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])
                                                 
-                                                # Store the images in the dictionary with the ID as the key and [img_a, img_b] as the value
                                                 image_dict[int(id_number)] = [img_a, img_b]
                                     self._state[key].update({'image_dict': image_dict})
                                     img_o, img_c = image_dict[2]
@@ -5270,8 +4860,6 @@ fi"""}]
                                     self.log(f"Error: There are {file_count} images.")
                                     icon_img = Image.new('1', (10, 10), 0x00)
                                     self._state[key].update({'image': icon_img})
-                            #else:
-                            #    self._state[key].update({'icon_image': adjust_image(Image.open(icon_path), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'])})
                         else:
                             fa_path = os.path.join(self._th_path, 'fonts', self.f_awesome_name)
                             fa = ImageFont.truetype(fa_path, self._state[key]['f_awesome_size'])
@@ -5292,23 +4880,18 @@ fi"""}]
             self.log(traceback.format_exc())
 
     def remove_widgets(self, ui):
-            # loop to remove unused widget from the state list
             if self._state:
-                keys_to_delete = []  # Store keys to delete
-                # Iterate over keys and states in self._state
+                keys_to_delete = [] 
                 for key, state in self._state.items():
-                    # Check if the key exists in ui._state
                     tag = 0
                     for k, s in ui._state.items():
                         if key == k:
                             tag = 1
                     if tag == 0:
                         keys_to_delete.append(key)
-                # Delete keys from self._state
                 for key in keys_to_delete:
                     self.log(f'[Fancygotchi] remove widget: {key}')
                     del self._state[key]
-    # Canvas section
     def pwncanvas_creation(self, res):
         try:
             th_opt = self._theme['theme']['options']
@@ -5324,7 +4907,6 @@ fi"""}]
 
             bg_color = th_opt['bg_color']
             if isinstance(bg_color, list):
-                # Convert list to tuple
                 bg_color = tuple(bg_color)
 
             if not bg_color or bg_color == '':
@@ -5342,10 +4924,9 @@ fi"""}]
 
         except Exception as e:
             logging.error(f"Error in pwncanvas_creation: {e}")
-            raise  # Raise the error to halt execution and see the full traceback
+            raise 
 
     def pos_convert(self, x, y, w, h, r=None, r0=None, r1=None):
-        # Dimensions for position calculations
         rot = self._config.get('main',{}).get('plugins',{}).get('Fancygotchi',{}).get('rotation', 0)
         if r is not None:
             rot = r
@@ -5361,25 +4942,23 @@ fi"""}]
             else: width = self._res[0]
             if r0 is not None: height = r0
             else: height = self._res[1]
-        # Check for percentage in 'w'
         if isinstance(w, str) and '%' in w:
             try:
                 percent_value = float(w.replace('%', ''))
                 w = (percent_value / 100) * width
             except ValueError:
                 self.log(f"Invalid percentage value for width: {w}")
-                w = 0  # Set to default value or raise an error
+                w = 0  
         else:
             w = int(w)
 
-        # Check for percentage in 'h'
         if isinstance(h, str) and '%' in h:
             try:
                 percent_value = float(h.replace('%', ''))
                 h = (percent_value / 100) * height
             except ValueError:
                 self.log(f"Invalid percentage value for height: {h}")
-                h = 0  # Set to default value or raise an error
+                h = 0  
         else:
             h = int(h)
         top = 0
@@ -5389,9 +4968,7 @@ fi"""}]
         center_x = (width / 2) - (w / 2)
         center_y = (height / 2) - (h / 2)
         
-
         def replace_keywords(formula, axis):
-            # Keyword mapping
             keyword_mapping = {
                 "center_x": center_x,
                 "center_y": center_y,
@@ -5405,7 +4982,6 @@ fi"""}]
                 "h": h,
             }
 
-            # Choose which 'center' keyword to use
             if axis == 'x':
                 keyword_mapping["center"] = center_x
                 keyword_mapping.pop('center_y', None)
@@ -5421,32 +4997,27 @@ fi"""}]
             else:
                 raise ValueError("Invalid axis. Choose 'x' or 'y'.")
 
-            # Replace keywords in the formula
             for keyword, value in keyword_mapping.items():
                 if keyword in formula:
                     formula = formula.replace(keyword, str(value))
 
             return formula
 
-        # Validate and safely evaluate expression
         def safe_eval(expr):
             try:
-                # Ensure the expression only contains allowed characters
                 if re.search(r'[^0-9\+\-\*/\(\)\. ]', expr):
                     raise ValueError(f"Invalid expression: {expr}")
-                # Evaluate the expression
                 result = eval(expr)
                 return result
             except Exception as e:
                 self.log(f"Error evaluating expression: {expr}. Exception: {e}")
                 return 0
 
-        # Process x
         axis = 'x'
         if not is_int(x):
             try:
                 x = replace_keywords(x, axis)
-                x = safe_eval(x)  # Evaluate after replacing keywords
+                x = safe_eval(x) 
             except ValueError as e:
                 self.log(f"Error processing x: {e}")
                 x = 0
@@ -5455,12 +5026,11 @@ fi"""}]
             if x < 0:
                 x = width + x
 
-        # Process y
         axis = 'y'
         if not is_int(y):
             try:
                 y = replace_keywords(y, axis)
-                y = safe_eval(y)  # Evaluate after replacing keywords
+                y = safe_eval(y) 
             except ValueError as e:
                 self.log(f"Error processing y: {e}")
                 y = 0
@@ -5469,10 +5039,8 @@ fi"""}]
             if y < 0:
                 y = height + y
 
-        # Process x2
         x2 = int(x + w)
 
-        # Process y2
         y2 = int(y + h)
 
         return int(x), int(y), int(x2), int(y2)
@@ -5482,7 +5050,7 @@ fi"""}]
         if isinstance(img, Image.Image):
             w, h = img.size
             x, y, x2, y2 = self.pos_convert(x,y,w,h)
-            img = img.convert('RGBA')  # Ensure the image mode is RGBA
+            img = img.convert('RGBA') 
             self._pwndata.paste(img, (x, y, x2, y2), img)
 
             x, y ,x2 ,y2 = self.pos_convert(x, y, w, h)
@@ -5494,7 +5062,6 @@ fi"""}]
             try:
                 text = '\n'.join(self.wrapper.wrap(value))
             except AttributeError:
-                # If wrapping fails, fall back to using the original value
                 text = value
         else:
             text = value
@@ -5507,10 +5074,8 @@ fi"""}]
             th_opt = copy.deepcopy(self._default['theme']['options'])
             th_opt.update( self._theme['theme']['options'])
             draw = ImageDraw.Draw(self._pwndata)
-            # Sort widgets by their z-axis values
             draw_state = dict(sorted(self._state.items(), key=lambda item: item[1].get('z_axis', 0)))
             
-            # Filter out widgets where z-axis is negative or zero
             keys_to_remove = {key: value for key, value in draw_state.items() if value.get('z_axis', 0) < 0}
             for key in keys_to_remove:
                 del draw_state[key]
@@ -5532,7 +5097,6 @@ fi"""}]
                 elif 'main_text_color' in th_opt and th_opt['main_text_color'] != []:
                     color = th_opt['main_text_color'][self._icolor]
 
-
                 if len(state['position']) >= 3:
                     x, y, w, h = state['position']
                     x, y, x2, y2 = self.pos_convert(x,y,w,h)
@@ -5553,7 +5117,7 @@ fi"""}]
                         except Exception as e:
                             label_font_size = state["label_font_size"]
                     try:
-                        txt_font_size = eval(f'self.{state["text_font_size"]}') #getattr(self, state["text_font_size"])
+                        txt_font_size = eval(f'self.{state["text_font_size"]}') 
                     except Exception as e:
                         txt_font_size = state["text_font_size"]
                     
@@ -5585,7 +5149,6 @@ fi"""}]
                                     icon_image = state['icon_image']
                                 else:
                                     if widget == 'face':
-                                        #self.log('this is the face')
                                         x = v_x
                                         y = v_y
                                         for face in state['face_map'].items():
@@ -5593,7 +5156,6 @@ fi"""}]
                                             if face_map[0] == state['value']:
                                                 icon_image = face_map[1]
                                     elif widget == 'friend_face':
-                                        #self.log('this is the friend face')
                                         x = v_x
                                         y = v_y
                                         for face in state['friend_face_map'].items():
@@ -5604,9 +5166,6 @@ fi"""}]
                                 if 'icon_color' in state and state['icon_color']:
                                     alpha = 0
                                     wht = (255, 255, 255, 255)
-                                    #self.log(icon_image)
-                                    #color = state['icon_color']
-                                    #self.log(color)
                                     if color == 'white': color = (249,249,249,256)
                                     if icon_image.mode in ('RGBA', 'LA') or (icon_image.mode == 'P' and 'transparency' in icon_image.info):
                                         alpha = 1
@@ -5620,8 +5179,6 @@ fi"""}]
                                         data = icon_image.getdata()
                                         newData = []
                                         for item in data:
-                                            # Change all white (also shades of whites)
-                                            # pixels to transparent
                                             if item[0] in range(250, 256) and item[1] in range(250, 256) and item[2] in range(250, 256):
                                                 newData.append((255, 255, 255, 0))
                                             else:
@@ -5638,8 +5195,6 @@ fi"""}]
                                 data = icon_image.getdata()
                                 newData = []
                                 for item in data:
-                                    # Change all white (also shades of whites)
-                                    # pixels to transparent
                                     if item[0] in range(240, 256) and item[1] in range(240, 256) and item[2] in range(240, 256):
                                         newData.append((255, 255, 255, 0))
                                     else:
@@ -5651,7 +5206,6 @@ fi"""}]
 
                 elif state['widget_type'] == 'Bitmap':
                     icon_bmp = state['image']
-                    #if 'icon_color' in state and state['icon_color']:
                     alpha = 0
                     original = icon_bmp
                     if icon_bmp is not None:
@@ -5660,7 +5214,6 @@ fi"""}]
                             if 'mask' in state and state['mask']:
                                 refine = state['refine']
                                 image = icon_bmp.convert('RGBA')
-                                #icon_bmp = masking(image, refine)
                                 
                                 width, height = image.size
                                 pixels = image.getdata()
@@ -5669,32 +5222,24 @@ fi"""}]
                                 for pixel in pixels:
                                     r, g, b, a = pixel
                                     
-                                    # Check if the pixel is close to white within the refine threshold
                                     if r > 255 - refine and g > 255 - refine and b > 255 - refine:
-                                        # Replace white pixels with fully transparent
-                                        new_pixel = (255, 255, 255, 0)  # Change this if you want a different color or transparency
+                                        new_pixel = (255, 255, 255, 0)  
                                     else:
-                                        # Keep the original pixel
                                         new_pixel = (r, g, b, a)
                                     
                                     new_pixels.append(new_pixel)
                                 
-                                # Create a new image with the modified pixel data
                                 refined_image = Image.new("RGBA", image.size)
                                 refined_image.putdata(new_pixels)
                                 white_image = Image.new('RGB', refined_image.size, (255, 255, 255))
                                 white_image.paste(icon_bmp, mask=refined_image.split()[3])
                                 icon_bmp = white_image
-                        #if 'invert' in state and state['invert']:
-                        #    icon_bmp = ImageOps.invert(icon_bmp)
                         if 'icon_color' in state and state['icon_color']:
                             L_image = icon_bmp.convert('L')
                             icon_bmp = ImageOps.colorize(L_image, black = color, white = (255, 255, 255))
                         if 'alpha' in state and state['alpha']:
                             if alpha:
                                 icon_bmp = alphamask(icon_bmp)
-                        #else:
-                        #    icon_bmp = state['image']
                         self.paste_image(icon_bmp, v_x, v_y)
                 elif state['widget_type'] == 'Line':
                     draw.line([x,y,x2,y2], fill=color, width=state['width'])
@@ -5717,7 +5262,7 @@ fi"""}]
                 self._pwndata.paste(self._fg, (self._pwndata.size[0], self._pwndata.size[1]), self._fg)
 
             if hasattr(self, 'fancy_menu'):
-                if getattr(self.fancy_menu, 'active', False):  # Use getattr to safely check for 'active'
+                if getattr(self.fancy_menu, 'active', False): 
                     menu_img = self.fancy_menu.render()
                     self.fancy_menu_img = menu_img
                     if self.fancy_menu_img is not None:
@@ -5728,17 +5273,12 @@ fi"""}]
         except Exception as e:
             logging.error(f"Error in Fancygotchi drawer: {e}")
             logging.error(traceback.format_exc())
-            raise  # Raise the error to halt execution and see the full traceback
+            raise
 
     def ui2(self):
-        #if self.display_config["second_screen_webui"]:
-        #    logging.warning(f'second screen enabled: {self.display_config["second_screen_webui"]}')
-        #if self.display_controller.is_running():
-        #    logging.warning(f'display controller is running: {self.display_controller.is_running()}')
         try:
             image = self.second_screen
             if hasattr(self, 'display_controller') and self.display_config['second_screen_webui']:
-                #logging.warning(f'display return new frame')
                 image = self.display_controller.screen()
             img_io = BytesIO()
             image.save(img_io, 'PNG')
@@ -5746,28 +5286,23 @@ fi"""}]
             return send_file(img_io, mimetype='image/png'), 200
 
         except Exception as ex:
-            #logging.warning(ex)
-            #logging.warning('returning black screen')
             image = self.second_screen
             img_io = BytesIO()
             image.save(img_io, 'PNG')
             img_io.seek(0) 
             return send_file(img_io, mimetype='image/png'), 200
 
-    # Web UI section
     def on_webhook(self, path, request):
         try:
             if not self.ready:
                 return "Plugin not ready"
             if request.method == "GET":
-                fancyS = False  # Default value for fancyS
+                fancyS = False 
                 if hasattr(self, '_config') and 'Fancygotchi' in self._config['main']['plugins']:
                     fancyS = self._config['main']['plugins']['Fancygotchi'].get('fancyserver', False)
 
                 if path == "/" or not path:
-                    #themes = self.theme_list()
                     themes = sorted(self.theme_list(), key=lambda x: x.lower())
-                    # open the css file, the theme file, info file
                     if self._theme_name != 'Default':
                         css_path = os.path.join(self._th_path, 'style.css')
                         info_path = os.path.join(self._th_path, 'info.json')
@@ -5798,7 +5333,6 @@ fi"""}]
                         css = ''
                         info = ''
                         name = 'Default'
-                    #files = {'CSS': [css_path, css], 'Info': [info_path, info]}
                     files = {'CSS': [css_path, css], 'Info': [info_path, info]}
                     return render_template_string(
                         INDEX, themes=themes, 
@@ -5811,7 +5345,6 @@ fi"""}]
                         name=name,
                         logo=LOGO,
                         fancyserver=fancyS,
-
                     )
 
                 elif path == "ui2":
@@ -5823,7 +5356,6 @@ fi"""}]
 
                 elif path == "theme_list":
                     themes = self.theme_list()
-                    #themes = sorted(self.theme_list(), key=lambda x: x.lower()
                     return json.dumps(themes)
                     
                 elif str(path).split("/")[0] == "theme_export":
@@ -5837,7 +5369,6 @@ fi"""}]
 
                 elif path == "load_config":
                     try:
-                        # Retrieve the config path
                         if self.cfg_path is not None:
                             cfg_path = self.cfg_path
                             with open(cfg_path, 'r') as f:
@@ -5845,7 +5376,6 @@ fi"""}]
                         else:
                             config = {}
                             cfg_path = ""
-                        # Retrieve the CSS and Info file content
                         if self._theme_name != 'Default':
                             css_path = os.path.join(self._th_path, 'style.css')
                             info_path = os.path.join(self._th_path, 'info.json')
@@ -5867,7 +5397,6 @@ fi"""}]
                             css_path = 'No custom CSS path'
                             info_path = 'No custom Info path'
 
-                        # Return the full data set as a JSON object
                         return json.dumps({
                             "config": config,
                             "css": css_content,
@@ -5901,9 +5430,6 @@ fi"""}]
                     try:
                         jreq = request.get_json()
                         response = json.loads(json.dumps(jreq))
-                        #rot = int(response['rotation'])
-                        #theme = response['theme']
-                        #self.theme_save_config(response['theme'], response['rotation'], response['fancyserver'])
                         self.toggle_fancyserver(response['fancyserver'])
                         self.refresh = True
                         return "success"
@@ -5923,7 +5449,6 @@ fi"""}]
                         self.log(f"Error: {e}")
                         return "Error resetting CSS", 500
 
-
                 elif path == "save_config":
                     try:
                         data = request.get_json()
@@ -5938,7 +5463,7 @@ fi"""}]
                             css_src = os.path.join(self._th_path, 'style.css')
                             info_src = os.path.join(self._th_path, 'info.json')
 
-                            if css != "No custom Info":
+                            if info != "No custom Info":
                                 if os.path.exists(info_src):
                                     os.remove(info_src)
                                 with open(info_src, 'w') as info_file:
@@ -5952,7 +5477,6 @@ fi"""}]
                                     css_file.write(css)
                                 self.log(f"Updated CSS files at {self._th_path}")
                             
-
                             self.log(f"Updated CSS and Info files at {self._th_path}")
                         self.refresh = True
                         return "Configuration saved successfully", 200
@@ -6033,21 +5557,16 @@ fi"""}]
                                 filename = file.filename
                                 themepath = os.path.join(self._plug_root, 'themes')
                                 filepath = os.path.join(themepath, filename)
-
-                                # save the theme zip file
                                 file.save(filepath)
 
-                                # Unzip the file into a temporary directory
                                 with tempfile.TemporaryDirectory() as temp_dir:
                                     unzip_file(filepath, temp_dir)
 
-                                    # List of folders inside the zip
                                     folders_in_zip = [
                                         name for name in os.listdir(temp_dir)
                                         if os.path.isdir(os.path.join(temp_dir, name))
                                     ]
 
-                                    # Check if any folders already exist in the theme path
                                     existing_folders = []
                                     for folder in folders_in_zip:
                                         target_folder = os.path.join(themepath, folder)
@@ -6055,10 +5574,8 @@ fi"""}]
                                             existing_folders.append(folder)
 
                                     if existing_folders:
-                                        # List of folders that already exist
                                         return f'{existing_folders} folders were not copied because they already exist.', 400
 
-                                    # Copy folders from temp_dir to themepath
                                     for folder in folders_in_zip:
                                         source = os.path.join(temp_dir, folder)
                                         target = os.path.join(themepath, folder)
@@ -6130,7 +5647,6 @@ fi"""}]
                 elif path == "display_hijack":
                     try:
                         self.dispHijack = True
-                        #self.display_hijack()
                         return "success", 200
                     except Exception as ex:
                         logging.error(ex)
@@ -6140,7 +5656,6 @@ fi"""}]
                 elif path == "display_pwny":
                     try:
                         self.dispHijack = False
-                        #self.display_pwny()
                         return "success", 200
                     except Exception as ex:
                             logging.error(ex)
@@ -6149,7 +5664,6 @@ fi"""}]
                 elif path == "display_next":
                     try:
                         self.process_actions({"action": "switch_screen_mode"})
-                        #self.display_pwny()
                         return "success", 200
                     except Exception as ex:
                             logging.error(ex)
@@ -6158,7 +5672,6 @@ fi"""}]
                 elif path == "display_previous":
                     try:
                         self.process_actions({"action": "switch_screen_mode_reverse"})
-                        #self.display_pwny()
                         return "success", 200
                     except Exception as ex:
                             logging.error(ex)
@@ -6167,7 +5680,6 @@ fi"""}]
                 elif path == "screen_saver_next":
                     try:
                         self.process_actions({"action": "next_screen_saver"})
-                        #self.display_pwny()
                         return "success", 200
                     except Exception as ex:
                             logging.error(ex)
@@ -6195,7 +5707,6 @@ fi"""}]
                         response = json.loads(json.dumps(jreq))
                         action = response['action']
                         
-                        # Map the received actions to menu commands
                         action_mapping = {
                             'up': 'menu_up',
                             'down': 'menu_down',
