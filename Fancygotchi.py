@@ -4248,12 +4248,10 @@ fi"""}]
         menu_opt = th_menu.get('options', {})
         menu_theme.update(menu_opt)
         custom_menus = {}
-        if self.fancyserver:      
-            custom_menu = {}
-                
-            if 'menu' in self._theme.get('theme', {}):
-                custom_menus = self._theme.get("theme", {}).get("menu", {})
-                custom_menus.pop('options', None)
+        if 'menu' in self._theme.get('theme', {}):
+            custom_menus = self._theme.get("theme", {}).get("menu", {})
+            custom_menus.pop('options', None)
+        if self.fancyserver:   
             if not hasattr(self, 'fancy_server') or (hasattr(self, 'fancy_server') and getattr(self, 'fancy_server', None) is None):
                 self.fancy_server = FancyServer()
 
