@@ -3322,64 +3322,6 @@ def serializer(obj):
         return list(obj)
     raise TypeError
 
-def check_and_fix_fb():
-    config_paths = [
-        "/boot/firmware/config.txt",
-        "/boot/config.txt"
-    ]
-    correct_overlay = "dtoverlay=vc4-fkms-v3d"
-    wrong_overlay = "dtoverlay=vc4-kms-v3d"
-
-    # Check if at least one framebuffer device exists
-    fb_device_exists = any(os.path.exists(f"/dev/fb{i}") for i in range(10))
-    logging.info(f"[Fancygotchi] Framebuffer device exists: {fb_device_exists}")
-    config_file = None
-    for path in config_paths:
-        if os.path.exists(path):
-            config_file = path
-            break
-
-    if not config_file:
-        return
-
-    with open(config_file, 'r') as file:
-        lines = file.readlines()
-
-    found_correct_overlay = any(correct_overlay in line for line in lines)
-
-    if fb_device_exists:
-        logging.info("[Fancygotchi] Framebuffer device exists. No reboot needed.")
-        return
-    elif found_correct_overlay:
-        logging.info("[Fancygotchi] config.txt already contains the correct overlay. No reboot needed.")
-        return
-    else:
-        logging.info("[Fancygotchi] Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
-
-    backup_path = config_file + ".bak"
-    shutil.copy(config_file, backup_path)
-    with open(config_file, 'r') as file:
-        lines = file.readlines()
-    found_wrong_overlay = False
-    found_correct_overlay = False
-    new_lines = []
-    for line in lines:
-        if wrong_overlay in line:
-            found_wrong_overlay = True
-            new_lines.append(line.replace(wrong_overlay, correct_overlay))
-        elif correct_overlay in line:
-            found_correct_overlay = True
-            new_lines.append(line)
-        else:
-            new_lines.append(line)
-    if not found_correct_overlay:
-        new_lines.append(f"\n{correct_overlay}\n")
-        logging.debug(f"{correct_overlay} added to {config_file}")
-    with open(config_file, 'w') as file:
-        file.writelines(new_lines)
-    logging.debug("Rebooting system to apply changes...")
-    subprocess.run(["sudo", "reboot"])
-
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
@@ -3654,7 +3596,7 @@ class Fancygotchi(plugins.Plugin):
 if [ -f "/usr/local/bin/boot_animation.py" ]; then
     {self.pyenv} /usr/local/bin/boot_animation.py
 fi"""}]
-        self.log('[Fancygotchi] Initiated')
+        #self.log('[Fancygotchi] Initiated')
         v_f = os.path.join(self._pwny_root, 'ui', 'view.py')
         s_f = os.path.join(self._pwny_root, 'ui', 'state.py')
         i_f = os.path.join(self._pwny_root, 'identity.py')
@@ -3664,15 +3606,17 @@ fi"""}]
         if self.adjust_code(s_f, s_code): rst = 1
         if self.adjust_code(i_f, i_code): rst = 1
         if self.adjust_code(p_f, p_code): rst = 1
-        rst = self.zram_check()
-        check_and_fix_fb()
+        if self.zram_check(): rst = 1
+        self.check_and_fix_fb()
         if rst:
-            self.log('[Fancygotchi] The pwnagotchi need to restart.')
+            self.log('The pwnagotchi need to restart.')
             os.system('sudo systemctl restart pwnagotchi.service')
-        logging.info('[Fancygotchi] Initiated')
+            os.system('sudo service pwnagotchi restart')
+        self.log('Initiated')
 
     # System section
     def adjust_code(self, file_path, changes):
+        self.log(f'Adjusting code in {file_path}')
         rst = 0
         with open(file_path, 'r') as file:
             lines = file.readlines()
@@ -3689,30 +3633,76 @@ fi"""}]
                         reference_index += 1
                     else:
                         reference_index = 0
-                    
                     if reference_index == len(reference_lines):
-                        # Reference code found, apply modification
                         if replace_flag:
-                            # Replace the code block
                             lines[i - len(reference_lines) + 1:i + 1] = [paste_code + '\n']
                         else:
-                            # Insert the code block after the reference lines
                             lines[i] = lines[i].rstrip() + '\n' + paste_code + '\n'
-
                         rst = 1
-
-        #if lines[-1].strip() != '':  # If the last line is not empty
-        #    lines.append('\n')  # Add an empty line
-
-        # Add the tag at the end (outside the loop)
         if rst:
             lines.append(self.Tag + '\n')
-
-        # Write the modified lines back to the file
         with open(file_path, 'w') as file:
             file.writelines(lines)
         
         return rst
+
+    def check_and_fix_fb(self):
+        config_paths = [
+            "/boot/firmware/config.txt",
+            "/boot/config.txt"
+        ]
+        correct_overlay = "dtoverlay=vc4-fkms-v3d"
+        wrong_overlay = "dtoverlay=vc4-kms-v3d"
+
+        # Check if at least one framebuffer device exists
+        fb_device_exists = any(os.path.exists(f"/dev/fb{i}") for i in range(10))
+        self.log(f"[Fancygotchi] Framebuffer device exists: {fb_device_exists}")
+        config_file = None
+        for path in config_paths:
+            if os.path.exists(path):
+                config_file = path
+                break
+
+        if not config_file:
+            return
+
+        with open(config_file, 'r') as file:
+            lines = file.readlines()
+
+        found_correct_overlay = any(correct_overlay in line for line in lines)
+
+        if fb_device_exists:
+            self.log("[Fancygotchi] Framebuffer device exists. No reboot needed.")
+            return
+        elif found_correct_overlay:
+            self.log("[Fancygotchi] config.txt already contains the correct overlay. No reboot needed.")
+            return
+        else:
+            self.log("[Fancygotchi] Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
+
+        backup_path = config_file + ".bak"
+        shutil.copy(config_file, backup_path)
+        with open(config_file, 'r') as file:
+            lines = file.readlines()
+        found_wrong_overlay = False
+        found_correct_overlay = False
+        new_lines = []
+        for line in lines:
+            if wrong_overlay in line:
+                found_wrong_overlay = True
+                new_lines.append(line.replace(wrong_overlay, correct_overlay))
+            elif correct_overlay in line:
+                found_correct_overlay = True
+                new_lines.append(line)
+            else:
+                new_lines.append(line)
+        if not found_correct_overlay:
+            new_lines.append(f"\n{correct_overlay}\n")
+            self.log(f"{correct_overlay} added to {config_file}")
+        with open(config_file, 'w') as file:
+            file.writelines(new_lines)
+        self.log("Rebooting system to apply changes...")
+        subprocess.run(["sudo", "reboot"])
 
     def zram_check(self):
         rst = 0
@@ -3740,8 +3730,8 @@ fi"""}]
             # working state
             # log = False
             # debug = True
-            log = True
-            debug = False
+            log = False
+            debug = True
 
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'log' in self._theme['theme']['dev']:
                 log = self._theme['theme']['dev']['log']
