@@ -1,6 +1,6 @@
 # <p align="center">🪄FANCYGOTCHI 2.0🖌️</p>
 
-# 🎉 🚀 Fancygotchi 2.0 will be available at the end of the week! The Ultimate pwnagotchi Plugin Just Leveled Up! Stay tuned, Friday the 8th November will be a great day for the community! 🚀 🎉
+# 🎉 🚀 Fancygotchi 2.0 is now available, it's a great day for the community! Happy theming! 🚀 🎉
 
 <p align="center">
 <img src='https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/fancygotchi2.0.png' width='500px'></img>
