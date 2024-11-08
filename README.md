@@ -1,6 +1,6 @@
 # <p align="center">🪄FANCYGOTCHI 2.0🖌️</p>
 
-# 🎉 🚀 Fancygotchi 2.0 is now available, it's a great day for the community! Happy theming! 🚀 🎉
+# 🎉 🚀 Fancygotchi 2.0 is now available, it's a great day for the community! Happy theming! Join us on [discord](https://discord.gg/78dGjukKU9)🚀 🎉
 
 <p align="center">
 <img src='https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/fancygotchi2.0.png' width='500px'></img>
