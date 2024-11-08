@@ -1,16 +1,17 @@
-ui.fps = 1 #<-- need to have an higher value than 0.0
-
-ui.display.enabled = true #<-- need to be true for Fancygotchi even in headless mode
-ui.display.rotation = 0
-ui.display.type = "displayhatmini" #<-- select your display (this will select the resolution type if in headless mode)
-
 main.plugins.Fancygotchi.enabled = true #<-- Fancygotchi will generate a default config 
 main.plugins.Fancygotchi.rotation = 0 # 0 or 180 is horizontal mode, 90 or 270 is vertival mode
 main.plugins.Fancygotchi.theme = "" #<-- if empty the default theme will be loaded
+main.plugins.Fancygotchi.fancyserver = false # Fancyserver is used for FancyMenu and for additional control. It is disabled by default.
 
-fs.memory.mounts.data.enabled = true
-fs.memory.mounts.data.mount = "/var/tmp/pwnagotchi"
-fs.memory.mounts.data.size = "50M" #<-- need to be set at 50M, else this can cause a errno 30 and the tmp file become read only and the pwnagotchi can't save his data
-fs.memory.mounts.data.sync = 3600
-fs.memory.mounts.data.zram = true
-fs.memory.mounts.data.rsync = true
+#ui.fps = 1 #<-- need to have an higher value than 0.0
+
+#ui.display.enabled = true
+#ui.display.rotation = 0 #<-- This value need to stay 0
+#ui.display.type = "displayhatmini" #<-- select your display
+
+#fs.memory.mounts.data.enabled = false #<-- need to be false to avoid the errno 30 and the tmp file become read only and the pwnagotchi can't save his data
+#fs.memory.mounts.data.mount = "/var/tmp/pwnagotchi"
+#fs.memory.mounts.data.size = "50M"
+#fs.memory.mounts.data.sync = 3600
+#fs.memory.mounts.data.zram = false #<-- need to be false to avoid the errno 30 and the tmp file become read only and the pwnagotchi can't save his data
+#fs.memory.mounts.data.rsync = true
