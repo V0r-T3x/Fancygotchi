@@ -3668,7 +3668,7 @@ fi"""}]
         check_and_fix_fb()
         if rst:
             self.log('[Fancygotchi] The pwnagotchi need to restart.')
-            os.system('service pwnagotchi restart')
+            os.system('sudo systemctl restart pwnagotchi.service')
         logging.info('[Fancygotchi] Initiated')
 
     # System section
@@ -3877,26 +3877,29 @@ fi"""}]
 
 
     def navigate_fancymenu(self, cmd=None):
-        logging.warning(cmd)
-        if hasattr(self, 'fancy_menu'):
-            if cmd:
-                menu_command = cmd
-            else:
-                menu_command = self.check_menu_command()
-            if menu_command:
-                cmd = menu_command['action']
-                #cmd = action["action"]
-                self.log(f'menu_command: {cmd}')
-                if cmd == 'menu_toggle':
-                    self.fancy_menu.toggle()
-                    self.log('toggle menu')
-                elif cmd in ['menu_up', 'menu_down', 'menu_left', 'menu_right']:
-                    direction = cmd.split('_')[1]
-                    self.fancy_menu.navigate(direction)
-                    self.log(direction)
-                elif cmd == 'menu_select':
-                    self.fancy_menu.select()
-                    self.log('select')
+        try:
+            if hasattr(self, 'fancy_menu'):
+                if cmd:
+                    menu_command = cmd
+                else:
+                    menu_command = self.check_menu_command()
+                if menu_command:
+                    cmd = menu_command['action']
+                    #cmd = action["action"]
+                    self.log(f'menu_command: {cmd}')
+                    if cmd == 'menu_toggle':
+                        self.fancy_menu.toggle()
+                        self.log('toggle menu')
+                    elif cmd in ['menu_up', 'menu_down', 'menu_left', 'menu_right']:
+                        direction = cmd.split('_')[1]
+                        self.fancy_menu.navigate(direction)
+                        self.log(direction)
+                    elif cmd == 'menu_select':
+                        self.fancy_menu.select()
+                        self.log('select')
+        except Exception as e:
+            logging.error(f"Error in navigate_fancymenu: {e}")
+            logging.error(traceback.format_exc())
 
     def on_ui_update(self, ui):
         try:
@@ -4035,7 +4038,7 @@ fi"""}]
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'refresh' in self._theme['theme']['dev']:
                 self.refresh_trigger = self._theme['theme']['dev']['refresh']
 
-            if hasattr(self, 'fancy_menu'):
+            if hasattr(self, 'fancyserver') and self.fancyserver and self.fancyserver and hasattr(self, 'fancy_menu'):
                 menu_command = self.check_menu_command()
                 if menu_command:
                     cmd = menu_command['action']
@@ -4599,15 +4602,16 @@ fi"""}]
         #self.log(pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}))
         #if pwnagotchi.config['main']['plugins']['Fancygotchi']['fancyserver']:
         fancygotchi_config = pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {})
-        self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
         diagnostic_path = "/usr/local/bin/diagnostic.sh"
         if os.path.exists(diagnostic_path):
             os.remove(diagnostic_path)
         with open(diagnostic_path, "w") as diagnostic_file:
             diagnostic_file.write(DIAGNOSTIC)
-            os.system(f'chmod +x {diagnostic_path}')
+        os.system(f'chmod +x {diagnostic_path}')
+        self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
         if fancygotchi_config.get('fancyserver', False):
             # Create FancyMenu instance with the updated theme
+            
             #self.log("Fancyserver detected, adding /usr/local/bin/fancytools and /usr/local/bin/diagnostic.sh")
             try:
                 fancytools_content = FANCYTOOLS.replace("{pyenv}", self.pyenv)
@@ -4622,7 +4626,6 @@ fi"""}]
 
                 # Change permissions to make the file executable
                 os.system(f'chmod +x {fancytools_path}')
-                
                 self.running = True
                 #self.on_loaded()
             except Exception as e:
