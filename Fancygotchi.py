@@ -2999,7 +2999,7 @@ def box_to_xywh(position):
     
     return [x, y, w, h]
 
-def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=False):
+def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=False, crop=[0,0,0,0]):
     try:
         if isinstance(image_path, str):
             try:
@@ -3011,6 +3011,8 @@ def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=F
             image = image_path
         if invert:
             image = invert_pixels(image)
+        if crop != [0,0,0,0]:
+            image = image.crop(crop)
         image = image.convert('RGBA') 
         
         original_width, original_height = image.size
@@ -3154,7 +3156,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.1'
+    __version__ = '2.0.2'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3193,6 +3195,7 @@ class Fancygotchi(plugins.Plugin):
             'theme': {
                 'options': {
                     'boot_animation': False,
+                    'boot_mode': 'normal', # Implementation to adjust the boot animation image with normal, stretch, fit, fill, center or tile
                     'boot_max_loops': 1,
                     'boot_total_duration': 1,
                     'screen_mode': 'screen_saver',
@@ -3269,6 +3272,7 @@ class Fancygotchi(plugins.Plugin):
             'icon_color': False,
             'invert': False,
             'alpha': False,
+            'crop': [0,0,0,0],
             'mask': False,
             'refine': 150,
             'zoom': 1,
@@ -3287,6 +3291,7 @@ class Fancygotchi(plugins.Plugin):
             'icon_color': False,
             'invert': False,
             'alpha': False,
+            'crop': [0,0,0,0],
             'mask': False,
             'refine': 150,
             'zoom': 1,
@@ -3321,6 +3326,7 @@ class Fancygotchi(plugins.Plugin):
             'icon': False,
             'invert': False,
             'alpha': False,
+            'crop': [0,0,0,0],
             'mask': False,
             'refine': 150,
             'zoom': 1,
@@ -4673,6 +4679,8 @@ fi"""}]
                     self._state[key].update({'invert': th_widget[key]['invert']})
                 if key in th_widget and th_widget[key].get('alpha'):
                     self._state[key].update({'alpha': th_widget[key]['alpha']})
+                if key in th_widget and th_widget[key].get('crop'):
+                    self._state[key].update({'crop': th_widget[key]['crop']})
                 if key in th_widget and th_widget[key].get('mask'):
                     self._state[key].update({'mask': th_widget[key]['mask']})
                 if key in th_widget and th_widget[key].get('refine'):
@@ -4737,6 +4745,8 @@ fi"""}]
                     self._state[key].update({'invert': th_widget[key]['invert']})
                 if key in th_widget and th_widget[key].get('alpha'):
                     self._state[key].update({'alpha': th_widget[key]['alpha']})
+                if key in th_widget and th_widget[key].get('crop'):
+                    self._state[key].update({'crop': th_widget[key]['crop']})
                 if key in th_widget and th_widget[key].get('mask'):
                     self._state[key].update({'mask': th_widget[key]['mask']})
                 if key in th_widget and th_widget[key].get('refine'):
@@ -4788,7 +4798,7 @@ fi"""}]
                                 self._state[key]['face_map'].update({
                                     face: [
                                         face_dict[face],
-                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])
+                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])
                                     ]
                                 })
                             else:
@@ -4811,7 +4821,7 @@ fi"""}]
                                 self._state[key]['friend_face_map'].update({
                                     face: [
                                         face_dict[face],
-                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])  
+                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])  
                                     ]
                                 })
                             else:
@@ -4824,7 +4834,7 @@ fi"""}]
                         if widget_type == 'LabeledValue' and not self._state[key]['f_awesome']:
                             
                             icon_path = os.path.join(self._th_path, 'img', 'widgets', key, self._state[key][source])
-                            self._state[key].update({'icon_image': adjust_image(Image.open(icon_path), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])})
+                            self._state[key].update({'icon_image': adjust_image(Image.open(icon_path), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])})
                         if not self._state[key]['f_awesome']:
                             if widget_type == 'Bitmap':
                                 img_path = os.path.join(self._th_path, 'img', 'widgets', key)
@@ -4832,7 +4842,7 @@ fi"""}]
                                 file_count = len(files)
                                 if file_count == 1:
                                     image_path = os.path.join(img_path, files[0])
-                                    self._state[key].update({'image': adjust_image(image_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])})
+                                    self._state[key].update({'image': adjust_image(image_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])})
 
                                 elif file_count > 3 and file_count % 2 == 0:
                                     image_dict = {}
@@ -4848,7 +4858,7 @@ fi"""}]
                                                 original_b = [f for f in files if os.path.splitext(f)[0] == corresponding_b][0]
                                                 
                                                 img_a = Image.open(os.path.join(img_path, original_a))
-                                                img_b = adjust_image(Image.open(os.path.join(img_path, original_b)), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])
+                                                img_b = adjust_image(Image.open(os.path.join(img_path, original_b)), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])
                                                 
                                                 image_dict[int(id_number)] = [img_a, img_b]
                                     self._state[key].update({'image_dict': image_dict})
