@@ -393,8 +393,6 @@ INDEX = """
             </div>
         </div>
 
-
-
         <div id="wrap" data-role="tabs">
             <div id="tabs" data-role="navbar">
                 <ul>
@@ -550,7 +548,7 @@ window.onload = function() {
         image.src = image.src.split("?")[0] + "?" + new Date().getTime();
         image2.src = image2.src.split("?")[0] + "?" + new Date().getTime();
     }
-    setInterval(updateImage, 1000);
+    setInterval(updateImage, {{webui_fps}});
 }
 
 window.onscroll = function() {
@@ -3201,6 +3199,7 @@ class Fancygotchi(plugins.Plugin):
                     'screen_mode': 'screen_saver',
                     'screen_saver': 'show_logo',
                     'second_screen_fps': 1,
+                    'webui_fps': 1,
                     'second_screen_webui': False,
                     'bg_fg_select': 'manu',
                     'bg_mode': 'normal',
@@ -4374,6 +4373,7 @@ fi"""}]
                 if hasattr(th_opt, 'main_text_color') and th_opt.get('main_text_color', []) != []:
                     self._icolor = 0
                 self.fps = th_opt.get('second_screen_fps', 1)
+                self.webui_fps = int(1000*th_opt.get('webui_fps', 1))
                 if rot in (90, 270):
                     startname = f'{self._res[1]}x{self._res[0]}' 
                     w = self._res[1]
@@ -5353,6 +5353,7 @@ fi"""}]
                         name=name,
                         logo=LOGO,
                         fancyserver=fancyS,
+                        webui_fps=self.webui_fps,
                     )
 
                 elif path == "ui2":
@@ -5412,7 +5413,7 @@ fi"""}]
                             "name": self._theme_name,
                             "cfg_path": cfg_path,
                             "css_path": css_path,
-                            "info_path": info_path
+                            "info_path": info_path,
                         })
                     except Exception as ex:
                         logging.error(ex)
