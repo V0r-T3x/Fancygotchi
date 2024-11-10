@@ -10,6 +10,7 @@ import numpy as np
 import os
 import random
 import re
+import requests
 import shutil
 import struct
 import subprocess
@@ -38,6 +39,12 @@ from pwnagotchi.plugins import toggle_plugin
 from pwnagotchi.ui import display
 from pwnagotchi.ui.hw import display_for
 from pwnagotchi.utils import load_config, merge_config, save_config
+
+V0RT3X_REPO = "https://github.com/V0r-T3x"
+FANCY_REPO = os.path.join(V0RT3X_REPO, "Fancygotchi")
+THEMES_REPO = "https://api.github.com/repos/V0r-T3x/Fancygotchi_themes/contents/fancygotchi_2.0/themes"
+
+# Fancygotchi_themes/tree/main/fancygotchi_2.0/themes
 
 
 LOGO = """░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -114,13 +121,13 @@ INDEX = """
     #tabs {
         border-bottom: 1px solid black;
         text-align: center;}
-    #theme {
+    .theme {
         width: 100%;
         margin-bottom: 20px;}
-    #theme-columns {
+    .theme-columns {
         display: flex;}
-    #select,
-    #theme-description {
+    .select,
+    .theme-description {
         flex: 1;
         margin-right: 20px;}
     #uploader {
@@ -397,13 +404,14 @@ INDEX = """
             <div id="tabs" data-role="navbar">
                 <ul>
                     <li class="ui-btn-active"><a href="#theme" data-theme="a" data-ajax="false">Theme manager</a></li>
+                    <li class=""><a href="#theme_downloader" data-theme="a" data-ajax="false" onclick="loadThemeTab()">Theme downloader</a></li>
                     <li class=""><a href="#config" data-theme="a" data-ajax="false">Configuration</a></li>
                     <li class=""><a href="#theme_editor" data-theme="a" data-ajax="false">Theme editor</a></li>
                 </ul>
             </div>
-            <div id="theme" class="ui-content">
-                <div id="theme-columns" class="row">
-                    <div id="select" class="column">
+            <div id="theme" class="ui-content theme">
+                <div id="theme-columns" class="row theme-columns">
+                    <div id="select" class="column select">
                         <label for="theme-selector">Select a theme:</label>
                         <select id="theme-selector">
                             <option value="Default"{% if default_theme == '' %}selected{% endif %}>Default</option>
@@ -411,7 +419,7 @@ INDEX = """
                             <option value="{{ theme }}"{% if default_theme == theme %}selected{% endif %}>{{ theme }}</option>
                             {% endfor %}
                         </select>
-                        <br> <!-- Add a line break for better separation -->
+                        <br>
                         <label for="orientation-selector">Select an orientation:</label>
                         <select id="orientation-selector">
                             <option value=0{% if rotation == 0 %} selected{% endif %}>0</option>
@@ -440,7 +448,7 @@ INDEX = """
                             <button id="create-theme-button" onclick="createNewTheme()">Create Theme</button>
                         </div>
                     </div>
-                    <div id="theme-description" class="column">
+                    <div id="theme-description" class="column theme-description">
                         <h3>Theme Description</h3>
                         <div id="theme-description-content"></div>
                         <img id="screenshot" src="/img/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
@@ -448,6 +456,35 @@ INDEX = """
                     </div>
                 </div>
             </div>
+
+
+
+
+
+<!-- Working here -->
+
+            <div id="theme_downloader" class="ui-content theme">
+                <div id="theme-downloader-columns" class="row theme-columns">
+                    <div id="downloader-select" class="column select">
+                        <label for="theme-downloader-selector">Select a theme:</label>
+                        <select id="theme-downloader-selector">
+                            <!-- Themes will be dynamically populated here -->
+                        </select>
+                        <br>
+                        <button id="select-theme-downloader-button" onclick="theme_select()">Select Theme</button>
+                    </div>
+                    <div id="theme-downloader-description" class="column theme-description">
+                        <h3>Theme Description</h3>
+                        <div id="theme-downloader-description-content"></div>
+                        <img id="repo_screenshot" src="/screenshots/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+
             <div id="config" class="ui-content">
                 <h2>No configuration for the default theme</h2> <!-- Updated dynamically -->
                 <div id="hidden">
@@ -472,7 +509,7 @@ INDEX = """
                     <div id="theme_editor_content">
                         <h2>Coming soon !</h2>
                         <h2>If you like the project feel free to contribute !</h2>
-                        <h2><a href='https://github.com/v0r-t3x/Fancygotchi'>Fancygotchi</a> is made with ❤ by <a href='https://linktr.ee/v0r_t3x'>V0rT3x</a></h2>
+                        <h2><a href='{{fancy_repo}}'>Fancygotchi</a> is made with ❤ by <a href='https://linktr.ee/v0r_t3x'>V0rT3x</a></h2>
                     </div>
                     <div id="logo">
                         <pre>
@@ -486,7 +523,7 @@ INDEX = """
         </div>
         
         <div id="footer">
-            <a href='https://github.com/v0r-t3x/Fancygotchi'>Fancygotchi</a> {{ version }} made with ❤ by <a href='https://linktr.ee/v0r_t3x'>{{ author }}</a>
+            <a href='{{fancy_repo}}'>Fancygotchi</a> {{ version }} made with ❤ by <a href='https://linktr.ee/v0r_t3x'>{{ author }}</a>
         </div>
         
     </div>
@@ -1082,6 +1119,100 @@ function populateThemeInfo(themeInfo) {
         $themeDescriptionContent.append(listItem);
     });
 }
+
+
+
+
+
+
+
+<!-- working here -->
+
+// This function will be triggered when the theme downloader tab is loaded
+function loadThemeTab() {
+    loadJSON("Fancygotchi/theme_download_list", function(response) {
+        populateThemeSelector_downloader(response);
+    });
+}
+
+// This ensures that the theme info is populated when a theme is selected
+$('#theme-downloader-selector').change(function() {
+    var themes = window.themes; // Store themes in a global variable when the tab is loaded
+    var selectedTheme = $('#theme-downloader-selector').val();
+    populateThemeInfo_downloader(themes[selectedTheme]);
+});
+
+// Populating the theme selector dropdown
+function populateThemeSelector_downloader(themes) {
+    window.themes = themes; // Store the themes in a global variable for easy access
+    var selectElement = $('#theme-downloader-selector');
+    selectElement.empty();
+
+    // Get the first theme from the response and select it by default
+    var firstTheme = Object.keys(themes)[0]; // Get the first theme key
+    var defaultOption = $('<option>').val(firstTheme).text(firstTheme);
+    selectElement.append(defaultOption);
+
+    // Populate the theme dropdown with all available themes
+    Object.keys(themes).forEach(function(theme) {
+        var option = $('<option>').val(theme).text(theme);
+        selectElement.append(option);
+    });
+    
+    selectElement.selectmenu('refresh');
+
+    // Immediately load info for the first theme (since it's selected by default)
+    populateThemeInfo_downloader(themes[firstTheme]);
+}
+
+// Populate the theme details when a theme is selected
+function populateThemeInfo_downloader(themeInfo) {
+    var $themeDescriptionContent = $('#theme-downloader-description-content');
+    var theme = $('#theme-downloader-selector').val();
+    
+    if (theme == '') {
+        theme = 'Default';
+    }
+    
+    $themeDescriptionContent.empty();
+    $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
+    
+    // Set the description (assuming 'description' key exists in the themeInfo response)
+    var description = themeInfo.info.description || 'No description available';
+    $themeDescriptionContent.append('<p>' + description + '</p>');
+    
+    var img = new Image();
+    var imgPath = '/repo_screenshots/' + theme + '/screenshot.png';
+    
+    img.onload = function() {
+        document.getElementById('repo_screenshot').src = imgPath;
+    };
+    
+    img.onerror = function() {
+        document.getElementById('repo_screenshot').src = '/repo_screenshots/screenshot.png';
+    };
+    
+    img.src = imgPath;
+    
+    // Dynamically populate additional info (author, version, etc.) if present in themeInfo
+    $.each(themeInfo.info, function(key, value) {
+        var val = '<span class="preserve-line-breaks">' + value + '</span>';
+        var listItem = $('<li>').html(key + ': ' + val);
+        $themeDescriptionContent.append(listItem);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+
+
 function sendJSON(url, data, callback) {
     var xobj = new XMLHttpRequest();
     var csrf = "{{ csrf_token() }}";
@@ -2967,6 +3098,22 @@ MENUS = {
     ]),
 }
 
+def check_internet_and_repo():
+    try:
+        requests.get("https://www.google.com", timeout=5)
+        response = requests.get(THEMES_REPO, timeout=5)
+        if response.status_code == 200:
+            return True
+        else:
+            logging.warning(f"Connected to the internet, but repo is not accessible. Status code: {response.status_code}")
+            return False    
+    except requests.ConnectionError:
+        logging.warning("No internet connection.")
+        return False
+    except requests.Timeout:
+        logging.warning("Connection timed out.")
+        return False
+
 def get_all_plugin_names(fancygotchi):
     config_dict = fancygotchi._config 
     plugins = list(config_dict['main'].get('plugins', {}).keys())
@@ -3160,7 +3307,8 @@ class Fancygotchi(plugins.Plugin):
 
     def __init__(self):
         self.pyenv = sys.executable
-
+        logging.warning(f'Repo reachable: {check_internet_and_repo()}')
+    
         self.running = False
         self.fancy_menu = None
         self.actions_log = []
@@ -3176,6 +3324,8 @@ class Fancygotchi(plugins.Plugin):
 
         self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame')
         self._config = pwnagotchi.config
+        self.gittoken = self._config['main']['plugins']['Fancygotchi'].get('github_token', None)
+        logging.warning(self.gittoken)
         self.cfg_path = None
         self.cursor_list = ['█', '-']
         self.options = dict()
@@ -4212,6 +4362,96 @@ fi"""}]
             self.log(f"Error in theme selector: {str(e)}")
             self.log(traceback.format_exc())
             return None
+
+    def save_screenshot(self, theme_name, screenshot_url, headers):
+        # Define the folder where screenshots will be saved locally
+        screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
+        
+        #os.makedirs(screenshots_path)  # Create the base directory if it doesn't exist
+        
+        # Create a folder for each theme inside the screenshots path
+        theme_folder_path = os.path.join(screenshots_path, theme_name)
+        os.makedirs(theme_folder_path, exist_ok=True)
+
+        # Download the screenshot and save it locally
+        #screenshot_data = requests.get(screenshot_url).content
+        response = requests.get(screenshot_url, headers=headers).content
+        screenshot_path = os.path.join(theme_folder_path, 'screenshot.png')
+        
+        with open(screenshot_path, 'wb') as f:
+            f.write(response)
+
+        # Return the local path for the screenshot
+        return os.path.join('repo_screenshots', theme_name, 'screenshot.png')
+
+
+    def fetch_themes(self):
+        themes = {}
+        screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
+
+        # Set up headers for requests, including the GitHub token if available
+        headers = {}
+        if self.gittoken:
+            headers["Authorization"] = f"Bearer {self.gittoken}"
+
+        try:
+            # Ensure the screenshots directory exists, remove old data first
+            if os.path.exists(screenshots_path):
+                shutil.rmtree(screenshots_path)
+
+            # Request the contents of the THEMES_REPO
+            response = requests.get(THEMES_REPO, headers=headers)
+            response.raise_for_status()
+
+            # Check each item to see if it's a directory (a theme folder)
+            for item in response.json():
+                if item["type"] == "dir":
+                    theme_name = item["name"]
+                    theme_url = item["url"]
+
+                    # Initialize theme data with placeholders
+                    themes[theme_name] = {"info": None, "screenshot": None}
+
+                    # Get contents of the theme folder
+                    theme_contents = requests.get(theme_url, headers=headers).json()
+
+                    # Find the info.json and screenshot in the theme folder
+                    for file in theme_contents:
+                        if file["name"] == "info.json":
+                            info_url = file["download_url"]
+                            info_data = requests.get(info_url, headers=headers).json()
+
+                            # Store entire info.json data
+                            themes[theme_name]["info"] = info_data
+
+                        elif file["name"] == "img" and file["type"] == "dir":
+                            # Check for screenshot.png in the img folder
+                            img_folder_url = file["url"]
+                            img_contents = requests.get(img_folder_url, headers=headers).json()
+
+                            # Debugging: Log the structure of img_contents
+                            self.log(f"img_contents for {theme_name}: {img_contents}")
+
+                            # Ensure img_contents is a list of dictionaries
+                            if isinstance(img_contents, list):
+                                for img_file in img_contents:
+                                    if isinstance(img_file, dict) and img_file.get("name") == "screenshot.png":
+                                        # Download and save the screenshot locally
+                                        local_screenshot_path = self.save_screenshot(theme_name, img_file["download_url"], headers=headers)
+                                        themes[theme_name]["screenshot"] = local_screenshot_path
+                            else:
+                                self.log(f"Unexpected structure for img_contents: {img_contents}")
+
+            self.log("Themes fetched successfully:")
+            for theme, info in themes.items():
+                version = info["info"].get("version") if info["info"] else "Unknown"
+                self.log(f"{theme}: Version {version}, Screenshot: {info['screenshot']}")
+
+            return themes
+
+        except requests.RequestException as e:
+            logging.error(f"Error fetching themes: {e}")
+            return {}
 
     def save_active_config(self, data):
         cfg_path = self.cfg_path
@@ -5354,6 +5594,7 @@ fi"""}]
                         logo=LOGO,
                         fancyserver=fancyS,
                         webui_fps=self.webui_fps,
+                        fancy_repo=FANCY_REPO,
                     )
 
                 elif path == "ui2":
@@ -5366,6 +5607,17 @@ fi"""}]
                 elif path == "theme_list":
                     themes = self.theme_list()
                     return json.dumps(themes)
+
+                elif path == "theme_download_list":
+                    try:
+                        if check_internet_and_repo():
+                            themes_dict = self.fetch_themes()
+                            return json.dumps(themes_dict)
+                        else: return {}
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "theme download list error", 500
                     
                 elif str(path).split("/")[0] == "theme_export":
                     try: 
