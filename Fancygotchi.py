@@ -44,8 +44,6 @@ V0RT3X_REPO = "https://github.com/V0r-T3x"
 FANCY_REPO = os.path.join(V0RT3X_REPO, "Fancygotchi")
 THEMES_REPO = "https://api.github.com/repos/V0r-T3x/Fancygotchi_themes/contents/fancygotchi_2.0/themes"
 
-# Fancygotchi_themes/tree/main/fancygotchi_2.0/themes
-
 
 LOGO = """░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -309,6 +307,12 @@ INDEX = """
         font-weight: bold;
         font-size: 24px; /* Makes the arrow icon larger */
     }
+    #download_window {
+        display: none;
+    }
+    #loading-spinner{
+    
+    }
 </style>
 {% endblock %}
 {% block content %}
@@ -404,7 +408,7 @@ INDEX = """
             <div id="tabs" data-role="navbar">
                 <ul>
                     <li class="ui-btn-active"><a href="#theme" data-theme="a" data-ajax="false">Theme manager</a></li>
-                    <li class=""><a href="#theme_downloader" data-theme="a" data-ajax="false" onclick="loadThemeTab()">Theme downloader</a></li>
+                    <li class=""><a href="#theme_downloader" data-theme="a" data-ajax="false">Theme downloader</a></li>
                     <li class=""><a href="#config" data-theme="a" data-ajax="false">Configuration</a></li>
                     <li class=""><a href="#theme_editor" data-theme="a" data-ajax="false">Theme editor</a></li>
                 </ul>
@@ -456,35 +460,31 @@ INDEX = """
                     </div>
                 </div>
             </div>
-
-
-
-
-
-<!-- Working here -->
-
             <div id="theme_downloader" class="ui-content theme">
-                <div id="theme-downloader-columns" class="row theme-columns">
-                    <div id="downloader-select" class="column select">
-                        <label for="theme-downloader-selector">Select a theme:</label>
-                        <select id="theme-downloader-selector">
-                            <!-- Themes will be dynamically populated here -->
-                        </select>
-                        <br>
-                        <button id="select-theme-downloader-button" onclick="theme_select()">Select Theme</button>
-                    </div>
-                    <div id="theme-downloader-description" class="column theme-description">
-                        <h3>Theme Description</h3>
-                        <div id="theme-downloader-description-content"></div>
-                        <img id="repo_screenshot" src="/screenshots/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
+                <div id="download_list_refresh">
+                    <p align="center">
+                        <button id="select-theme-downloader-button" onclick="loadThemeTab()">Load theme list</button>
+                    </p>
+                </div>
+                <div id="loading-spinner" style="display:none;"><p align="center">Loading...</p></div>
+                <div id="download_window" style="display:none;">
+                    <div id="theme-downloader-columns" class="row theme-columns">
+                        <div id="downloader-select" class="column select">
+                            <label for="theme-downloader-selector">Select a theme:</label>
+                            <select id="theme-downloader-selector">
+                                <!-- Themes will be dynamically populated here -->
+                            </select>
+                            <br>
+                            <button id="select-theme-downloader-button" onclick="theme_download_select()">Select Theme</button>
+                        </div>
+                        <div id="theme-downloader-description" class="column theme-description">
+                            <h3>Theme Description</h3>
+                            <div id="theme-downloader-description-content"><p>No description available</p></div>
+                            <img id="repo_screenshot" src="/screenshots/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
+                        </div>
                     </div>
                 </div>
             </div>
-
-
-
-
-
             <div id="config" class="ui-content">
                 <h2>No configuration for the default theme</h2> <!-- Updated dynamically -->
                 <div id="hidden">
@@ -1120,81 +1120,56 @@ function populateThemeInfo(themeInfo) {
     });
 }
 
-
-
-
-
-
-
-<!-- working here -->
-
-// This function will be triggered when the theme downloader tab is loaded
 function loadThemeTab() {
+    $('#theme_downloader').find('select, button').prop('disabled', true); // Disable dropdown and button
+    $('#loading-spinner').show(); 
+    $('#download_window').hide();
     loadJSON("Fancygotchi/theme_download_list", function(response) {
         populateThemeSelector_downloader(response);
+        $('#loading-spinner').hide();
+        $('#download_window').show();
+        $('#theme_downloader').find('select, button').prop('disabled', false); // Enable dropdown and button
     });
 }
 
-// This ensures that the theme info is populated when a theme is selected
 $('#theme-downloader-selector').change(function() {
-    var themes = window.themes; // Store themes in a global variable when the tab is loaded
+    var themes = window.themes; 
     var selectedTheme = $('#theme-downloader-selector').val();
     populateThemeInfo_downloader(themes[selectedTheme]);
 });
 
-// Populating the theme selector dropdown
 function populateThemeSelector_downloader(themes) {
-    window.themes = themes; // Store the themes in a global variable for easy access
+    window.themes = themes; 
     var selectElement = $('#theme-downloader-selector');
     selectElement.empty();
-
-    // Get the first theme from the response and select it by default
-    var firstTheme = Object.keys(themes)[0]; // Get the first theme key
-    var defaultOption = $('<option>').val(firstTheme).text(firstTheme);
-    selectElement.append(defaultOption);
-
-    // Populate the theme dropdown with all available themes
-    Object.keys(themes).forEach(function(theme) {
+    const sortedThemes = Object.keys(themes).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    sortedThemes.forEach(function(theme) {
         var option = $('<option>').val(theme).text(theme);
         selectElement.append(option);
     });
-    
     selectElement.selectmenu('refresh');
-
-    // Immediately load info for the first theme (since it's selected by default)
-    populateThemeInfo_downloader(themes[firstTheme]);
+    if (sortedThemes.length > 0) {
+        populateThemeInfo_downloader(themes[sortedThemes[0]]);
+    }
 }
 
-// Populate the theme details when a theme is selected
 function populateThemeInfo_downloader(themeInfo) {
     var $themeDescriptionContent = $('#theme-downloader-description-content');
     var theme = $('#theme-downloader-selector').val();
-    
     if (theme == '') {
         theme = 'Default';
     }
-    
     $themeDescriptionContent.empty();
     $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
-    
-    // Set the description (assuming 'description' key exists in the themeInfo response)
-    var description = themeInfo.info.description || 'No description available';
-    $themeDescriptionContent.append('<p>' + description + '</p>');
-    
     var img = new Image();
     var imgPath = '/repo_screenshots/' + theme + '/screenshot.png';
-    
     img.onload = function() {
         document.getElementById('repo_screenshot').src = imgPath;
     };
-    
     img.onerror = function() {
         document.getElementById('repo_screenshot').src = '/repo_screenshots/screenshot.png';
     };
-    
     img.src = imgPath;
-    
-    // Dynamically populate additional info (author, version, etc.) if present in themeInfo
     $.each(themeInfo.info, function(key, value) {
         var val = '<span class="preserve-line-breaks">' + value + '</span>';
         var listItem = $('<li>').html(key + ': ' + val);
@@ -1202,16 +1177,38 @@ function populateThemeInfo_downloader(themeInfo) {
     });
 }
 
-
-
-
-
-
-
-
-
-
-
+function theme_download_select() {
+    var theme = document.getElementById("theme-downloader-selector").value;
+    var themes = window.themes; 
+    var version = themes[theme]?.info?.version || 'Unknown'; 
+    var json = {
+        "theme": theme,
+        "version": version
+    };
+    sendJSON("Fancygotchi/version_compare", json, function(response) {
+        data = JSON.parse(response.responseText)
+        var localVersion = data.local_version || 'Unknown';
+        var isNewer = data.is_newer;
+        if (isNewer) {
+            var message = `A newer ${theme} version (${version}) is available. Your current version is ${localVersion}. Would you like to update?`;
+        } else {
+            var message = `You have the ${theme} version ${localVersion} installed. The available version is ${version}. Do you want to overwrite your current version?`;
+        }
+        var confirmOverwrite = confirm(message);
+        if (confirmOverwrite) {
+            var json = {
+                "theme": theme,
+            };
+            sendJSON("Fancygotchi/theme_download_select", json, function(response) {
+                if (response.status == 200) {
+                    alert("Theme updated successfully!");
+                } else {
+                    alert("There was an error updating the theme.");
+                }
+            });
+        }
+    });
+}
 
 function sendJSON(url, data, callback) {
     var xobj = new XMLHttpRequest();
@@ -1220,9 +1217,9 @@ function sendJSON(url, data, callback) {
     xobj.setRequestHeader("Content-Type", "application/json");
     xobj.setRequestHeader('x-csrf-token', csrf);
     xobj.onreadystatechange = function () {
-            if (xobj.readyState == 4) {
+        if (xobj.readyState == 4) {
             callback(xobj);
-            }
+        }
     };
     xobj.send(JSON.stringify(data));
 }
@@ -3754,6 +3751,9 @@ fi"""}]
         screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/screenshots')
         if os.path.exists(screenshots_path):
             os.system(f'rm -r {screenshots_path}')
+        repo_screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
+        if os.path.exists(repo_screenshots_path):
+            os.system(f'rm -r {repo_screenshots_path}')
         css_dst = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
         css_backup = css_dst + '.backup'
         if os.path.exists(css_backup):
@@ -4364,94 +4364,95 @@ fi"""}]
             return None
 
     def save_screenshot(self, theme_name, screenshot_url, headers):
-        # Define the folder where screenshots will be saved locally
         screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
-        
-        #os.makedirs(screenshots_path)  # Create the base directory if it doesn't exist
-        
-        # Create a folder for each theme inside the screenshots path
         theme_folder_path = os.path.join(screenshots_path, theme_name)
         os.makedirs(theme_folder_path, exist_ok=True)
-
-        # Download the screenshot and save it locally
-        #screenshot_data = requests.get(screenshot_url).content
         response = requests.get(screenshot_url, headers=headers).content
         screenshot_path = os.path.join(theme_folder_path, 'screenshot.png')
-        
         with open(screenshot_path, 'wb') as f:
             f.write(response)
-
-        # Return the local path for the screenshot
         return os.path.join('repo_screenshots', theme_name, 'screenshot.png')
-
 
     def fetch_themes(self):
         themes = {}
         screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
-
-        # Set up headers for requests, including the GitHub token if available
-        headers = {}
-        if self.gittoken:
-            headers["Authorization"] = f"Bearer {self.gittoken}"
-
         try:
-            # Ensure the screenshots directory exists, remove old data first
             if os.path.exists(screenshots_path):
                 shutil.rmtree(screenshots_path)
-
-            # Request the contents of the THEMES_REPO
+            headers = {"Authorization": f"Bearer {self.gittoken}"} if self.gittoken else {}
             response = requests.get(THEMES_REPO, headers=headers)
             response.raise_for_status()
-
-            # Check each item to see if it's a directory (a theme folder)
             for item in response.json():
                 if item["type"] == "dir":
                     theme_name = item["name"]
                     theme_url = item["url"]
-
-                    # Initialize theme data with placeholders
                     themes[theme_name] = {"info": None, "screenshot": None}
-
-                    # Get contents of the theme folder
                     theme_contents = requests.get(theme_url, headers=headers).json()
-
-                    # Find the info.json and screenshot in the theme folder
                     for file in theme_contents:
                         if file["name"] == "info.json":
                             info_url = file["download_url"]
                             info_data = requests.get(info_url, headers=headers).json()
-
-                            # Store entire info.json data
                             themes[theme_name]["info"] = info_data
-
                         elif file["name"] == "img" and file["type"] == "dir":
-                            # Check for screenshot.png in the img folder
                             img_folder_url = file["url"]
                             img_contents = requests.get(img_folder_url, headers=headers).json()
-
-                            # Debugging: Log the structure of img_contents
-                            self.log(f"img_contents for {theme_name}: {img_contents}")
-
-                            # Ensure img_contents is a list of dictionaries
                             if isinstance(img_contents, list):
                                 for img_file in img_contents:
                                     if isinstance(img_file, dict) and img_file.get("name") == "screenshot.png":
-                                        # Download and save the screenshot locally
-                                        local_screenshot_path = self.save_screenshot(theme_name, img_file["download_url"], headers=headers)
+                                        local_screenshot_path = self.save_screenshot(theme_name, img_file["download_url"], headers)
                                         themes[theme_name]["screenshot"] = local_screenshot_path
-                            else:
-                                self.log(f"Unexpected structure for img_contents: {img_contents}")
-
+            sorted_themes = dict(sorted(themes.items(), key=lambda item: item[0].lower()))
             self.log("Themes fetched successfully:")
-            for theme, info in themes.items():
+            for theme, info in sorted_themes.items():
                 version = info["info"].get("version") if info["info"] else "Unknown"
                 self.log(f"{theme}: Version {version}, Screenshot: {info['screenshot']}")
-
-            return themes
+            return sorted_themes
 
         except requests.RequestException as e:
             logging.error(f"Error fetching themes: {e}")
             return {}
+
+    def theme_downloader(self, theme_name):
+        try:
+            headers = {"Authorization": f"Bearer {self.gittoken}"} if self.gittoken else {}
+            
+            # Correct URL construction
+            theme_contents_url = os.path.join(THEMES_REPO, theme_name)
+            
+            response = requests.get(theme_contents_url, headers=headers)
+            response.raise_for_status()
+            contents = response.json()
+            
+            local_path = os.path.join(self._plug_root, "themes", theme_name)
+            
+            if os.path.exists(local_path):
+                shutil.rmtree(local_path)
+            
+            os.makedirs(local_path, exist_ok=True)
+            
+            def download_content(contents, current_path):
+                for item in contents:
+                    item_path = os.path.join(current_path, item['name'])
+                    
+                    if item['type'] == 'dir':
+                        os.makedirs(item_path, exist_ok=True)
+                        dir_response = requests.get(item['url'], headers=headers)
+                        dir_response.raise_for_status()
+                        download_content(dir_response.json(), item_path)
+                    else:
+                        file_response = requests.get(item['download_url'], headers=headers)
+                        file_response.raise_for_status()
+                        with open(item_path, 'wb') as f:
+                            f.write(file_response.content)
+                            
+            download_content(contents, local_path)
+            logging.warning(f"Theme {theme_name} downloaded successfully to {local_path}")
+            
+        except requests.RequestException as e:
+            logging.error(f"Error downloading themes: {e}")
+            logging.error(traceback.format_exc())
+
+
 
     def save_active_config(self, data):
         cfg_path = self.cfg_path
@@ -5600,7 +5601,6 @@ fi"""}]
                 elif path == "ui2":
                     return self.ui2()
 
-
                 elif path == "active_theme":
                     return json.dumps({"theme": self._theme_name})
 
@@ -5679,9 +5679,77 @@ fi"""}]
                         response = json.loads(json.dumps(jreq))
                         rot = int(response['rotation'])
                         theme = response['theme']
+        
                         self.theme_save_config(response['theme'], response['rotation'])
                         self.refresh = True
                         return "success"
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "theme selection error", 500
+
+                elif path == "version_compare":
+                    try:
+                        # Extract data from the request
+                        jreq = request.get_json()  # Get the JSON data from the request
+                        response = json.loads(json.dumps(jreq))  # Deserialize the JSON into a Python dict
+                       
+                        theme = response['theme']  # Extract theme name
+                        version = response['version']  # Extract the version from the request
+                        logging.warning(f'Download selection: theme {theme} version {version}')  # Log the selected theme and version
+
+
+                        # Define the path to the theme's info.json
+                        info_path = os.path.join(self._plug_root, "themes", theme, "info.json")
+
+
+                        # Check if the theme exists
+                        if not os.path.exists(info_path):
+                            logging.error(f"Theme {theme} not found locally.")
+                            return json.dumps({'error': f"Theme {theme} not found locally."}), 404
+                       
+                        # Read the local theme's info.json
+                        with open(info_path, 'r') as f:
+                            local_info = json.load(f)
+                            local_version = local_info.get('version')  # Extract the local version
+                       
+                        # Log the local version
+                        if local_version is None:
+                            logging.warning(f"Local version not found for theme {theme}.")
+                            local_version = 'Unknown'  # Fallback value if no version found
+                       
+                        logging.warning(f"Local theme version: {local_version}")
+
+
+                        # Compare the versions and return True if the downloaded version is newer
+                        is_newer = version > local_version if local_version != 'Unknown' else False
+                        logging.warning(f'Is the online theme newer: {is_newer}')
+
+
+                        # Return the response with both the `is_newer` flag and the local version number
+                        return json.dumps({
+                            'is_newer': is_newer,
+                            'local_version': local_version
+                        }), 200  # Return the comparison result and the local version
+
+
+                    except Exception as ex:
+                        # Log any errors that occur
+                        logging.error(f"Error handling theme version: {ex}")
+                        logging.error(traceback.format_exc())
+                        return json.dumps({'error': 'Theme version error'}), 500
+
+                # theme_download_select
+                if path == "theme_download_select":
+                    try:
+                        jreq = request.get_json()
+                        response = json.loads(json.dumps(jreq))
+                        theme = response['theme']
+                        logging.warning(f'Download selection: theme {theme}')
+                        self.theme_downloader(theme)
+                        #self.theme_save_config(response['theme'])
+                        #self.refresh = True
+                        return "success", 200
                     except Exception as ex:
                         logging.error(ex)
                         logging.error(traceback.format_exc())
