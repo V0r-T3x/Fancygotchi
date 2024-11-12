@@ -463,7 +463,7 @@ INDEX = """
             <div id="theme_downloader" class="ui-content theme">
                 <div id="download_list_refresh">
                     <p align="center">
-                        <button id="select-theme-downloader-button" onclick="loadThemeTab()">Load theme list</button>
+                        <button id="select-theme-downloader-btn" onclick="loadThemeRepo()">Load theme list</button>
                     </p>
                 </div>
                 <div id="loading-spinner" style="display:none;"><p align="center">Loading...</p></div>
@@ -808,7 +808,7 @@ function saveConfig() {
     });
     active_theme(function(activeTheme) {
         loadConfig(0, activeTheme)
-        theme_info()
+        theme_info(activeTheme)
     });
 }
 
@@ -1050,7 +1050,14 @@ $(document).on('click', '#confirm-delete', function() {
         var json = { "theme": theme };
         sendJSON("Fancygotchi/theme_delete", json, function(xhr) {
             if (xhr.status == 200) {
-                theme_list();
+                
+                active_theme(function(activeTheme) {
+                    theme_list();
+                    $('#theme-selector').val(activeTheme);
+                    $('#theme-selector').find('option[value="' + activeTheme + '"]').prop('selected', true);
+                    $('#theme-selector').trigger('change');
+                    theme_info(activeTheme)
+                });
             }
         });
     } else {
@@ -1062,7 +1069,7 @@ function theme_list() {
         populateThemeSelector(response);
     });
 }
-function theme_info() {
+function theme_info(activeTheme) {
     var theme = $('#theme-selector').val();
     var json = { "theme": theme };
     sendJSON("Fancygotchi/theme_info", json, function(xhr) {
@@ -1078,57 +1085,80 @@ $('#theme-selector').change(function() {
 function populateThemeSelector(themes) {
     var selectElement = $('#theme-selector');
     selectElement.empty();
-    var defaultOption = $('<option>').val('Default').text('Default');
-    selectElement.append(defaultOption);
-    themes.forEach(function(theme) {
-        var option = $('<option>').val(theme).text(theme);
-        selectElement.append(option);
+    
+    active_theme(function(activeTheme) {
+        var defaultOption = $('<option>').val('Default').text('Default');
+        selectElement.append(defaultOption);
+        
+        themes.forEach(function(theme) {
+            var option = $('<option>').val(theme).text(theme);
+            if (theme === activeTheme) {
+                option.attr('selected', 'selected');
+            }
+            selectElement.append(option);
+        });
+        
+        if (!themes.includes('Default') && !activeTheme) {
+            defaultOption.attr('selected', 'selected');
+        }
+        
+        selectElement.selectmenu('refresh');
     });
-    if (!themes.includes('Default')) {
-        defaultOption.attr('selected', 'selected');
-    }
-    selectElement.selectmenu('refresh');
 }
 function populateThemeInfo(themeInfo) {
     var $themeDescriptionContent = $('#theme-description-content');
-    var theme = $('#theme-selector').val();
     
-    if (theme == '') {
-        theme = 'Default';
-    }
-    
-    $themeDescriptionContent.empty();
-    $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
-    
-    var img = new Image();
-    var imgPath = '/screenshots/' + theme + '/screenshot.png';
-    
-    img.onload = function() {
-        document.getElementById('screenshot').src = imgPath;
-    };
-    
-    img.onerror = function() {
-        document.getElementById('screenshot').src = '/screenshots/screenshot.png';
-    };
-    
-    img.src = imgPath;
-    
-    $.each(themeInfo, function(key, value) {
-        var val = '<span class="preserve-line-breaks">' + value + '</span>';
-        var listItem = $('<li>').html(key + ': ' + val);
-        $themeDescriptionContent.append(listItem);
+    active_theme(function(activeTheme) {
+        var theme = $('#theme-selector').val();
+        
+        if (theme == '') {
+            theme = activeTheme || 'Default';
+        }
+        
+        $themeDescriptionContent.empty();
+        $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
+        
+        var img = new Image();
+        var imgPath = '/screenshots/' + theme + '/screenshot.png';
+        
+        img.onload = function() {
+            document.getElementById('screenshot').src = imgPath;
+        };
+        
+        img.onerror = function() {
+            document.getElementById('screenshot').src = '/screenshots/screenshot.png';
+        };
+        
+        img.src = imgPath;
+        
+        $.each(themeInfo, function(key, value) {
+            var val = '<span class="preserve-line-breaks">' + value + '</span>';
+            var listItem = $('<li>').html(key + ': ' + val);
+            $themeDescriptionContent.append(listItem);
+        });
     });
 }
 
-function loadThemeTab() {
-    $('#theme_downloader').find('select, button').prop('disabled', true); // Disable dropdown and button
-    $('#loading-spinner').show(); 
+
+function loadThemeRepo() {
+    $('#theme_downloader').find('select, button').prop('disabled', true);
+    $('#loading-spinner').show();
     $('#download_window').hide();
+    $('#loading-spinner p').text("Loading...");
+
     loadJSON("Fancygotchi/theme_download_list", function(response) {
-        populateThemeSelector_downloader(response);
-        $('#loading-spinner').hide();
-        $('#download_window').show();
-        $('#theme_downloader').find('select, button').prop('disabled', false); // Enable dropdown and button
+        console.log(response.status);
+        if (response.status == 200) {
+            populateThemeSelector_downloader(response.data);
+            $('#loading-spinner').hide();
+            $('#download_window').show();
+            $('#theme_downloader').find('select, button').prop('disabled', false);
+        }
+        else {
+            var error = response.error || "An error occurred";
+            $('#loading-spinner p').text(error);
+            $('#theme_downloader').find('select, button').prop('disabled', false);
+        }
     });
 }
 
@@ -1179,6 +1209,9 @@ function populateThemeInfo_downloader(themeInfo) {
 
 function theme_download_select() {
     var theme = document.getElementById("theme-downloader-selector").value;
+    
+    $('#theme_downloader').find('select, button').prop('disabled', true);
+
     var themes = window.themes; 
     var version = themes[theme]?.info?.version || 'Unknown'; 
     var json = {
@@ -1191,20 +1224,30 @@ function theme_download_select() {
         var isNewer = data.is_newer;
         if (isNewer) {
             var message = `A newer ${theme} version (${version}) is available. Your current version is ${localVersion}. Would you like to update?`;
-        } else {
+        } 
+        if (!isNewer) {
             var message = `You have the ${theme} version ${localVersion} installed. The available version is ${version}. Do you want to overwrite your current version?`;
+        }
+        if (isNewer == null) {
+            var message = `You will download ${theme} version ${version}. Do you want to peoceed?`;
         }
         var confirmOverwrite = confirm(message);
         if (confirmOverwrite) {
             var json = {
                 "theme": theme,
             };
+            $('#loading-spinner').show();
+            $('#loading-spinner p').text("Downloading...");
             sendJSON("Fancygotchi/theme_download_select", json, function(response) {
                 if (response.status == 200) {
+                    $('#loading-spinner').hide();
                     alert("Theme updated successfully!");
+                    theme_list();
                 } else {
+                    $('#loading-spinner').hide();
                     alert("There was an error updating the theme.");
                 }
+                $('#theme_downloader').find('select, button').prop('disabled', false);
             });
         }
     });
@@ -1255,9 +1298,16 @@ function loadJSON(url, callback) {
         if (xobj.readyState == 4 && xobj.status == "200") {
             callback(JSON.parse(xobj.responseText));
         }
+        if (xobj.readyState == 4 && xobj.status == "500") {
+            callback(JSON.parse(xobj.responseText));
+        }
+        if (xobj.readyState == 4 && xobj.status == "404") {
+            callback(JSON.parse(xobj.responseText));
+        }
     };
     xobj.send(null);
 }
+
 function flattenJson(data) {
     var result = {};
 
@@ -3099,17 +3149,23 @@ def check_internet_and_repo():
     try:
         requests.get("https://www.google.com", timeout=5)
         response = requests.get(THEMES_REPO, timeout=5)
+        
         if response.status_code == 200:
-            return True
+            return True, "Connection successful"
         else:
-            logging.warning(f"Connected to the internet, but repo is not accessible. Status code: {response.status_code}")
-            return False    
-    except requests.ConnectionError:
-        logging.warning("No internet connection.")
-        return False
-    except requests.Timeout:
-        logging.warning("Connection timed out.")
-        return False
+            error_msg = f"Repository not accessible. Status code: {response.status_code}"
+            logging.warning(error_msg)
+            return False, error_msg
+            
+    except requests.ConnectionError as e:
+        error_msg = f"No internet connection: {str(e)}"
+        logging.warning(error_msg)
+        return False, error_msg
+        
+    except requests.Timeout as e:
+        error_msg = f"Connection timed out: {str(e)}"
+        logging.warning(error_msg)
+        return False, error_msg
 
 def get_all_plugin_names(fancygotchi):
     config_dict = fancygotchi._config 
@@ -3303,9 +3359,7 @@ class Fancygotchi(plugins.Plugin):
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
     def __init__(self):
-        self.pyenv = sys.executable
-        logging.warning(f'Repo reachable: {check_internet_and_repo()}')
-    
+        self.pyenv = sys.executable    
         self.running = False
         self.fancy_menu = None
         self.actions_log = []
@@ -4385,6 +4439,7 @@ fi"""}]
             for item in response.json():
                 if item["type"] == "dir":
                     theme_name = item["name"]
+                    self.log(f"Fetching theme: {theme_name}")
                     theme_url = item["url"]
                     themes[theme_name] = {"info": None, "screenshot": None}
                     theme_contents = requests.get(theme_url, headers=headers).json()
@@ -4415,21 +4470,20 @@ fi"""}]
     def theme_downloader(self, theme_name):
         try:
             headers = {"Authorization": f"Bearer {self.gittoken}"} if self.gittoken else {}
-            
-            # Correct URL construction
             theme_contents_url = os.path.join(THEMES_REPO, theme_name)
             
             response = requests.get(theme_contents_url, headers=headers)
             response.raise_for_status()
             contents = response.json()
-            
-            local_path = os.path.join(self._plug_root, "themes", theme_name)
-            
-            if os.path.exists(local_path):
-                shutil.rmtree(local_path)
-            
-            os.makedirs(local_path, exist_ok=True)
-            
+
+            # Create temporary directory
+            temp_dir = tempfile.mkdtemp()
+            temp_theme_path = os.path.join(temp_dir, theme_name)
+            final_path = os.path.join(self._plug_root, "themes", theme_name)
+
+            # Create temp theme directory
+            os.makedirs(temp_theme_path, exist_ok=True)
+
             def download_content(contents, current_path):
                 for item in contents:
                     item_path = os.path.join(current_path, item['name'])
@@ -4444,14 +4498,28 @@ fi"""}]
                         file_response.raise_for_status()
                         with open(item_path, 'wb') as f:
                             f.write(file_response.content)
-                            
-            download_content(contents, local_path)
-            logging.warning(f"Theme {theme_name} downloaded successfully to {local_path}")
-            
+
+            # Download to temp directory
+            download_content(contents, temp_theme_path)
+
+            # Remove existing theme if present
+            if os.path.exists(final_path):
+                shutil.rmtree(final_path)
+
+            # Move theme from temp to final location
+            shutil.move(temp_theme_path, final_path)
+
+            # Clean up temp directory
+            shutil.rmtree(temp_dir)
+
+            logging.warning(f"Theme {theme_name} downloaded successfully to {final_path}")
+
         except requests.RequestException as e:
             logging.error(f"Error downloading themes: {e}")
             logging.error(traceback.format_exc())
-
+            # Clean up temp directory in case of error
+            if 'temp_dir' in locals():
+                shutil.rmtree(temp_dir)
 
 
     def save_active_config(self, data):
@@ -5609,15 +5677,23 @@ fi"""}]
                     return json.dumps(themes)
 
                 elif path == "theme_download_list":
+                    self.log("Theme download list fetching started...")
                     try:
-                        if check_internet_and_repo():
+                        isInternet, msg = check_internet_and_repo()
+                        self.log(f"isInternet: {isInternet}, msg: {msg}")
+                        if isInternet:
+
                             themes_dict = self.fetch_themes()
-                            return json.dumps(themes_dict)
-                        else: return {}
+                            logging.warning(themes_dict)
+                            return json.dumps({"status": 200, "data": themes_dict}), 200
+                        else:
+                            # Return a properly formatted JSON response
+                            return json.dumps({"error": msg}), 500
                     except Exception as ex:
                         logging.error(ex)
                         logging.error(traceback.format_exc())
-                        return "theme download list error", 500
+                        return json.dumps({"error": "Theme download list error"}), 500
+
                     
                 elif str(path).split("/")[0] == "theme_export":
                     try: 
@@ -5689,57 +5765,38 @@ fi"""}]
                         return "theme selection error", 500
 
                 elif path == "version_compare":
+                    is_newer = None
+                    local_version = None
                     try:
-                        # Extract data from the request
-                        jreq = request.get_json()  # Get the JSON data from the request
-                        response = json.loads(json.dumps(jreq))  # Deserialize the JSON into a Python dict
-                       
-                        theme = response['theme']  # Extract theme name
-                        version = response['version']  # Extract the version from the request
-                        logging.warning(f'Download selection: theme {theme} version {version}')  # Log the selected theme and version
-
-
-                        # Define the path to the theme's info.json
+                        jreq = request.get_json() 
+                        response = json.loads(json.dumps(jreq)) 
+                        theme = response['theme']
+                        version = response['version']
+                        logging.warning(f'Download selection: theme {theme} version {version}')
                         info_path = os.path.join(self._plug_root, "themes", theme, "info.json")
-
-
-                        # Check if the theme exists
                         if not os.path.exists(info_path):
                             logging.error(f"Theme {theme} not found locally.")
-                            return json.dumps({'error': f"Theme {theme} not found locally."}), 404
-                       
-                        # Read the local theme's info.json
-                        with open(info_path, 'r') as f:
-                            local_info = json.load(f)
-                            local_version = local_info.get('version')  # Extract the local version
-                       
-                        # Log the local version
-                        if local_version is None:
-                            logging.warning(f"Local version not found for theme {theme}.")
-                            local_version = 'Unknown'  # Fallback value if no version found
-                       
-                        logging.warning(f"Local theme version: {local_version}")
-
-
-                        # Compare the versions and return True if the downloaded version is newer
-                        is_newer = version > local_version if local_version != 'Unknown' else False
+                            #return json.dumps({'error': f"Theme {theme} not found locally."}), 404
+                            
+                        else:
+                            with open(info_path, 'r') as f:
+                                local_info = json.load(f)
+                                local_version = local_info.get('version')
+                            if local_version is None:
+                                logging.warning(f"Local version not found for theme {theme}.")
+                                local_version = 'Unknown'
+                            logging.warning(f"Local theme version: {local_version}")
+                            is_newer = version > local_version if local_version != 'Unknown' else False
                         logging.warning(f'Is the online theme newer: {is_newer}')
-
-
-                        # Return the response with both the `is_newer` flag and the local version number
                         return json.dumps({
                             'is_newer': is_newer,
                             'local_version': local_version
-                        }), 200  # Return the comparison result and the local version
-
-
+                        }), 200
                     except Exception as ex:
-                        # Log any errors that occur
                         logging.error(f"Error handling theme version: {ex}")
                         logging.error(traceback.format_exc())
                         return json.dumps({'error': 'Theme version error'}), 500
 
-                # theme_download_select
                 if path == "theme_download_select":
                     try:
                         jreq = request.get_json()
@@ -5747,13 +5804,11 @@ fi"""}]
                         theme = response['theme']
                         logging.warning(f'Download selection: theme {theme}')
                         self.theme_downloader(theme)
-                        #self.theme_save_config(response['theme'])
-                        #self.refresh = True
                         return "success", 200
                     except Exception as ex:
                         logging.error(ex)
                         logging.error(traceback.format_exc())
-                        return "theme selection error", 500
+                        return json.dumps({'error': f"theme download error: {ex}"}) , 500
 
                 elif path == "fancyserver":
                     try:
