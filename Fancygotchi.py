@@ -1054,8 +1054,6 @@ $(document).on('click', '#confirm-delete', function() {
                 active_theme(function(activeTheme) {
                     theme_list();
                     $('#theme-selector').val(activeTheme);
-                    
-                    // Get theme info through the proper API endpoint
                     theme_info(activeTheme, function(themeInfo) {
                         populateThemeInfo(themeInfo);
                     });
@@ -1077,7 +1075,7 @@ function theme_info(activeTheme) {
     var json = { "theme": theme };
     sendJSON("Fancygotchi/theme_info", json, function(xhr) {
         if (xhr.status == 200) {
-            var themeInfo = JSON.parse(xhr.responseText); // Parse the response as JSON
+            var themeInfo = JSON.parse(xhr.responseText);
             console.log(themeInfo);
             populateThemeInfo(themeInfo);
         }
@@ -1111,20 +1109,14 @@ function populateThemeSelector(themes) {
 }
 function populateThemeInfo(themeInfo) {
     var $themeDescriptionContent = $('#theme-description-content');
-    
     active_theme(function(activeTheme) {
         var theme = $('#theme-selector').val() || activeTheme || 'Default';
-        
         $themeDescriptionContent.empty();
         $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
-        
-        // Set the screenshot src directly
         $('#screenshot').attr('src', '/screenshots/' + theme + '/screenshot.png')
             .on('error', function() {
                 $(this).attr('src', '/screenshots/screenshot.png');
             });
-        
-        // Add theme information
         Object.entries(themeInfo).forEach(([key, value]) => {
             var val = '<span class="preserve-line-breaks">' + value + '</span>';
             $themeDescriptionContent.append($('<li>').html(key + ': ' + val));
@@ -2020,7 +2012,7 @@ class FancyDisplay:
         self.fps = fps
         self.fb = self.find_fb_device()
         self.current_mode = mode
-        self.current_screen_saver = sub_mode  # Default screen saver mode
+        self.current_screen_saver = sub_mode
         self.modes = ['screen_saver', 'auxiliary', 'terminal']
         self.screen_saver_modes = ['show_logo', 'moving_shapes', 'random_colors', 'hyper_drive', 'show_animation']
         if config: self.screen_data = config
@@ -3402,16 +3394,19 @@ class Fancygotchi(plugins.Plugin):
                     'bg_color': 'white',
                     'bg_image': '',
                     'bg_anim_image': '',
-                    'font_sizes': [10, 8, 10, 25, 25, 9],
+                    #[Bold, BoldSmall, Medium, Huge, BoldBig, Small]
+                    'font_sizes': [14, 9, 14, 25, 19, 9],
                     'font': 'DejaVuSansMono',
                     'font_bold': 'DejaVuSansMono-Bold',
                     'status_font': 'DejaVuSansMono',
                     'font_awesome': '',
                     'size_offset': 5,
                     'label_spacing': 9,
+                    'label_line_spacing': 0,
                     'cursor': '❤',
                     'friend_bars': '▌',
                     'friend_no_bars': '│',
+                    'base_text_color': ['black'],
                     'main_text_color': ['black'],
                     'color_mode': ['P', 'P']
                 },
@@ -4464,23 +4459,16 @@ fi"""}]
         try:
             headers = {"Authorization": f"Bearer {self.gittoken}"} if self.gittoken else {}
             theme_contents_url = os.path.join(THEMES_REPO, theme_name)
-            
             response = requests.get(theme_contents_url, headers=headers)
             response.raise_for_status()
             contents = response.json()
-
-            # Create temporary directory
             temp_dir = tempfile.mkdtemp()
             temp_theme_path = os.path.join(temp_dir, theme_name)
             final_path = os.path.join(self._plug_root, "themes", theme_name)
-
-            # Create temp theme directory
             os.makedirs(temp_theme_path, exist_ok=True)
-
             def download_content(contents, current_path):
                 for item in contents:
                     item_path = os.path.join(current_path, item['name'])
-                    
                     if item['type'] == 'dir':
                         os.makedirs(item_path, exist_ok=True)
                         dir_response = requests.get(item['url'], headers=headers)
@@ -4491,26 +4479,16 @@ fi"""}]
                         file_response.raise_for_status()
                         with open(item_path, 'wb') as f:
                             f.write(file_response.content)
-
-            # Download to temp directory
             download_content(contents, temp_theme_path)
-
-            # Remove existing theme if present
             if os.path.exists(final_path):
                 shutil.rmtree(final_path)
-
-            # Move theme from temp to final location
             shutil.move(temp_theme_path, final_path)
-
-            # Clean up temp directory
             shutil.rmtree(temp_dir)
-
             logging.warning(f"Theme {theme_name} downloaded successfully to {final_path}")
 
         except requests.RequestException as e:
             logging.error(f"Error downloading themes: {e}")
             logging.error(traceback.format_exc())
-            # Clean up temp directory in case of error
             if 'temp_dir' in locals():
                 shutil.rmtree(temp_dir)
 
@@ -4673,6 +4651,8 @@ fi"""}]
                     setattr(ui, '_web_mode', self._color_mode[0])
                     setattr(ui, '_hw_mode', self._color_mode[1])
                 if hasattr(th_opt, 'main_text_color') and th_opt.get('main_text_color', []) != []:
+                    self._icolor = 0
+                if hasattr(th_opt, 'base_text_color') and th_opt.get('base_text_color', []) != []:
                     self._icolor = 0
                 self.fps = th_opt.get('second_screen_fps', 1)
                 self.webui_fps = int(1000*th_opt.get('webui_fps', 1))
@@ -4919,6 +4899,10 @@ fi"""}]
                 if self._state[key]['color'] != th_widget[key]['color']:
                     self._state[key]['color'] = th_widget[key]['color']
                     self._state[key]['icolor'] = 0
+            elif "base_text_color" in th_opt and th_opt['base_text_color']:
+                if self._state[key]['color'] != th_opt['base_text_color']:
+                    self._state[key]['color'] = th_opt['base_text_color']
+                    self._state[key]['icolor'] = 0
             else:
                 if self._state[key]['color'] != [ui._state.get_attr(key, 'color')]:
                     self._state[key]['color'] = [ui._state.get_attr(key, 'color')]
@@ -4944,10 +4928,12 @@ fi"""}]
 
             if key in th_widget and th_widget[key].get('position'):
                 self._state[key].update({'position': tuple(th_widget[key]['position'])})
-
             self._state_default[key].update({'color': [ui._state.get_attr(key, 'color')]})
             if key in th_widget and th_widget[key].get('color'):
                 self._state[key].update({'color': th_widget[key]['color']})
+                self._state[key].update({'icolor': 0})
+            elif th_opt.get('base_text_color'):
+                self._state[key].update({'color': th_opt['base_text_color']})
                 self._state[key].update({'icolor': 0})
             else:
                 self._state[key].update({'color': [ui._state.get_attr(key, 'color')]})
@@ -5023,9 +5009,10 @@ fi"""}]
                     self._state[key].update({'label_spacing': th_opt['label_spacing']})
                 else:
                     self._state[key].update({'label_spacing': ui._state.get_attr(key, 'label_spacing')})
-                if key in th_widget and th_widget[key].get('label_line_spacing', 0):
-                    
+                if key in th_widget and th_widget[key].get('label_line_spacing'):
                     self._state[key].update({'label_line_spacing': th_widget[key]['label_line_spacing']})
+                elif 'label_line_spacing' in th_opt and th_opt['label_line_spacing']:
+                    self._state[key].update({'label_line_spacing': th_opt['label_line_spacing']})
                 else:
                     self._state[key].update({'label_line_spacing': 0})
 
@@ -5413,8 +5400,14 @@ fi"""}]
                 else:
                     if state['widget_type'] == 'LabeledValue':
                         x, y = state['position']
+                        logging.warning(f'****************{widget}****************')
+                        logging.warning(f'label line spacing: {state["label_line_spacing"]}')
+                        logging.warning(f'label spacing: {state["label_spacing"]}')
+                        logging.warning(f'x: {x}, y: {y}')
+                        
                         v_y = y + state['label_line_spacing']
                         v_x = x + state['label_spacing'] + 5 * len(state['label'])
+                        logging.warning(f'v_x: {v_x}, v_y: {v_y}')
                     else:
                         v_x, v_y = state['position']
                 
@@ -5680,7 +5673,6 @@ fi"""}]
                             logging.warning(themes_dict)
                             return json.dumps({"status": 200, "data": themes_dict}), 200
                         else:
-                            # Return a properly formatted JSON response
                             return json.dumps({"error": msg}), 500
                     except Exception as ex:
                         logging.error(ex)
@@ -5769,8 +5761,6 @@ fi"""}]
                         info_path = os.path.join(self._plug_root, "themes", theme, "info.json")
                         if not os.path.exists(info_path):
                             logging.error(f"Theme {theme} not found locally.")
-                            #return json.dumps({'error': f"Theme {theme} not found locally."}), 404
-                            
                         else:
                             with open(info_path, 'r') as f:
                                 local_info = json.load(f)
