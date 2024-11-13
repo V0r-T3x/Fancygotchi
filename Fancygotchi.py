@@ -960,13 +960,7 @@ function copyTheme() {
             sendJSON("Fancygotchi/theme_copy", {"theme": theme, "new_name": newName}, function(response) {
                 if (response.status == 200) {
                     alert("Theme copied successfully");
-                    active_theme(function(activeTheme) {
-                        theme_list();
-                        $('#theme-selector').val(activeTheme);
-                        theme_info(activeTheme, function(themeInfo) {
-                            theme_info(themeInfo);
-                        });
-                    });
+                    theme_list();
                 } else {
                     alert("Error copying theme: " + response.responseText);
                 }
@@ -1057,13 +1051,7 @@ $(document).on('click', '#confirm-delete', function() {
         
         sendJSON("Fancygotchi/theme_delete", json, function(xhr) {
             if (xhr.status == 200) {
-                active_theme(function(activeTheme) {
-                    theme_list();
-                    $('#theme-selector').val(activeTheme);
-                    theme_info(activeTheme, function(themeInfo) {
-                        theme_info(themeInfo);
-                    });
-                });
+                theme_list();
             }
         });
     } else {
@@ -1072,10 +1060,13 @@ $(document).on('click', '#confirm-delete', function() {
 });
 
 function theme_list() {
-    loadJSON("Fancygotchi/theme_list", function(response) {
-        populateThemeSelector(response, function(response) {
-            theme_info(response);
+
+    active_theme(function(activeTheme) {
+        loadJSON("Fancygotchi/theme_list", function(response) {
+            populateThemeSelector(response, activeTheme);
         });
+        $('#theme-selector').val(activeTheme);
+        theme_info(activeTheme);
     });
 }
 function theme_info(activeTheme) {
@@ -1092,29 +1083,29 @@ function theme_info(activeTheme) {
 $('#theme-selector').change(function() {
     theme_info($(this).val());
 });
-function populateThemeSelector(themes) {
+function populateThemeSelector(themes, activeTheme) {
     var selectElement = $('#theme-selector');
     selectElement.empty();
     
-    active_theme(function(activeTheme) {
-        var defaultOption = $('<option>').val('Default').text('Default');
-        selectElement.append(defaultOption);
-        
-        themes.forEach(function(theme) {
-            var option = $('<option>').val(theme).text(theme);
-            if (theme === activeTheme) {
-                option.attr('selected', 'selected');
-            }
-            selectElement.append(option);
-        });
-        
-        if (!themes.includes('Default') && !activeTheme) {
-            defaultOption.attr('selected', 'selected');
+
+    var defaultOption = $('<option>').val('Default').text('Default');
+    selectElement.append(defaultOption);
+    
+    themes.forEach(function(theme) {
+        var option = $('<option>').val(theme).text(theme);
+        if (theme === activeTheme) {
+            option.attr('selected', 'selected');
         }
-        
-        selectElement.selectmenu('refresh');
-        return activeTheme
+        selectElement.append(option);
     });
+    
+    if (!themes.includes('Default') && !activeTheme) {
+        defaultOption.attr('selected', 'selected');
+    }
+    
+    selectElement.selectmenu('refresh');
+    return activeTheme
+
 }
 function populateThemeInfo(themeInfo) {
     var $themeDescriptionContent = $('#theme-description-content');
