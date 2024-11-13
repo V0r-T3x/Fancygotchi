@@ -960,7 +960,13 @@ function copyTheme() {
             sendJSON("Fancygotchi/theme_copy", {"theme": theme, "new_name": newName}, function(response) {
                 if (response.status == 200) {
                     alert("Theme copied successfully");
-                    theme_list();
+                    active_theme(function(activeTheme) {
+                        theme_list();
+                        $('#theme-selector').val(activeTheme);
+                        theme_info(activeTheme, function(themeInfo) {
+                            theme_info(themeInfo);
+                        });
+                    });
                 } else {
                     alert("Error copying theme: " + response.responseText);
                 }
@@ -1055,7 +1061,7 @@ $(document).on('click', '#confirm-delete', function() {
                     theme_list();
                     $('#theme-selector').val(activeTheme);
                     theme_info(activeTheme, function(themeInfo) {
-                        populateThemeInfo(themeInfo);
+                        theme_info(themeInfo);
                     });
                 });
             }
@@ -1067,7 +1073,9 @@ $(document).on('click', '#confirm-delete', function() {
 
 function theme_list() {
     loadJSON("Fancygotchi/theme_list", function(response) {
-        populateThemeSelector(response);
+        populateThemeSelector(response, function(response) {
+            theme_info(response);
+        });
     });
 }
 function theme_info(activeTheme) {
@@ -1105,24 +1113,41 @@ function populateThemeSelector(themes) {
         }
         
         selectElement.selectmenu('refresh');
+        return activeTheme
     });
 }
 function populateThemeInfo(themeInfo) {
     var $themeDescriptionContent = $('#theme-description-content');
+
     active_theme(function(activeTheme) {
         var theme = $('#theme-selector').val() || activeTheme || 'Default';
+        console.log(theme);
+
         $themeDescriptionContent.empty();
         $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
-        $('#screenshot').attr('src', '/screenshots/' + theme + '/screenshot.png')
-            .on('error', function() {
-                $(this).attr('src', '/screenshots/screenshot.png');
-            });
+
+        var $screenshot = $('#screenshot');
+        var screenshotSrc = $('#theme-selector').val() == activeTheme 
+            ? '/img/screenshot.png' 
+            : '/screenshots/' + theme + '/screenshot.png';
+
+        // Add a cache-busting timestamp parameter
+        $screenshot.attr('src', screenshotSrc + '?cache_buster=' + new Date().getTime());
+        
+        // Log the src attribute to check the updated URL
+        console.log($screenshot.attr('src'));
+
+        $screenshot.on('error', function() {
+            $(this).attr('src', '/screenshots/screenshot.png?cache_buster=' + new Date().getTime());
+        });
+
         Object.entries(themeInfo).forEach(([key, value]) => {
             var val = '<span class="preserve-line-breaks">' + value + '</span>';
             $themeDescriptionContent.append($('<li>').html(key + ': ' + val));
         });
     });
 }
+
 
 
 function loadThemeRepo() {
@@ -5400,14 +5425,14 @@ fi"""}]
                 else:
                     if state['widget_type'] == 'LabeledValue':
                         x, y = state['position']
-                        logging.warning(f'****************{widget}****************')
-                        logging.warning(f'label line spacing: {state["label_line_spacing"]}')
-                        logging.warning(f'label spacing: {state["label_spacing"]}')
-                        logging.warning(f'x: {x}, y: {y}')
+                        #logging.warning(f'****************{widget}****************')
+                        #logging.warning(f'label line spacing: {state["label_line_spacing"]}')
+                        #logging.warning(f'label spacing: {state["label_spacing"]}')
+                        #logging.warning(f'x: {x}, y: {y}')
                         
                         v_y = y + state['label_line_spacing']
                         v_x = x + state['label_spacing'] + 5 * len(state['label'])
-                        logging.warning(f'v_x: {v_x}, v_y: {v_y}')
+                        #logging.warning(f'v_x: {v_x}, v_y: {v_y}')
                     else:
                         v_x, v_y = state['position']
                 
