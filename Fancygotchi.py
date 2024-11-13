@@ -1045,18 +1045,20 @@ function theme_export() {
 }
 $(document).on('click', '#confirm-delete', function() {
     var theme = $('#theme-selector').val();
+    
     if (theme != "Default") {
-        
         var json = { "theme": theme };
+        
         sendJSON("Fancygotchi/theme_delete", json, function(xhr) {
             if (xhr.status == 200) {
-                
                 active_theme(function(activeTheme) {
                     theme_list();
                     $('#theme-selector').val(activeTheme);
-                    $('#theme-selector').find('option[value="' + activeTheme + '"]').prop('selected', true);
-                    $('#theme-selector').trigger('change');
-                    theme_info(activeTheme)
+                    
+                    // Get theme info through the proper API endpoint
+                    theme_info(activeTheme, function(themeInfo) {
+                        populateThemeInfo(themeInfo);
+                    });
                 });
             }
         });
@@ -1064,6 +1066,7 @@ $(document).on('click', '#confirm-delete', function() {
         alert('Default theme cannot be deleted.');
     }
 });
+
 function theme_list() {
     loadJSON("Fancygotchi/theme_list", function(response) {
         populateThemeSelector(response);
@@ -1075,6 +1078,7 @@ function theme_info(activeTheme) {
     sendJSON("Fancygotchi/theme_info", json, function(xhr) {
         if (xhr.status == 200) {
             var themeInfo = JSON.parse(xhr.responseText); // Parse the response as JSON
+            console.log(themeInfo);
             populateThemeInfo(themeInfo);
         }
     });
@@ -1109,32 +1113,21 @@ function populateThemeInfo(themeInfo) {
     var $themeDescriptionContent = $('#theme-description-content');
     
     active_theme(function(activeTheme) {
-        var theme = $('#theme-selector').val();
-        
-        if (theme == '') {
-            theme = activeTheme || 'Default';
-        }
+        var theme = $('#theme-selector').val() || activeTheme || 'Default';
         
         $themeDescriptionContent.empty();
         $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
         
-        var img = new Image();
-        var imgPath = '/screenshots/' + theme + '/screenshot.png';
+        // Set the screenshot src directly
+        $('#screenshot').attr('src', '/screenshots/' + theme + '/screenshot.png')
+            .on('error', function() {
+                $(this).attr('src', '/screenshots/screenshot.png');
+            });
         
-        img.onload = function() {
-            document.getElementById('screenshot').src = imgPath;
-        };
-        
-        img.onerror = function() {
-            document.getElementById('screenshot').src = '/screenshots/screenshot.png';
-        };
-        
-        img.src = imgPath;
-        
-        $.each(themeInfo, function(key, value) {
+        // Add theme information
+        Object.entries(themeInfo).forEach(([key, value]) => {
             var val = '<span class="preserve-line-breaks">' + value + '</span>';
-            var listItem = $('<li>').html(key + ': ' + val);
-            $themeDescriptionContent.append(listItem);
+            $themeDescriptionContent.append($('<li>').html(key + ': ' + val));
         });
     });
 }
