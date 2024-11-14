@@ -17,7 +17,7 @@
 
 *I'm in active development, if you want encourage me, become a [Patreon](https://patreon.com/v0rt3x_workshop) or send me a voluntary contribution with [Paypal](https://www.paypal.com/paypalme/v0r73x?country.x=CA&locale.x=en_US)*  
 
-# ** To use Fancygotchi 2.0 you need to have a board ABOVE the raspberry pi zero w. **
+# ** The raspberry pi zero W need a fix to run, you need to use [`/pwnagotchi/plugins/__init__.py`](https://github.com/Sniffleupagus/pwnagotchi-snflpgs/blob/snflpgs/pwnagotchi/plugins/__init__.py) **
 # ** The rpi4 need some additional steps to access all the features, this will be documented soon **
 
 # :books: The documentation is available in the [FANCYGOTCHI WIKI](https://github.com/V0r-T3x/fancygotchi/wiki)
