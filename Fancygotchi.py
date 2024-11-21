@@ -10,6 +10,7 @@ import numpy as np
 import os
 import random
 import re
+import requests
 import shutil
 import struct
 import subprocess
@@ -38,6 +39,10 @@ from pwnagotchi.plugins import toggle_plugin
 from pwnagotchi.ui import display
 from pwnagotchi.ui.hw import display_for
 from pwnagotchi.utils import load_config, merge_config, save_config
+
+V0RT3X_REPO = "https://github.com/V0r-T3x"
+FANCY_REPO = os.path.join(V0RT3X_REPO, "Fancygotchi")
+THEMES_REPO = "https://api.github.com/repos/V0r-T3x/Fancygotchi_themes/contents/fancygotchi_2.0/themes"
 
 
 LOGO = """░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
@@ -114,13 +119,13 @@ INDEX = """
     #tabs {
         border-bottom: 1px solid black;
         text-align: center;}
-    #theme {
+    .theme {
         width: 100%;
         margin-bottom: 20px;}
-    #theme-columns {
+    .theme-columns {
         display: flex;}
-    #select,
-    #theme-description {
+    .select,
+    .theme-description {
         flex: 1;
         margin-right: 20px;}
     #uploader {
@@ -302,6 +307,12 @@ INDEX = """
         font-weight: bold;
         font-size: 24px; /* Makes the arrow icon larger */
     }
+    #download_window {
+        display: none;
+    }
+    #loading-spinner{
+    
+    }
 </style>
 {% endblock %}
 {% block content %}
@@ -393,19 +404,18 @@ INDEX = """
             </div>
         </div>
 
-
-
         <div id="wrap" data-role="tabs">
             <div id="tabs" data-role="navbar">
                 <ul>
                     <li class="ui-btn-active"><a href="#theme" data-theme="a" data-ajax="false">Theme manager</a></li>
+                    <li class=""><a href="#theme_downloader" data-theme="a" data-ajax="false">Theme downloader</a></li>
                     <li class=""><a href="#config" data-theme="a" data-ajax="false">Configuration</a></li>
                     <li class=""><a href="#theme_editor" data-theme="a" data-ajax="false">Theme editor</a></li>
                 </ul>
             </div>
-            <div id="theme" class="ui-content">
-                <div id="theme-columns" class="row">
-                    <div id="select" class="column">
+            <div id="theme" class="ui-content theme">
+                <div id="theme-columns" class="row theme-columns">
+                    <div id="select" class="column select">
                         <label for="theme-selector">Select a theme:</label>
                         <select id="theme-selector">
                             <option value="Default"{% if default_theme == '' %}selected{% endif %}>Default</option>
@@ -413,7 +423,7 @@ INDEX = """
                             <option value="{{ theme }}"{% if default_theme == theme %}selected{% endif %}>{{ theme }}</option>
                             {% endfor %}
                         </select>
-                        <br> <!-- Add a line break for better separation -->
+                        <br>
                         <label for="orientation-selector">Select an orientation:</label>
                         <select id="orientation-selector">
                             <option value=0{% if rotation == 0 %} selected{% endif %}>0</option>
@@ -442,11 +452,36 @@ INDEX = """
                             <button id="create-theme-button" onclick="createNewTheme()">Create Theme</button>
                         </div>
                     </div>
-                    <div id="theme-description" class="column">
+                    <div id="theme-description" class="column theme-description">
                         <h3>Theme Description</h3>
                         <div id="theme-description-content"></div>
                         <img id="screenshot" src="/img/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
                         </br><input type="checkbox" name="fancyserver" data-on-text="Fancyserver" data-off-text="Fancyserver" data-role="flipswitch" id="fancyserver-selector" onchange="fancyserver()" {% if fancyserver %}checked{% endif %} data-wrapper-class="custom-size-flipswitch"></input>
+                    </div>
+                </div>
+            </div>
+            <div id="theme_downloader" class="ui-content theme">
+                <div id="download_list_refresh">
+                    <p align="center">
+                        <button id="select-theme-downloader-btn" onclick="loadThemeRepo()">Load theme list</button>
+                    </p>
+                </div>
+                <div id="loading-spinner" style="display:none;"><p align="center">Loading...</p></div>
+                <div id="download_window" style="display:none;">
+                    <div id="theme-downloader-columns" class="row theme-columns">
+                        <div id="downloader-select" class="column select">
+                            <label for="theme-downloader-selector">Select a theme:</label>
+                            <select id="theme-downloader-selector">
+                                <!-- Themes will be dynamically populated here -->
+                            </select>
+                            <br>
+                            <button id="select-theme-downloader-button" onclick="theme_download_select()">Select Theme</button>
+                        </div>
+                        <div id="theme-downloader-description" class="column theme-description">
+                            <h3>Theme Description</h3>
+                            <div id="theme-downloader-description-content"><p>No description available</p></div>
+                            <img id="repo_screenshot" src="/screenshots/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -474,7 +509,7 @@ INDEX = """
                     <div id="theme_editor_content">
                         <h2>Coming soon !</h2>
                         <h2>If you like the project feel free to contribute !</h2>
-                        <h2><a href='https://github.com/v0r-t3x/Fancygotchi'>Fancygotchi</a> is made with ❤ by <a href='https://linktr.ee/v0r_t3x'>V0rT3x</a></h2>
+                        <h2><a href='{{fancy_repo}}'>Fancygotchi</a> is made with ❤ by <a href='https://linktr.ee/v0r_t3x'>V0rT3x</a></h2>
                     </div>
                     <div id="logo">
                         <pre>
@@ -488,7 +523,7 @@ INDEX = """
         </div>
         
         <div id="footer">
-            <a href='https://github.com/v0r-t3x/Fancygotchi'>Fancygotchi</a> {{ version }} made with ❤ by <a href='https://linktr.ee/v0r_t3x'>{{ author }}</a>
+            <a href='{{fancy_repo}}'>Fancygotchi</a> {{ version }} made with ❤ by <a href='https://linktr.ee/v0r_t3x'>{{ author }}</a>
         </div>
         
     </div>
@@ -550,7 +585,7 @@ window.onload = function() {
         image.src = image.src.split("?")[0] + "?" + new Date().getTime();
         image2.src = image2.src.split("?")[0] + "?" + new Date().getTime();
     }
-    setInterval(updateImage, 1000);
+    setInterval(updateImage, {{webui_fps}});
 }
 
 window.onscroll = function() {
@@ -773,7 +808,7 @@ function saveConfig() {
     });
     active_theme(function(activeTheme) {
         loadConfig(0, activeTheme)
-        theme_info()
+        theme_info(activeTheme)
     });
 }
 
@@ -1010,9 +1045,10 @@ function theme_export() {
 }
 $(document).on('click', '#confirm-delete', function() {
     var theme = $('#theme-selector').val();
+    
     if (theme != "Default") {
-        
         var json = { "theme": theme };
+        
         sendJSON("Fancygotchi/theme_delete", json, function(xhr) {
             if (xhr.status == 200) {
                 theme_list();
@@ -1022,17 +1058,24 @@ $(document).on('click', '#confirm-delete', function() {
         alert('Default theme cannot be deleted.');
     }
 });
+
 function theme_list() {
-    loadJSON("Fancygotchi/theme_list", function(response) {
-        populateThemeSelector(response);
+
+    active_theme(function(activeTheme) {
+        loadJSON("Fancygotchi/theme_list", function(response) {
+            populateThemeSelector(response, activeTheme);
+        });
+        $('#theme-selector').val(activeTheme);
+        theme_info(activeTheme);
     });
 }
-function theme_info() {
+function theme_info(activeTheme) {
     var theme = $('#theme-selector').val();
     var json = { "theme": theme };
     sendJSON("Fancygotchi/theme_info", json, function(xhr) {
         if (xhr.status == 200) {
-            var themeInfo = JSON.parse(xhr.responseText); // Parse the response as JSON
+            var themeInfo = JSON.parse(xhr.responseText);
+            console.log(themeInfo);
             populateThemeInfo(themeInfo);
         }
     });
@@ -1040,50 +1083,177 @@ function theme_info() {
 $('#theme-selector').change(function() {
     theme_info($(this).val());
 });
-function populateThemeSelector(themes) {
+function populateThemeSelector(themes, activeTheme) {
     var selectElement = $('#theme-selector');
     selectElement.empty();
+    
+
     var defaultOption = $('<option>').val('Default').text('Default');
     selectElement.append(defaultOption);
+    
     themes.forEach(function(theme) {
         var option = $('<option>').val(theme).text(theme);
+        if (theme === activeTheme) {
+            option.attr('selected', 'selected');
+        }
         selectElement.append(option);
     });
-    if (!themes.includes('Default')) {
+    
+    if (!themes.includes('Default') && !activeTheme) {
         defaultOption.attr('selected', 'selected');
     }
+    
     selectElement.selectmenu('refresh');
+    return activeTheme
+
 }
 function populateThemeInfo(themeInfo) {
     var $themeDescriptionContent = $('#theme-description-content');
-    var theme = $('#theme-selector').val();
-    
+
+    active_theme(function(activeTheme) {
+        var theme = $('#theme-selector').val() || activeTheme || 'Default';
+        console.log(theme);
+
+        $themeDescriptionContent.empty();
+        $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
+
+        var $screenshot = $('#screenshot');
+        var screenshotSrc = $('#theme-selector').val() == activeTheme 
+            ? '/img/screenshot.png' 
+            : '/screenshots/' + theme + '/screenshot.png';
+
+        // Add a cache-busting timestamp parameter
+        $screenshot.attr('src', screenshotSrc + '?cache_buster=' + new Date().getTime());
+        
+        // Log the src attribute to check the updated URL
+        console.log($screenshot.attr('src'));
+
+        $screenshot.on('error', function() {
+            $(this).attr('src', '/screenshots/screenshot.png?cache_buster=' + new Date().getTime());
+        });
+
+        Object.entries(themeInfo).forEach(([key, value]) => {
+            var val = '<span class="preserve-line-breaks">' + value + '</span>';
+            $themeDescriptionContent.append($('<li>').html(key + ': ' + val));
+        });
+    });
+}
+
+
+
+function loadThemeRepo() {
+    $('#theme_downloader').find('select, button').prop('disabled', true);
+    $('#loading-spinner').show();
+    $('#download_window').hide();
+    $('#loading-spinner p').text("Loading...");
+
+    loadJSON("Fancygotchi/theme_download_list", function(response) {
+        console.log(response.status);
+        if (response.status == 200) {
+            populateThemeSelector_downloader(response.data);
+            $('#loading-spinner').hide();
+            $('#download_window').show();
+            $('#theme_downloader').find('select, button').prop('disabled', false);
+        }
+        else {
+            var error = response.error || "An error occurred";
+            $('#loading-spinner p').text(error);
+            $('#theme_downloader').find('select, button').prop('disabled', false);
+        }
+    });
+}
+
+$('#theme-downloader-selector').change(function() {
+    var themes = window.themes; 
+    var selectedTheme = $('#theme-downloader-selector').val();
+    populateThemeInfo_downloader(themes[selectedTheme]);
+});
+
+function populateThemeSelector_downloader(themes) {
+    window.themes = themes; 
+    var selectElement = $('#theme-downloader-selector');
+    selectElement.empty();
+    const sortedThemes = Object.keys(themes).sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+    sortedThemes.forEach(function(theme) {
+        var option = $('<option>').val(theme).text(theme);
+        selectElement.append(option);
+    });
+    selectElement.selectmenu('refresh');
+    if (sortedThemes.length > 0) {
+        populateThemeInfo_downloader(themes[sortedThemes[0]]);
+    }
+}
+
+function populateThemeInfo_downloader(themeInfo) {
+    var $themeDescriptionContent = $('#theme-downloader-description-content');
+    var theme = $('#theme-downloader-selector').val();
     if (theme == '') {
         theme = 'Default';
     }
-    
     $themeDescriptionContent.empty();
     $themeDescriptionContent.append('<h3>' + theme.toUpperCase() + '</h3>');
-    
     var img = new Image();
-    var imgPath = '/screenshots/' + theme + '/screenshot.png';
-    
+    var imgPath = '/repo_screenshots/' + theme + '/screenshot.png';
     img.onload = function() {
-        document.getElementById('screenshot').src = imgPath;
+        document.getElementById('repo_screenshot').src = imgPath;
     };
-    
     img.onerror = function() {
-        document.getElementById('screenshot').src = '/screenshots/screenshot.png';
+        document.getElementById('repo_screenshot').src = '/repo_screenshots/screenshot.png';
     };
-    
     img.src = imgPath;
-    
-    $.each(themeInfo, function(key, value) {
+    $.each(themeInfo.info, function(key, value) {
         var val = '<span class="preserve-line-breaks">' + value + '</span>';
         var listItem = $('<li>').html(key + ': ' + val);
         $themeDescriptionContent.append(listItem);
     });
 }
+
+function theme_download_select() {
+    var theme = document.getElementById("theme-downloader-selector").value;
+    
+    $('#theme_downloader').find('select, button').prop('disabled', true);
+
+    var themes = window.themes; 
+    var version = themes[theme]?.info?.version || 'Unknown'; 
+    var json = {
+        "theme": theme,
+        "version": version
+    };
+    sendJSON("Fancygotchi/version_compare", json, function(response) {
+        data = JSON.parse(response.responseText)
+        var localVersion = data.local_version || 'Unknown';
+        var isNewer = data.is_newer;
+        if (isNewer) {
+            var message = `A newer ${theme} version (${version}) is available. Your current version is ${localVersion}. Would you like to update?`;
+        } 
+        if (!isNewer) {
+            var message = `You have the ${theme} version ${localVersion} installed. The available version is ${version}. Do you want to overwrite your current version?`;
+        }
+        if (isNewer == null) {
+            var message = `You will download ${theme} version ${version}. Do you want to peoceed?`;
+        }
+        var confirmOverwrite = confirm(message);
+        if (confirmOverwrite) {
+            var json = {
+                "theme": theme,
+            };
+            $('#loading-spinner').show();
+            $('#loading-spinner p').text("Downloading...");
+            sendJSON("Fancygotchi/theme_download_select", json, function(response) {
+                if (response.status == 200) {
+                    $('#loading-spinner').hide();
+                    alert("Theme updated successfully!");
+                    theme_list();
+                } else {
+                    $('#loading-spinner').hide();
+                    alert("There was an error updating the theme.");
+                }
+                $('#theme_downloader').find('select, button').prop('disabled', false);
+            });
+        }
+    });
+}
+
 function sendJSON(url, data, callback) {
     var xobj = new XMLHttpRequest();
     var csrf = "{{ csrf_token() }}";
@@ -1091,9 +1261,9 @@ function sendJSON(url, data, callback) {
     xobj.setRequestHeader("Content-Type", "application/json");
     xobj.setRequestHeader('x-csrf-token', csrf);
     xobj.onreadystatechange = function () {
-            if (xobj.readyState == 4) {
+        if (xobj.readyState == 4) {
             callback(xobj);
-            }
+        }
     };
     xobj.send(JSON.stringify(data));
 }
@@ -1129,9 +1299,16 @@ function loadJSON(url, callback) {
         if (xobj.readyState == 4 && xobj.status == "200") {
             callback(JSON.parse(xobj.responseText));
         }
+        if (xobj.readyState == 4 && xobj.status == "500") {
+            callback(JSON.parse(xobj.responseText));
+        }
+        if (xobj.readyState == 4 && xobj.status == "404") {
+            callback(JSON.parse(xobj.responseText));
+        }
     };
     xobj.send(null);
 }
+
 function flattenJson(data) {
     var result = {};
 
@@ -1851,7 +2028,7 @@ class FancyDisplay:
         self.fps = fps
         self.fb = self.find_fb_device()
         self.current_mode = mode
-        self.current_screen_saver = sub_mode  # Default screen saver mode
+        self.current_screen_saver = sub_mode
         self.modes = ['screen_saver', 'auxiliary', 'terminal']
         self.screen_saver_modes = ['show_logo', 'moving_shapes', 'random_colors', 'hyper_drive', 'show_animation']
         if config: self.screen_data = config
@@ -2969,6 +3146,28 @@ MENUS = {
     ]),
 }
 
+def check_internet_and_repo():
+    try:
+        requests.get("https://www.google.com", timeout=5)
+        response = requests.get(THEMES_REPO, timeout=5)
+        
+        if response.status_code == 200:
+            return True, "Connection successful"
+        else:
+            error_msg = f"Repository not accessible. Status code: {response.status_code}"
+            logging.warning(error_msg)
+            return False, error_msg
+            
+    except requests.ConnectionError as e:
+        error_msg = f"No internet connection: {str(e)}"
+        logging.warning(error_msg)
+        return False, error_msg
+        
+    except requests.Timeout as e:
+        error_msg = f"Connection timed out: {str(e)}"
+        logging.warning(error_msg)
+        return False, error_msg
+
 def get_all_plugin_names(fancygotchi):
     config_dict = fancygotchi._config 
     plugins = list(config_dict['main'].get('plugins', {}).keys())
@@ -2999,7 +3198,7 @@ def box_to_xywh(position):
     
     return [x, y, w, h]
 
-def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=False):
+def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=False, crop=[0,0,0,0]):
     try:
         if isinstance(image_path, str):
             try:
@@ -3011,6 +3210,8 @@ def adjust_image(image_path, zoom, mask=False, refine=150, alpha=False, invert=F
             image = image_path
         if invert:
             image = invert_pixels(image)
+        if crop != [0,0,0,0]:
+            image = image.crop(crop)
         image = image.convert('RGBA') 
         
         original_width, original_height = image.size
@@ -3154,13 +3355,12 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.1'
+    __version__ = '2.0.2'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
     def __init__(self):
-        self.pyenv = sys.executable
-
+        self.pyenv = sys.executable    
         self.running = False
         self.fancy_menu = None
         self.actions_log = []
@@ -3176,6 +3376,8 @@ class Fancygotchi(plugins.Plugin):
 
         self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame')
         self._config = pwnagotchi.config
+        self.gittoken = self._config['main']['plugins']['Fancygotchi'].get('github_token', None)
+        logging.warning(self.gittoken)
         self.cfg_path = None
         self.cursor_list = ['█', '-']
         self.options = dict()
@@ -3193,11 +3395,13 @@ class Fancygotchi(plugins.Plugin):
             'theme': {
                 'options': {
                     'boot_animation': False,
+                    'boot_mode': 'normal', # Implementation to adjust the boot animation image with normal, stretch, fit, fill, center or tile
                     'boot_max_loops': 1,
                     'boot_total_duration': 1,
                     'screen_mode': 'screen_saver',
                     'screen_saver': 'show_logo',
                     'second_screen_fps': 1,
+                    'webui_fps': 1,
                     'second_screen_webui': False,
                     'bg_fg_select': 'manu',
                     'bg_mode': 'normal',
@@ -3206,16 +3410,19 @@ class Fancygotchi(plugins.Plugin):
                     'bg_color': 'white',
                     'bg_image': '',
                     'bg_anim_image': '',
-                    'font_sizes': [10, 8, 10, 25, 25, 9],
+                    #[Bold, BoldSmall, Medium, Huge, BoldBig, Small]
+                    'font_sizes': [14, 9, 14, 25, 19, 9],
                     'font': 'DejaVuSansMono',
                     'font_bold': 'DejaVuSansMono-Bold',
                     'status_font': 'DejaVuSansMono',
                     'font_awesome': '',
                     'size_offset': 5,
                     'label_spacing': 9,
+                    'label_line_spacing': 0,
                     'cursor': '❤',
                     'friend_bars': '▌',
                     'friend_no_bars': '│',
+                    'base_text_color': ['black'],
                     'main_text_color': ['black'],
                     'color_mode': ['P', 'P']
                 },
@@ -3269,6 +3476,7 @@ class Fancygotchi(plugins.Plugin):
             'icon_color': False,
             'invert': False,
             'alpha': False,
+            'crop': [0,0,0,0],
             'mask': False,
             'refine': 150,
             'zoom': 1,
@@ -3287,6 +3495,7 @@ class Fancygotchi(plugins.Plugin):
             'icon_color': False,
             'invert': False,
             'alpha': False,
+            'crop': [0,0,0,0],
             'mask': False,
             'refine': 150,
             'zoom': 1,
@@ -3321,6 +3530,7 @@ class Fancygotchi(plugins.Plugin):
             'icon': False,
             'invert': False,
             'alpha': False,
+            'crop': [0,0,0,0],
             'mask': False,
             'refine': 150,
             'zoom': 1,
@@ -3599,6 +3809,9 @@ fi"""}]
         screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/screenshots')
         if os.path.exists(screenshots_path):
             os.system(f'rm -r {screenshots_path}')
+        repo_screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
+        if os.path.exists(repo_screenshots_path):
+            os.system(f'rm -r {repo_screenshots_path}')
         css_dst = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
         css_backup = css_dst + '.backup'
         if os.path.exists(css_backup):
@@ -4208,6 +4421,94 @@ fi"""}]
             self.log(traceback.format_exc())
             return None
 
+    def save_screenshot(self, theme_name, screenshot_url, headers):
+        screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
+        theme_folder_path = os.path.join(screenshots_path, theme_name)
+        os.makedirs(theme_folder_path, exist_ok=True)
+        response = requests.get(screenshot_url, headers=headers).content
+        screenshot_path = os.path.join(theme_folder_path, 'screenshot.png')
+        with open(screenshot_path, 'wb') as f:
+            f.write(response)
+        return os.path.join('repo_screenshots', theme_name, 'screenshot.png')
+
+    def fetch_themes(self):
+        themes = {}
+        screenshots_path = os.path.join(self._pwny_root, 'ui/web/static/repo_screenshots')
+        try:
+            if os.path.exists(screenshots_path):
+                shutil.rmtree(screenshots_path)
+            headers = {"Authorization": f"Bearer {self.gittoken}"} if self.gittoken else {}
+            response = requests.get(THEMES_REPO, headers=headers)
+            response.raise_for_status()
+            for item in response.json():
+                if item["type"] == "dir":
+                    theme_name = item["name"]
+                    self.log(f"Fetching theme: {theme_name}")
+                    theme_url = item["url"]
+                    themes[theme_name] = {"info": None, "screenshot": None}
+                    theme_contents = requests.get(theme_url, headers=headers).json()
+                    for file in theme_contents:
+                        if file["name"] == "info.json":
+                            info_url = file["download_url"]
+                            info_data = requests.get(info_url, headers=headers).json()
+                            themes[theme_name]["info"] = info_data
+                        elif file["name"] == "img" and file["type"] == "dir":
+                            img_folder_url = file["url"]
+                            img_contents = requests.get(img_folder_url, headers=headers).json()
+                            if isinstance(img_contents, list):
+                                for img_file in img_contents:
+                                    if isinstance(img_file, dict) and img_file.get("name") == "screenshot.png":
+                                        local_screenshot_path = self.save_screenshot(theme_name, img_file["download_url"], headers)
+                                        themes[theme_name]["screenshot"] = local_screenshot_path
+            sorted_themes = dict(sorted(themes.items(), key=lambda item: item[0].lower()))
+            self.log("Themes fetched successfully:")
+            for theme, info in sorted_themes.items():
+                version = info["info"].get("version") if info["info"] else "Unknown"
+                self.log(f"{theme}: Version {version}, Screenshot: {info['screenshot']}")
+            return sorted_themes
+
+        except requests.RequestException as e:
+            logging.error(f"Error fetching themes: {e}")
+            return {}
+
+    def theme_downloader(self, theme_name):
+        try:
+            headers = {"Authorization": f"Bearer {self.gittoken}"} if self.gittoken else {}
+            theme_contents_url = os.path.join(THEMES_REPO, theme_name)
+            response = requests.get(theme_contents_url, headers=headers)
+            response.raise_for_status()
+            contents = response.json()
+            temp_dir = tempfile.mkdtemp()
+            temp_theme_path = os.path.join(temp_dir, theme_name)
+            final_path = os.path.join(self._plug_root, "themes", theme_name)
+            os.makedirs(temp_theme_path, exist_ok=True)
+            def download_content(contents, current_path):
+                for item in contents:
+                    item_path = os.path.join(current_path, item['name'])
+                    if item['type'] == 'dir':
+                        os.makedirs(item_path, exist_ok=True)
+                        dir_response = requests.get(item['url'], headers=headers)
+                        dir_response.raise_for_status()
+                        download_content(dir_response.json(), item_path)
+                    else:
+                        file_response = requests.get(item['download_url'], headers=headers)
+                        file_response.raise_for_status()
+                        with open(item_path, 'wb') as f:
+                            f.write(file_response.content)
+            download_content(contents, temp_theme_path)
+            if os.path.exists(final_path):
+                shutil.rmtree(final_path)
+            shutil.move(temp_theme_path, final_path)
+            shutil.rmtree(temp_dir)
+            logging.warning(f"Theme {theme_name} downloaded successfully to {final_path}")
+
+        except requests.RequestException as e:
+            logging.error(f"Error downloading themes: {e}")
+            logging.error(traceback.format_exc())
+            if 'temp_dir' in locals():
+                shutil.rmtree(temp_dir)
+
+
     def save_active_config(self, data):
         cfg_path = self.cfg_path
         self.log(f"Saving active config to: {self.cfg_path}")
@@ -4248,12 +4549,10 @@ fi"""}]
         menu_opt = th_menu.get('options', {})
         menu_theme.update(menu_opt)
         custom_menus = {}
-        if self.fancyserver:      
-            custom_menu = {}
-                
-            if 'menu' in self._theme.get('theme', {}):
-                custom_menus = self._theme.get("theme", {}).get("menu", {})
-                custom_menus.pop('options', None)
+        if 'menu' in self._theme.get('theme', {}):
+            custom_menus = self._theme.get("theme", {}).get("menu", {})
+            custom_menus.pop('options', None)
+        if self.fancyserver:   
             if not hasattr(self, 'fancy_server') or (hasattr(self, 'fancy_server') and getattr(self, 'fancy_server', None) is None):
                 self.fancy_server = FancyServer()
 
@@ -4369,7 +4668,10 @@ fi"""}]
                     setattr(ui, '_hw_mode', self._color_mode[1])
                 if hasattr(th_opt, 'main_text_color') and th_opt.get('main_text_color', []) != []:
                     self._icolor = 0
+                if hasattr(th_opt, 'base_text_color') and th_opt.get('base_text_color', []) != []:
+                    self._icolor = 0
                 self.fps = th_opt.get('second_screen_fps', 1)
+                self.webui_fps = int(1000*th_opt.get('webui_fps', 1))
                 if rot in (90, 270):
                     startname = f'{self._res[1]}x{self._res[0]}' 
                     w = self._res[1]
@@ -4613,6 +4915,10 @@ fi"""}]
                 if self._state[key]['color'] != th_widget[key]['color']:
                     self._state[key]['color'] = th_widget[key]['color']
                     self._state[key]['icolor'] = 0
+            elif "base_text_color" in th_opt and th_opt['base_text_color']:
+                if self._state[key]['color'] != th_opt['base_text_color']:
+                    self._state[key]['color'] = th_opt['base_text_color']
+                    self._state[key]['icolor'] = 0
             else:
                 if self._state[key]['color'] != [ui._state.get_attr(key, 'color')]:
                     self._state[key]['color'] = [ui._state.get_attr(key, 'color')]
@@ -4638,10 +4944,12 @@ fi"""}]
 
             if key in th_widget and th_widget[key].get('position'):
                 self._state[key].update({'position': tuple(th_widget[key]['position'])})
-
             self._state_default[key].update({'color': [ui._state.get_attr(key, 'color')]})
             if key in th_widget and th_widget[key].get('color'):
                 self._state[key].update({'color': th_widget[key]['color']})
+                self._state[key].update({'icolor': 0})
+            elif th_opt.get('base_text_color'):
+                self._state[key].update({'color': th_opt['base_text_color']})
                 self._state[key].update({'icolor': 0})
             else:
                 self._state[key].update({'color': [ui._state.get_attr(key, 'color')]})
@@ -4675,6 +4983,8 @@ fi"""}]
                     self._state[key].update({'invert': th_widget[key]['invert']})
                 if key in th_widget and th_widget[key].get('alpha'):
                     self._state[key].update({'alpha': th_widget[key]['alpha']})
+                if key in th_widget and th_widget[key].get('crop'):
+                    self._state[key].update({'crop': th_widget[key]['crop']})
                 if key in th_widget and th_widget[key].get('mask'):
                     self._state[key].update({'mask': th_widget[key]['mask']})
                 if key in th_widget and th_widget[key].get('refine'):
@@ -4715,9 +5025,10 @@ fi"""}]
                     self._state[key].update({'label_spacing': th_opt['label_spacing']})
                 else:
                     self._state[key].update({'label_spacing': ui._state.get_attr(key, 'label_spacing')})
-                if key in th_widget and th_widget[key].get('label_line_spacing', 0):
-                    
+                if key in th_widget and th_widget[key].get('label_line_spacing'):
                     self._state[key].update({'label_line_spacing': th_widget[key]['label_line_spacing']})
+                elif 'label_line_spacing' in th_opt and th_opt['label_line_spacing']:
+                    self._state[key].update({'label_line_spacing': th_opt['label_line_spacing']})
                 else:
                     self._state[key].update({'label_line_spacing': 0})
 
@@ -4739,6 +5050,8 @@ fi"""}]
                     self._state[key].update({'invert': th_widget[key]['invert']})
                 if key in th_widget and th_widget[key].get('alpha'):
                     self._state[key].update({'alpha': th_widget[key]['alpha']})
+                if key in th_widget and th_widget[key].get('crop'):
+                    self._state[key].update({'crop': th_widget[key]['crop']})
                 if key in th_widget and th_widget[key].get('mask'):
                     self._state[key].update({'mask': th_widget[key]['mask']})
                 if key in th_widget and th_widget[key].get('refine'):
@@ -4790,7 +5103,7 @@ fi"""}]
                                 self._state[key]['face_map'].update({
                                     face: [
                                         face_dict[face],
-                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])
+                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])
                                     ]
                                 })
                             else:
@@ -4813,7 +5126,7 @@ fi"""}]
                                 self._state[key]['friend_face_map'].update({
                                     face: [
                                         face_dict[face],
-                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])  
+                                        adjust_image(face_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])  
                                     ]
                                 })
                             else:
@@ -4826,7 +5139,7 @@ fi"""}]
                         if widget_type == 'LabeledValue' and not self._state[key]['f_awesome']:
                             
                             icon_path = os.path.join(self._th_path, 'img', 'widgets', key, self._state[key][source])
-                            self._state[key].update({'icon_image': adjust_image(Image.open(icon_path), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])})
+                            self._state[key].update({'icon_image': adjust_image(Image.open(icon_path), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])})
                         if not self._state[key]['f_awesome']:
                             if widget_type == 'Bitmap':
                                 img_path = os.path.join(self._th_path, 'img', 'widgets', key)
@@ -4834,7 +5147,7 @@ fi"""}]
                                 file_count = len(files)
                                 if file_count == 1:
                                     image_path = os.path.join(img_path, files[0])
-                                    self._state[key].update({'image': adjust_image(image_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])})
+                                    self._state[key].update({'image': adjust_image(image_path, self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])})
 
                                 elif file_count > 3 and file_count % 2 == 0:
                                     image_dict = {}
@@ -4850,7 +5163,7 @@ fi"""}]
                                                 original_b = [f for f in files if os.path.splitext(f)[0] == corresponding_b][0]
                                                 
                                                 img_a = Image.open(os.path.join(img_path, original_a))
-                                                img_b = adjust_image(Image.open(os.path.join(img_path, original_b)), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'])
+                                                img_b = adjust_image(Image.open(os.path.join(img_path, original_b)), self._state[key]['zoom'], self._state[key]['mask'], self._state[key]['refine'], self._state[key]['alpha'], self._state[key]['invert'], self._state[key]['crop'])
                                                 
                                                 image_dict[int(id_number)] = [img_a, img_b]
                                     self._state[key].update({'image_dict': image_dict})
@@ -5103,8 +5416,14 @@ fi"""}]
                 else:
                     if state['widget_type'] == 'LabeledValue':
                         x, y = state['position']
+                        #logging.warning(f'****************{widget}****************')
+                        #logging.warning(f'label line spacing: {state["label_line_spacing"]}')
+                        #logging.warning(f'label spacing: {state["label_spacing"]}')
+                        #logging.warning(f'x: {x}, y: {y}')
+                        
                         v_y = y + state['label_line_spacing']
                         v_x = x + state['label_spacing'] + 5 * len(state['label'])
+                        #logging.warning(f'v_x: {v_x}, v_y: {v_y}')
                     else:
                         v_x, v_y = state['position']
                 
@@ -5345,11 +5664,12 @@ fi"""}]
                         name=name,
                         logo=LOGO,
                         fancyserver=fancyS,
+                        webui_fps=self.webui_fps,
+                        fancy_repo=FANCY_REPO,
                     )
 
                 elif path == "ui2":
                     return self.ui2()
-
 
                 elif path == "active_theme":
                     return json.dumps({"theme": self._theme_name})
@@ -5357,6 +5677,24 @@ fi"""}]
                 elif path == "theme_list":
                     themes = self.theme_list()
                     return json.dumps(themes)
+
+                elif path == "theme_download_list":
+                    self.log("Theme download list fetching started...")
+                    try:
+                        isInternet, msg = check_internet_and_repo()
+                        self.log(f"isInternet: {isInternet}, msg: {msg}")
+                        if isInternet:
+
+                            themes_dict = self.fetch_themes()
+                            logging.warning(themes_dict)
+                            return json.dumps({"status": 200, "data": themes_dict}), 200
+                        else:
+                            return json.dumps({"error": msg}), 500
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return json.dumps({"error": "Theme download list error"}), 500
+
                     
                 elif str(path).split("/")[0] == "theme_export":
                     try: 
@@ -5404,7 +5742,7 @@ fi"""}]
                             "name": self._theme_name,
                             "cfg_path": cfg_path,
                             "css_path": css_path,
-                            "info_path": info_path
+                            "info_path": info_path,
                         })
                     except Exception as ex:
                         logging.error(ex)
@@ -5418,6 +5756,7 @@ fi"""}]
                         response = json.loads(json.dumps(jreq))
                         rot = int(response['rotation'])
                         theme = response['theme']
+        
                         self.theme_save_config(response['theme'], response['rotation'])
                         self.refresh = True
                         return "success"
@@ -5425,6 +5764,50 @@ fi"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "theme selection error", 500
+
+                elif path == "version_compare":
+                    is_newer = None
+                    local_version = None
+                    try:
+                        jreq = request.get_json() 
+                        response = json.loads(json.dumps(jreq)) 
+                        theme = response['theme']
+                        version = response['version']
+                        logging.warning(f'Download selection: theme {theme} version {version}')
+                        info_path = os.path.join(self._plug_root, "themes", theme, "info.json")
+                        if not os.path.exists(info_path):
+                            logging.error(f"Theme {theme} not found locally.")
+                        else:
+                            with open(info_path, 'r') as f:
+                                local_info = json.load(f)
+                                local_version = local_info.get('version')
+                            if local_version is None:
+                                logging.warning(f"Local version not found for theme {theme}.")
+                                local_version = 'Unknown'
+                            logging.warning(f"Local theme version: {local_version}")
+                            is_newer = version > local_version if local_version != 'Unknown' else False
+                        logging.warning(f'Is the online theme newer: {is_newer}')
+                        return json.dumps({
+                            'is_newer': is_newer,
+                            'local_version': local_version
+                        }), 200
+                    except Exception as ex:
+                        logging.error(f"Error handling theme version: {ex}")
+                        logging.error(traceback.format_exc())
+                        return json.dumps({'error': 'Theme version error'}), 500
+
+                if path == "theme_download_select":
+                    try:
+                        jreq = request.get_json()
+                        response = json.loads(json.dumps(jreq))
+                        theme = response['theme']
+                        logging.warning(f'Download selection: theme {theme}')
+                        self.theme_downloader(theme)
+                        return "success", 200
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return json.dumps({'error': f"theme download error: {ex}"}) , 500
 
                 elif path == "fancyserver":
                     try:
