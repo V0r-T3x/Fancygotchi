@@ -4864,7 +4864,7 @@ fi"""}]
             if color == 'white' : color = (249, 249, 249, 255)
             if color == 255 : color = 'black'
             if text is not None and tfont is not None:
-                w,h = tfont.getsize(text)
+                _,_,w,h = tfont.getbbox(text)
                 nb_lines = text.count('\n') + 1
                 h = (h + 1) * nb_lines
                 if nb_lines > 1:
