@@ -33,6 +33,7 @@ from flask import abort, jsonify, make_response, render_template_string, send_fi
 
 import pwnagotchi
 import pwnagotchi.plugins as plugins
+import pwnagotchi.ui.faces as faces
 import pwnagotchi.ui.fonts as fonts
 from pwnagotchi import utils
 from pwnagotchi.plugins import toggle_plugin
@@ -3358,7 +3359,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.3'
+    __version__ = '2.0.4'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3428,7 +3429,34 @@ class Fancygotchi(plugins.Plugin):
                     'friend_no_bars': '│',
                     'base_text_color': ['black'],
                     'main_text_color': ['black'],
-                    'color_mode': ['P', 'P']
+                    'color_mode': ['P', 'P'],
+                    'faces': {
+                        'look_r': "( ⚆_⚆)",
+                        'look_l': "(☉_☉ )",
+                        'look_r_happy': "( ◕‿◕)",
+                        'look_l_happy': "(◕‿◕ )",
+                        'sleep': "(⇀‿‿↼)",
+                        'sleep2': "(≖‿‿≖)",
+                        'awake': "(◕‿‿◕)",
+                        'bored': "(-__-)",
+                        'intense': "(°▃▃°)",
+                        'cool': "(⌐■_■)",
+                        'happy': "(•‿‿•)",
+                        'excited': "(ᵔ◡◡ᵔ)",
+                        'grateful': "(^‿‿^)",
+                        'motivated': "(☼‿‿☼)",
+                        'demotivated': "(≖__≖)",
+                        'smart': "(✜‿‿✜)",
+                        'lonely': "(ب__ب)",
+                        'sad': "(╥☁╥ )",
+                        'angry': "(-_-')",
+                        'friend': "(♥‿‿♥)",
+                        'broken': "(☓‿‿☓)",
+                        'debug': "(#__#)",
+                        'upload': "(1__0)",
+                        'upload1': "(1__1)",
+                        'upload2': "(0__1)",
+                    }
                 },
                 'widget': {}
             }
@@ -3782,6 +3810,9 @@ fi"""}]
         self.ready = True
 
     def on_unload(self, ui):
+        with open('/etc/pwnagotchi/config.toml', 'r') as f:
+            f_toml = toml.load(f)
+            faces.load_from_config(f_toml['ui']['faces'])
         with ui._lock:
             self.cleanup_display()
             self.dispHijack = False
@@ -4196,7 +4227,7 @@ fi"""}]
             elif action == 'theme_select':
                 name = command.get('name')
                 rotation = command.get('rotation')
-                self.theme_save_config(name, rotation, True)
+                self.theme_save_config(name, rotation)
                 self.refresh = True
             elif action == 'theme_refresh':
                 self.refresh = True
@@ -4413,6 +4444,10 @@ fi"""}]
                 if os.path.exists(icon_bkup):
                     copyfile(icon_bkup, icon_dst)
                     os.remove(icon_bkup)
+
+            if self._theme['theme']['options'].get('faces'):
+                self._config['ui']['faces'] = self._theme['theme']['options']['faces']
+            faces.load_from_config(self._config['ui']['faces'])
 
             if 'fancyserver' in fancy_opt:
                 self.fancyserver = self._config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('fancyserver', False)
