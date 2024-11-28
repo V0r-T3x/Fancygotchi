@@ -4445,7 +4445,8 @@ fi"""}]
                     copyfile(icon_bkup, icon_dst)
                     os.remove(icon_bkup)
 
-            self._config['ui']['faces'] = self._theme['theme']['options']['faces']
+            if self._theme['theme']['options'].get('faces'):
+                self._config['ui']['faces'] = self._theme['theme']['options']['faces']
             faces.load_from_config(self._config['ui']['faces'])
 
             if 'fancyserver' in fancy_opt:
