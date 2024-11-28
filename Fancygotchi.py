@@ -33,6 +33,7 @@ from flask import abort, jsonify, make_response, render_template_string, send_fi
 
 import pwnagotchi
 import pwnagotchi.plugins as plugins
+import pwnagotchi.ui.faces as faces
 import pwnagotchi.ui.fonts as fonts
 from pwnagotchi import utils
 from pwnagotchi.plugins import toggle_plugin
@@ -3428,7 +3429,34 @@ class Fancygotchi(plugins.Plugin):
                     'friend_no_bars': '│',
                     'base_text_color': ['black'],
                     'main_text_color': ['black'],
-                    'color_mode': ['P', 'P']
+                    'color_mode': ['P', 'P'],
+                    'faces': {
+                        'look_r': "( ⚆_⚆)",
+                        'look_l': "(☉_☉ )",
+                        'look_r_happy': "( ◕‿◕)",
+                        'look_l_happy': "(◕‿◕ )",
+                        'sleep': "(⇀‿‿↼)",
+                        'sleep2': "(≖‿‿≖)",
+                        'awake': "(◕‿‿◕)",
+                        'bored': "(-__-)",
+                        'intense': "(°▃▃°)",
+                        'cool': "(⌐■_■)",
+                        'happy': "(•‿‿•)",
+                        'excited': "(ᵔ◡◡ᵔ)",
+                        'grateful': "(^‿‿^)",
+                        'motivated': "(☼‿‿☼)",
+                        'demotivated': "(≖__≖)",
+                        'smart': "(✜‿‿✜)",
+                        'lonely': "(ب__ب)",
+                        'sad': "(╥☁╥ )",
+                        'angry': "(-_-')",
+                        'friend': "(♥‿‿♥)",
+                        'broken': "(☓‿‿☓)",
+                        'debug': "(#__#)",
+                        'upload': "(1__0)",
+                        'upload1': "(1__1)",
+                        'upload2': "(0__1)",
+                    }
                 },
                 'widget': {}
             }
@@ -4413,6 +4441,9 @@ fi"""}]
                 if os.path.exists(icon_bkup):
                     copyfile(icon_bkup, icon_dst)
                     os.remove(icon_bkup)
+
+            faces.load_from_config(self._theme['theme']['options']['faces'])
+            logging.warning(f"Theme config faces {self._theme['theme']['options']['faces']}")
 
             if 'fancyserver' in fancy_opt:
                 self.fancyserver = self._config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('fancyserver', False)
