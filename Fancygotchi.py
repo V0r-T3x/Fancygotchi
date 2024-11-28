@@ -3358,7 +3358,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.3'
+    __version__ = '2.0.4'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -4196,7 +4196,7 @@ fi"""}]
             elif action == 'theme_select':
                 name = command.get('name')
                 rotation = command.get('rotation')
-                self.theme_save_config(name, rotation, True)
+                self.theme_save_config(name, rotation)
                 self.refresh = True
             elif action == 'theme_refresh':
                 self.refresh = True
