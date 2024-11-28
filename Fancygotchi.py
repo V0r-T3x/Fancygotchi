@@ -2379,7 +2379,7 @@ class FancyDisplay:
         text = "Auxiliary mode"
         text_color = (255, 0, 0) 
         image_width, image_height = image.size
-        text_width, text_height = draw.textsize(text, font)
+        _, _, text_width, text_height = draw.textbbox((0, 0),text, font)
         position = ((image_width - text_width) // 2, 10)
         draw.text(position, text, font=font, fill=text_color)
         return image
@@ -2392,7 +2392,7 @@ class FancyDisplay:
             draw = ImageDraw.Draw(canvas)
             font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 3)
             text = self.glitch_text_effect(LOGO, glitch_chance=0.25, max_spaces=5)
-            text_width, text_height = draw.textsize(text, font=font)
+            _, _, text_width, text_height = draw.textbbox((0, 0), text, font=font)
             logo_img = Image.new('RGBA', (text_width, text_height), (0, 0, 0, 0))
             draw_logo = ImageDraw.Draw(logo_img)
             draw_logo.text((0, 0), text, fill='lime', font=font)
@@ -2903,7 +2903,7 @@ class FancyMenu:
 
                 if title_font:
                     title_text = current_menu.name
-                    title_width, title_height = draw.textsize(title_text, font=title_font)
+                    _, _, title_width, title_height = draw.textbbox((0,0),title_text, font=title_font)
 
                     title_x, title_y, _, _ = Fancygotchi.pos_convert(
                         self._fancygotchi,
@@ -2916,7 +2916,8 @@ class FancyMenu:
                         r1=menu_height,
                     )
 
-                    title_size = draw.textsize(title_text, font=title_font)
+                    title_box = draw.textbbox((0, 0), title_text, font=title_font)
+                    title_size = (title_box[2], title_box[3])
                     if title_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                         self.scroll_text(draw, title_text, title_color, title_text, title_font, menu_width, text_speed)
                     else:
@@ -2961,7 +2962,7 @@ class FancyMenu:
 
                     if button_font:
                         button_text = item_name
-                        text_width, text_height = draw.textsize(button_text, font=button_font)
+                        _, _, text_width, text_height = draw.textbbox((0, 0), button_text, font=button_font)
                         
 
                     text_x, text_y, _, _ = Fancygotchi.pos_convert(
@@ -3028,7 +3029,8 @@ class FancyMenu:
                         if self.loaded_images.get(image_to_use_path):
                             button_image.paste(self.loaded_images[image_to_use_path], (0, 0), self.loaded_images[image_to_use_path].split()[3])
 
-                        button_size = button_draw.textsize(button_text, font=button_font)
+                        button_box = button_draw.textbbox((0, 0), button_text, font=button_font)
+                        button_size = (button_box[2], button_box[3])
                         if button_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                             self.scroll_text(button_draw, button_text, highlight_text_color, button_text, button_font, menu_width, text_speed)
                         else:
@@ -3041,7 +3043,8 @@ class FancyMenu:
                         if self.loaded_images.get(button_bg_image_path):
                             button_image.paste(self.loaded_images[button_bg_image_path], (0, 0), self.loaded_images[button_bg_image_path].split()[3])
 
-                        button_size = button_draw.textsize(button_text, font=button_font)
+                        button_box = button_draw.textbbox((0, 0), button_text, font=button_font)
+                        button_size = (button_box[2], button_box[3])
                         if button_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                             self.scroll_text(button_draw, button_text, button_text_color, button_text, button_font, menu_width, text_speed)
                         else:
@@ -3062,7 +3065,7 @@ class FancyMenu:
     def scroll_text(self, draw, menu_item_key, color, scrolltext, scrollfont, menu_width, distance=10):
         scroll_state = self.scroll_state.get(menu_item_key, None)
         if not scroll_state:
-            text_width, text_height = draw.textsize(scrolltext, font=scrollfont)
+            _, _, text_width, text_height = draw.textbbox((0, 0), scrolltext, font=scrollfont)
             
             scroll_state = {
                 'text_width': text_width,
@@ -3355,7 +3358,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.2'
+    __version__ = '2.0.3'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3390,6 +3393,7 @@ class Fancygotchi(plugins.Plugin):
         self.star = '*'
         logging.info(f'[Fancygotchi]{20*self.star}[Fancygotchi]{20*self.star}')
         self._pwny_root = os.path.dirname(pwnagotchi.__file__)
+        logging.warning(self._pwny_root)
         self._plug_root = os.path.dirname(os.path.realpath(__file__))
         self._default = {
             'theme': {
@@ -4864,7 +4868,7 @@ fi"""}]
             if color == 'white' : color = (249, 249, 249, 255)
             if color == 255 : color = 'black'
             if text is not None and tfont is not None:
-                w,h = tfont.getsize(text)
+                _,_,w,h = tfont.getbbox(text)
                 nb_lines = text.count('\n') + 1
                 h = (h + 1) * nb_lines
                 if nb_lines > 1:
