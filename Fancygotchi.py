@@ -3810,6 +3810,9 @@ fi"""}]
         self.ready = True
 
     def on_unload(self, ui):
+        with open('/etc/pwnagotchi/config.toml', 'r') as f:
+            f_toml = toml.load(f)
+            faces.load_from_config(f_toml['ui']['faces'])
         with ui._lock:
             self.cleanup_display()
             self.dispHijack = False
@@ -4443,7 +4446,6 @@ fi"""}]
                     os.remove(icon_bkup)
 
             faces.load_from_config(self._theme['theme']['options']['faces'])
-            logging.warning(f"Theme config faces {self._theme['theme']['options']['faces']}")
 
             if 'fancyserver' in fancy_opt:
                 self.fancyserver = self._config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('fancyserver', False)
