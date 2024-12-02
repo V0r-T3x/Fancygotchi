@@ -1858,7 +1858,7 @@ DIAGNOSTIC= """#!/bin/bash
 get_log_file_path() {
   local config_file="$1"
   if [ -f "$config_file" ]; then
-    log_path=$(grep '^main\.log\.path' "$config_file" | cut -d'=' -f2 | tr -d ' "')
+    log_path=$(grep '^main\.log\.path ' "$config_file" | cut -d'=' -f2 | tr -d ' "')
     if [ -n "$log_path" ]; then
       echo "$log_path"
       return
@@ -2997,7 +2997,7 @@ class FancyMenu:
                             try:
                                 button_bg_image = Image.open(button_bg_image_path)
                                 button_bg_image = button_bg_image.convert("RGBA")
-                                button_bg_image = button_bg_image.resize((btns_menu_width, btn_height), Image.ANTIALIAS)
+                                button_bg_image = button_bg_image.resize((btns_menu_width, btn_height), Image.Resampling.LANCZOS)
                                 self.loaded_images[button_bg_image_path] = button_bg_image
                             except Exception as e:
                                 logging.error(f"[FancyMenu] Failed to load button background image: {e}")
@@ -3011,7 +3011,7 @@ class FancyMenu:
                             try:
                                 highlight_button_bg_image = Image.open(highlight_button_bg_image_path)
                                 highlight_button_bg_image = highlight_button_bg_image.convert("RGBA")
-                                highlight_button_bg_image = highlight_button_bg_image.resize((btns_menu_width, btn_height), Image.ANTIALIAS)
+                                highlight_button_bg_image = highlight_button_bg_image.resize((btns_menu_width, btn_height), Image.Resampling.LANCZOS)
                                 self.loaded_images[highlight_button_bg_image_path] = highlight_button_bg_image
                             except Exception as e:
                                 logging.error(f"[FancyMenu] Failed to load highlight button background image: {e}")
@@ -3312,7 +3312,7 @@ def image_mode(canvas, image, mode):
             new_height = canvas_height
             new_width = int(canvas_height * original_aspect)
 
-        image_resized = image.resize((new_width, new_height), Image.ANTIALIAS)
+        image_resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
         x = (canvas_width - new_width) // 2
         y = (canvas_height - new_height) // 2
