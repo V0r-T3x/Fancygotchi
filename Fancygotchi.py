@@ -1858,7 +1858,7 @@ DIAGNOSTIC= """#!/bin/bash
 get_log_file_path() {
   local config_file="$1"
   if [ -f "$config_file" ]; then
-    log_path=$(grep '^main\.log\.path' "$config_file" | cut -d'=' -f2 | tr -d ' "')
+    log_path=$(grep '^main\.log\.path ' "$config_file" | cut -d'=' -f2 | tr -d ' "')
     if [ -n "$log_path" ]; then
       echo "$log_path"
       return
