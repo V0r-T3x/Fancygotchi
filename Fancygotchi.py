@@ -2037,7 +2037,7 @@ class FancyDisplay:
         self.set_mode(mode, sub_mode)
 
     def _start_loop(self):
-        logging.warning("[FancyDisplay] Starting the asyncio event loop in a new thread.")
+        logging.info("[FancyDisplay] Starting the asyncio event loop in a new thread.")
         asyncio.set_event_loop(self.loop)
         self.is_running_event.set()
         try:
@@ -2133,7 +2133,6 @@ class FancyDisplay:
                         self.displayImpl.render(canvas)
                 else:
                     logging.warning("[FancyDisplay] No image to display.")
-                    
                 
                 await asyncio.sleep(fps)
                 iteration += 1
@@ -3359,7 +3358,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.4'
+    __version__ = '2.0.5'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3381,7 +3380,6 @@ class Fancygotchi(plugins.Plugin):
         self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame')
         self._config = pwnagotchi.config
         self.gittoken = self._config['main']['plugins']['Fancygotchi'].get('github_token', None)
-        logging.warning(self.gittoken)
         self.cfg_path = None
         self.cursor_list = ['█', '-']
         self.options = dict()
@@ -3394,7 +3392,6 @@ class Fancygotchi(plugins.Plugin):
         self.star = '*'
         logging.info(f'[Fancygotchi]{20*self.star}[Fancygotchi]{20*self.star}')
         self._pwny_root = os.path.dirname(pwnagotchi.__file__)
-        logging.warning(self._pwny_root)
         self._plug_root = os.path.dirname(os.path.realpath(__file__))
         self.orientation = 'horizontal'
         self._default = {
@@ -3820,10 +3817,9 @@ fi"""}]
             if not self.dispHijack:
                 if hasattr(self, 'display_controller') and self.display_controller:
                     self.display_controller.stop()
-                logging.warning(ui._enabled)
                 if hasattr(ui, '_enabled') and not ui._enabled:
                     ui._enabled = True
-                    logging.warning("[Fancygotchi] Switched back to the original display.")
+                    self.log("[Fancygotchi] Switched back to the original display.")
         if self._config['ui']['display']['enabled']:
             ui._enabled = True
             ui.init_display()
@@ -4059,15 +4055,15 @@ fi"""}]
                                 self.dispHijack = False
                         elif self.display_config['mode'] == 'screen_saver':
                             if cmd == 'menu_up':
-                                logging.warning('switch screen saver mode')
+                                self.log('switch screen saver mode')
                                 self.process_actions({'action': 'next_screen_saver'})
                             elif cmd == 'menu_down':
-                                logging.warning('switch screen saver mode')
+                                self.log('switch screen saver mode')
                                 self.process_actions({'action': 'previous_screen_saver'})
                             else:
                                 self.process_actions(menu_command)
                         elif self.display_config['mode'] == 'auxiliary':
-                            logging.warning('enable auxiliary mode')
+                            self.log('enable auxiliary mode')
                             self.process_actions(menu_command)
                         elif self.display_config['mode'] == 'terminal':
                             self.process_actions(menu_command)
@@ -4249,16 +4245,16 @@ fi"""}]
                 self.dispHijack = True
                 self.fancy_menu.active = False
             elif action == 'disable_second_screen':
-                logging.warning('disable second screen')
+                self.log('disable second screen')
                 self.dispHijack = False
             elif action == 'next_screen_saver':
-                logging.warning('next screen saver')
+                self.log('next screen saver')
                 try:
                     self.display_config['sub_mode'] = self.display_controller.switch_screen_saver_submode('next')
                 except:
                     self.display_config['sub_mode'] = self.screen_saver_modes[(self.screen_saver_modes.index(self.display_config['sub_mode']) + 1) % len(self.screen_saver_modes)]
             elif action == 'previous_screen_saver':
-                logging.warning('previous screen saver')
+                self.log('previous screen saver')
                 try:
                     self.display_config['sub_mode'] =  self.display_controller.switch_screen_saver_submode('previous')
                 except:
@@ -4540,7 +4536,7 @@ fi"""}]
                 shutil.rmtree(final_path)
             shutil.move(temp_theme_path, final_path)
             shutil.rmtree(temp_dir)
-            logging.warning(f"Theme {theme_name} downloaded successfully to {final_path}")
+            self.log(f"Theme {theme_name} downloaded successfully to {final_path}")
 
         except requests.RequestException as e:
             logging.error(f"Error downloading themes: {e}")
@@ -4656,7 +4652,7 @@ fi"""}]
                         self.options['rotation'] = f_toml['main']['plugins']['Fancygotchi']['rotation']
                     except:
                         self.options['rotation'] = 0
-                        f_toml['main']['plugins']['Fancygotchi']['rotation'] = self.options['rotation']
+                        f_toml['main']['plugins']['Fancygotchi']['rotation'] = self.options.get('rotation', 0)
 
                     try:
                         self.options['theme'] = f_toml['main']['plugins']['Fancygotchi']['theme']
@@ -4995,7 +4991,6 @@ fi"""}]
             if key in th_widget:
                 
                 if self.orientation == 'vertical':
-                    logging.warning(self.orientation)
                     if th_widget[key].get('position-v'):
                         self._state[key].update({'position': tuple(th_widget[key]['position-v'])})
                     elif th_widget[key].get('position'):
@@ -5833,7 +5828,7 @@ fi"""}]
                         response = json.loads(json.dumps(jreq)) 
                         theme = response['theme']
                         version = response['version']
-                        logging.warning(f'Download selection: theme {theme} version {version}')
+                        self.log(f'Download selection: theme {theme} version {version}')
                         info_path = os.path.join(self._plug_root, "themes", theme, "info.json")
                         if not os.path.exists(info_path):
                             logging.error(f"Theme {theme} not found locally.")
@@ -5842,11 +5837,11 @@ fi"""}]
                                 local_info = json.load(f)
                                 local_version = local_info.get('version')
                             if local_version is None:
-                                logging.warning(f"Local version not found for theme {theme}.")
+                                self.log(f"Local version not found for theme {theme}.")
                                 local_version = 'Unknown'
-                            logging.warning(f"Local theme version: {local_version}")
+                            self.log(f"Local theme version: {local_version}")
                             is_newer = version > local_version if local_version != 'Unknown' else False
-                        logging.warning(f'Is the online theme newer: {is_newer}')
+                        self.log(f'Is the online theme newer: {is_newer}')
                         return json.dumps({
                             'is_newer': is_newer,
                             'local_version': local_version
@@ -5861,7 +5856,7 @@ fi"""}]
                         jreq = request.get_json()
                         response = json.loads(json.dumps(jreq))
                         theme = response['theme']
-                        logging.warning(f'Download selection: theme {theme}')
+                        self.log(f'Download selection: theme {theme}')
                         self.theme_downloader(theme)
                         return "success", 200
                     except Exception as ex:
