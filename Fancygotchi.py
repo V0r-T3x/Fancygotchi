@@ -3396,6 +3396,7 @@ class Fancygotchi(plugins.Plugin):
         self._pwny_root = os.path.dirname(pwnagotchi.__file__)
         logging.warning(self._pwny_root)
         self._plug_root = os.path.dirname(os.path.realpath(__file__))
+        self.orientation = 'horizontal'
         self._default = {
             'theme': {
                 'options': {
@@ -4940,9 +4941,16 @@ fi"""}]
         conf = 0
         th_opt = self._theme['theme']['options']
         if key in self._state:
-            if key in th_widget and th_widget[key].get('position'):
-                if self._state[key]['position'] != tuple(th_widget[key]['position']):
-                    self._state[key]['position'] =  tuple(th_widget[key]['position'])
+
+
+
+            if key in th_widget:
+                if self.orientation == 'vertical' and th_widget[key].get('position-v'):
+                    if self._state[key]['position'] != tuple(th_widget[key]['position-v']):
+                        self._state[key]['position'] =  tuple(th_widget[key]['position-v'])
+                elif th_widget[key].get('position'):
+                    if self._state[key]['position'] != tuple(th_widget[key]['position']):
+                        self._state[key]['position'] =  tuple(th_widget[key]['position'])
             else:
                 if self._state[key]['position'] != tuple(ui._state.get_attr(key, 'xy')):
                     position = ui._state.get_attr(key, 'xy')
@@ -4950,6 +4958,9 @@ fi"""}]
                     if len(position) >= 3:
                         position = box_to_xywh(position)
                     self._state[key]['position'] = position
+
+
+
             if key in th_widget and th_widget[key].get('color'):
                 if self._state[key]['color'] != th_widget[key]['color']:
                     self._state[key]['color'] = th_widget[key]['color']
@@ -4981,8 +4992,16 @@ fi"""}]
             self._state[key].update({'position': position})
             self._state_default[key].update({'position': position})
 
-            if key in th_widget and th_widget[key].get('position'):
-                self._state[key].update({'position': tuple(th_widget[key]['position'])})
+            if key in th_widget:
+                
+                if self.orientation == 'vertical':
+                    logging.warning(self.orientation)
+                    if th_widget[key].get('position-v'):
+                        self._state[key].update({'position': tuple(th_widget[key]['position-v'])})
+                    elif th_widget[key].get('position'):
+                        self._state[key].update({'position': tuple(th_widget[key]['position'])})
+                elif th_widget[key].get('position'):
+                    self._state[key].update({'position': tuple(th_widget[key]['position'])})
             self._state_default[key].update({'color': [ui._state.get_attr(key, 'color')]})
             if key in th_widget and th_widget[key].get('color'):
                 self._state[key].update({'color': th_widget[key]['color']})
@@ -5249,10 +5268,12 @@ fi"""}]
             th_opt = self._theme['theme']['options']
             rot = self.options['rotation']
             if rot == 0 or rot == 180:
+                self.orientation = 'horizontal'
                 x, y = res
                 l = x
                 w = y
             elif rot == 90 or rot == 270:
+                self.orientation = 'vertical'
                 x, y = res
                 l = y
                 w = x
