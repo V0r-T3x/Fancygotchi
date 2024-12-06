@@ -2396,7 +2396,7 @@ class FancyDisplay:
             font = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 3)
             text = self.glitch_text_effect(LOGO, glitch_chance=0.25, max_spaces=5)
             try:
-                text_width, text_height = draw.textsize(text, font)
+                text_width, text_height = draw.textsize(text, font=font)
             except:
                 _, _, text_width, text_height = draw.textbbox((0, 0), text, font=font)
             logo_img = Image.new('RGBA', (text_width, text_height), (0, 0, 0, 0))
@@ -2910,7 +2910,7 @@ class FancyMenu:
                 if title_font:
                     title_text = current_menu.name
                     try:
-                        title_width, title_height = draw.textsize(text, font)
+                        title_width, title_height = draw.textsize(title_text, font=title_font)
                     except:
                         _, _, title_width, title_height = draw.textbbox((0,0),title_text, font=title_font)
 
@@ -2925,10 +2925,11 @@ class FancyMenu:
                         r1=menu_height,
                     )
                     try:
-                        title_box = draw.textbbox(title_text, font=title_font)
+                        title_box = draw.textsize(title_text, font=title_font)
+                        title_size = (title_box[0], title_box[1])
                     except:
                         title_box = draw.textbbox((0, 0), title_text, font=title_font)
-                    title_size = (title_box[2], title_box[3])
+                        title_size = (title_box[2], title_box[3])
                     if title_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                         self.scroll_text(draw, title_text, title_color, title_text, title_font, menu_width, text_speed)
                     else:
@@ -3051,9 +3052,10 @@ class FancyMenu:
 
                         try:
                             button_box = button_draw.textsize(button_text, font=button_font)
+                            button_size = (button_box[0], button_box[1])
                         except:
                             button_box = button_draw.textbbox((0, 0), button_text, font=button_font)
-                        button_size = (button_box[2], button_box[3])
+                            button_size = (button_box[2], button_box[3])
                         if button_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                             self.scroll_text(button_draw, button_text, highlight_text_color, button_text, button_font, menu_width, text_speed)
                         else:
@@ -3068,9 +3070,10 @@ class FancyMenu:
 
                         try:
                             button_box = button_draw.textsize(button_text, font=button_font)
+                            button_size = (button_box[0], button_box[1])
                         except:
                             button_box = button_draw.textbbox((0, 0), button_text, font=button_font)
-                        button_size = (button_box[2], button_box[3])
+                            button_size = (button_box[2], button_box[3])
                         if button_size[0] > menu_width and self.menu_theme.get('motion_text', True):
                             self.scroll_text(button_draw, button_text, button_text_color, button_text, button_font, menu_width, text_speed)
                         else:
@@ -5781,7 +5784,6 @@ fi"""}]
                         if isInternet:
 
                             themes_dict = self.fetch_themes()
-                            logging.warning(themes_dict)
                             return json.dumps({"status": 200, "data": themes_dict}), 200
                         else:
                             return json.dumps({"error": msg}), 500
