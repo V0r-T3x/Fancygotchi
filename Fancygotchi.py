@@ -3726,6 +3726,7 @@ fi # End of the Fancygotchi hack"""}]
         if self.adjust_code(i_f, i_code): rst = 1
         if self.adjust_code(p_f, p_code): rst = 1
         if self.zram_check(): rst = 1
+        if self.fps_check(): rst = 1
         self.check_and_fix_fb()
         if rst:
             self.log('The pwnagotchi need to restart.')
@@ -3832,10 +3833,21 @@ fi # End of the Fancygotchi hack"""}]
                     if 'size' in fs_data:
                         size = num_size = int(re.search(r'\d+', fs_data['size']).group())
                         if num_size < 50:
-                            self._config['fs']['memory']['mounts']['data']['size'] = '50M' 
+                            self._config['fs']['memory']['mounts']['data']['size'] = '250M' 
                             save_config(self._config, '/etc/pwnagotchi/config.toml')
                             rst= 1
         return rst
+
+    def fps_check(self):
+        rst = 0
+        if 'ui' in self._config and 'fps' in self._config['ui']:
+            fps_value = self._config['ui']['fps']
+            if fps_value == 0:
+                self._config['ui']['fps'] = 1  # Set to 1 if it's 0
+                save_config(self._config, '/etc/pwnagotchi/config.toml')
+                rst = 1
+        return rst
+
 
     def log(self, msg):
         try:
