@@ -3393,7 +3393,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.5'
+    __version__ = '2.0.6'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3637,6 +3637,7 @@ class Fancygotchi(plugins.Plugin):
         v_code = [{'replace': False, 
                     'reference': 'lv.draw(self._canvas, drawer)',
                     'paste': """
+                # Start of the Fancygotchi hack
                 if hasattr(self, '_pwncanvas'):
                     rot = pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation']
                     if self._pwncanvas_tmp is not None:
@@ -3649,13 +3650,14 @@ class Fancygotchi(plugins.Plugin):
                     web_tmp = self._canvas
                     hw_tmp = self._canvas
                     if rot in [90,270]: hw_tmp = hw_tmp.rotate(-90, expand=True)
-                    self._canvas = hw_tmp.convert(self._web_mode)"""},
+                    self._canvas = hw_tmp.convert(self._web_mode)# End of the Fancygotchi hack"""},
                     {'replace': False, 'reference': 'web.update_frame(self._canvas)',
-                    'paste':"""                if hasattr(self, '_pwncanvas'):
+                    'paste':"""                # Start of the Fancygotchi hack
+                if hasattr(self, '_pwncanvas'):
                     self._canvas = hw_tmp.convert(self._hw_mode)
                     if rot == 90: self._canvas = self._canvas.rotate(90, expand=True)
                     if rot == 270: self._canvas = self._canvas.rotate(-90, expand=True)
-                    if rot == 180: self._canvas = self._canvas.rotate(180)"""}]
+                    if rot == 180: self._canvas = self._canvas.rotate(180) # End of the Fancygotchi hack"""}]
         s_code = [{'replace': False, 
                     'reference': 'self._listeners[key](prev, value)',
                     'paste': """
@@ -3673,26 +3675,47 @@ class Fancygotchi(plugins.Plugin):
                     'reference': """                self._view.on_keys_generation()
                 logging.debug("generating %s ..." % self.priv_path)
                 os.system("pwngrid -generate -keys '%s'" % self.path)""",
-                    'paste': """                if os.path.exists(f'{self.priv_path}.backup') and os.path.exists(f'{self.pub_path}.backup') and os.path.exists(f'{self.fingerprint_path}.backup'):
+                    'paste': """                # Start of the Fancygotchi hack
+                # self._view.on_keys_generation()
+                # logging.debug("generating %s ..." % self.priv_path)
+                # os.system("pwngrid -generate -keys '%s'" % self.path)
+                if os.path.exists(f'{self.priv_path}.backup') and os.path.exists(f'{self.pub_path}.backup') and os.path.exists(f'{self.fingerprint_path}.backup'):
                     shutil.copy(f'{self.priv_path}.backup', self.priv_path)
                     shutil.copy(f'{self.pub_path}.backup', self.pub_path)
                 else:
                     self._view.on_keys_generation()
                     logging.debug("generating %s ..." % self.priv_path)
-                    os.system("pwngrid -generate -keys '%s'" % self.path)"""},
+                    os.system("pwngrid -generate -keys '%s'" % self.path) # End of the Fancygotchi hack"""},
+                    {'replace': True, 
+                    'reference': """                self._view.on_keys_generation()
+                logging.info("generating %s ..." % self.priv_path)
+                os.system("pwngrid -generate -keys '%s'" % self.path)""",
+                    'paste': """                # Start of the Fancygotchi hack
+                # self._view.on_keys_generation()
+                # logging.debug("generating %s ..." % self.priv_path)
+                # os.system("pwngrid -generate -keys '%s'" % self.path)
+                if os.path.exists(f'{self.priv_path}.backup') and os.path.exists(f'{self.pub_path}.backup') and os.path.exists(f'{self.fingerprint_path}.backup'):
+                    shutil.copy(f'{self.priv_path}.backup', self.priv_path)
+                    shutil.copy(f'{self.pub_path}.backup', self.pub_path)
+                else:
+                    self._view.on_keys_generation()
+                    logging.debug("generating %s ..." % self.priv_path)
+                    os.system("pwngrid -generate -keys '%s'" % self.path) # End of the Fancygotchi hack"""},
                     {'replace': False, 'reference': 'self._view.on_starting()',
-                    'paste': """                if not os.path.exists(f'{self.priv_path}.backup'):
+                    'paste': """                # Start of the Fancygotchi hack
+                if not os.path.exists(f'{self.priv_path}.backup'):
                     shutil.copy(self.priv_path, f'{self.priv_path}.backup')
                 if not os.path.exists(f'{self.pub_path}.backup'):
                     shutil.copy(self.pub_path, f'{self.pub_path}.backup')
                 if not os.path.exists(f'{self.fingerprint_path}.backup'):
-                    shutil.copy(self.fingerprint_path, f'{self.fingerprint_path}.backup')"""}]
+                    shutil.copy(self.fingerprint_path, f'{self.fingerprint_path}.backup') # End of the Fancygotchi hack"""}]
         p_code  = [{'replace': False, 
                 'reference': 'source /usr/bin/pwnlib',
                 'paste': f"""
+# Start of the Fancygotchi hack
 if [ -f "/usr/local/bin/boot_animation.py" ]; then
     {self.pyenv} /usr/local/bin/boot_animation.py
-fi"""}]
+fi # End of the Fancygotchi hack"""}]
         v_f = os.path.join(self._pwny_root, 'ui', 'view.py')
         s_f = os.path.join(self._pwny_root, 'ui', 'state.py')
         i_f = os.path.join(self._pwny_root, 'identity.py')
@@ -4437,6 +4460,7 @@ fi"""}]
 
             else:
                 self._theme = copy.deepcopy(self._default)
+
             if th_path:
                 css_src = os.path.join(th_path, 'style.css')
                 css_dst = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
@@ -4626,7 +4650,7 @@ fi"""}]
         menu_theme.update(menu_opt)
         custom_menus = {}
         if 'menu' in self._theme.get('theme', {}):
-            custom_menus = self._theme.get("theme", {}).get("menu", {})
+            custom_menus = copy.deepcopy(self._theme.get("theme", {}).get("menu", {}))
             custom_menus.pop('options', None)
         if self.fancyserver:   
             if not hasattr(self, 'fancy_server') or (hasattr(self, 'fancy_server') and getattr(self, 'fancy_server', None) is None):
@@ -4707,10 +4731,10 @@ fi"""}]
                         f_toml['main']['plugins']['Fancygotchi']['fancyserver'] = self.options['fancyserver']
 
                 rot = self.options['rotation']
-                th = self.options['theme']
+                th_name = self.options['theme']
                 fancys = self.options['fancyserver']
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation'] = rot
-                pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th
+                pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th_name
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['fancyserver'] = fancys
                 pwnagotchi.config = merge_config(f_toml, pwnagotchi.config)
                 if self._agent:
@@ -4724,12 +4748,33 @@ fi"""}]
                 th_menu = th.get('menu', {})
             else:
                 self.log('Partial update')
+                th = self._theme['theme']
+                rot = self.options['rotation']
                 if 'options' in ui._update['dict_part']:
-                    th_opt = ui._update['dict_part']['options']
-                th = ui._update['dict_part']
-                th_widget = {}
+                    th_options = ui._update['dict_part']['options']
+                    th['options'].update(th_options)
                 if 'widget' in ui._update['dict_part']:
-                    th_widget = th['widget']
+                    th_widget = ui._update['dict_part']['widget']
+                    for widget_name, widget_data in th_widget.items():
+                        if widget_name in th['widget']:
+                            th['widget'][widget_name].update(widget_data)
+                        else:
+                            th['widget'][widget_name] = widget_data
+                th_menu = th.get('menu', {})
+                if 'menu' in ui._update['dict_part']:
+                    th_menu_update = ui._update['dict_part']['menu']
+                    for menu_key, menu_data in th_menu_update.items():
+                        if menu_key in th_menu:
+                            th_menu[menu_key].update(menu_data)
+                        else:
+                            th_menu[menu_key] = menu_data
+                    th['menu'] = th_menu
+                for key, value in ui._update['dict_part'].items():
+                    if key not in ['options', 'widget', 'menu']:
+                        th[key] = value
+                th_opt = th['options']
+                th_widget = th['widget']
+                th_menu = th['menu']
                 
             if th_opt:
                 if 'font' in th_opt and th_opt['font'] != '':
