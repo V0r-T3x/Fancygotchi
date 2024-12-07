@@ -3839,9 +3839,11 @@ fi # End of the Fancygotchi hack"""}]
         return rst
 
     def fps_check(self):
+        
+        logging.warning(self._config['ui']['fps'])
         rst = 0
         if 'ui' in self._config and 'fps' in self._config['ui']:
-            fps_value = self._config['ui']['fps']
+            fps_value = int(self._config['ui']['fps'])
             if fps_value == 0:
                 self._config['ui']['fps'] = 1  # Set to 1 if it's 0
                 save_config(self._config, '/etc/pwnagotchi/config.toml')
