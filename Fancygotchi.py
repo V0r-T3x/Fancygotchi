@@ -11,6 +11,7 @@ import os
 import random
 import re
 import requests
+import secrets
 import shutil
 import struct
 import subprocess
@@ -29,7 +30,7 @@ from shutil import copy2, copyfile, copytree
 from textwrap import TextWrapper
 from toml import dump, load
 from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageOps, ImageSequence
-from flask import abort, jsonify, make_response, render_template_string, send_file
+from flask import abort, jsonify, make_response, render_template_string, send_file, session
 
 import pwnagotchi
 import pwnagotchi.plugins as plugins
@@ -3839,13 +3840,11 @@ fi # End of the Fancygotchi hack"""}]
         return rst
 
     def fps_check(self):
-        
-        logging.warning(self._config['ui']['fps'])
         rst = 0
         if 'ui' in self._config and 'fps' in self._config['ui']:
             fps_value = int(self._config['ui']['fps'])
             if fps_value == 0:
-                self._config['ui']['fps'] = 1  # Set to 1 if it's 0
+                self._config['ui']['fps'] = 1
                 save_config(self._config, '/etc/pwnagotchi/config.toml')
                 rst = 1
         return rst
@@ -5824,6 +5823,10 @@ fi # End of the Fancygotchi hack"""}]
                         webui_fps=self.webui_fps,
                         fancy_repo=FANCY_REPO,
                     )
+
+                elif path == "key":
+                    # curl -X GET "http://changeme:changeme@localhost:8080/plugins/Fancygotchi/key"
+                    return render_template_string("{{ csrf_token() }}"), 200
 
                 elif path == "ui2":
                     return self.ui2()
