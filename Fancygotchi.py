@@ -11,6 +11,7 @@ import os
 import random
 import re
 import requests
+import secrets
 import shutil
 import struct
 import subprocess
@@ -29,7 +30,7 @@ from shutil import copy2, copyfile, copytree
 from textwrap import TextWrapper
 from toml import dump, load
 from PIL import Image, ImageChops, ImageDraw, ImageFont, ImageOps, ImageSequence
-from flask import abort, jsonify, make_response, render_template_string, send_file
+from flask import abort, jsonify, make_response, render_template_string, send_file, session
 
 import pwnagotchi
 import pwnagotchi.plugins as plugins
@@ -457,7 +458,6 @@ INDEX = """
                         <h3>Theme Description</h3>
                         <div id="theme-description-content"></div>
                         <img id="screenshot" src="/img/screenshot.png" onerror="this.onerror=null; this.src='/screenshots/screenshot.png';"></img>
-                        </br><input type="checkbox" name="fancyserver" data-on-text="Fancyserver" data-off-text="Fancyserver" data-role="flipswitch" id="fancyserver-selector" onchange="fancyserver()" {% if fancyserver %}checked{% endif %} data-wrapper-class="custom-size-flipswitch"></input>
                     </div>
                 </div>
             </div>
@@ -608,8 +608,7 @@ function active_theme(callback) {
 }
 
 function resetCSS() {
-    var json = {"reset_css": true};
-    sendJSON("Fancygotchi/reset_css", json, function(response) {
+    loadJSON("Fancygotchi/reset_css", function(response) {
         console.log("CSS reset successful!");
         alert("CSS reset successful!");
     });
@@ -619,17 +618,12 @@ function theme_select() {
     var theme = document.getElementById("theme-selector").value;
     var rotation = document.getElementById("orientation-selector").value;
     
-    var json = {"theme": theme, "rotation": rotation};
-    sendJSON("Fancygotchi/theme_select", json, function(response) {
+    //var json = {"theme": theme, "rotation": rotation};
+    var url = "Fancygotchi/theme_select?theme="+theme+"&rotation="+rotation;
+    console.log(url);
+    loadJSON(url, function(response) {
         loadConfig(1, theme);
     }); 
-}
-
-function fancyserver(){
-    var fancyserver = document.getElementById("fancyserver-selector").checked;
-    console.log(fancyserver);
-    var json = {"fancyserver": fancyserver};
-    sendJSON("Fancygotchi/fancyserver", json);
 }
 
 function loadConfig(a, theme) {
@@ -1355,8 +1349,7 @@ function theme_delete() {
 }
 
 function display_hijack() {
-    var data = {};
-    sendJSON("Fancygotchi/display_hijack", data, function(response) {
+    loadJSON("Fancygotchi/display_hijack",function(response) {
         if (response.status == "200") {
             alert("Screen Hijacked");
         } else {
@@ -1365,8 +1358,7 @@ function display_hijack() {
     });
 }
 function display_pwny() {
-    var data = {};
-    sendJSON("Fancygotchi/display_pwny", data, function(response) {
+    loadJSON("Fancygotchi/display_pwny", function(response) {
         if (response.status == "200") {
             alert("Screen Pwny");
         } else {
@@ -1375,8 +1367,7 @@ function display_pwny() {
     });
 }
 function display_next() {
-    var data = {};
-    sendJSON("Fancygotchi/display_next", data, function(response) {
+    loadJSON("Fancygotchi/display_next",function(response) {
         if (response.status == "200") {
             alert("Next second screen mode");
         } else {
@@ -1385,8 +1376,7 @@ function display_next() {
     });
 }
 function display_previous() {
-    var data = {};
-    sendJSON("Fancygotchi/display_previous", data, function(response) {
+    loadJSON("Fancygotchi/display_previous", function(response) {
         if (response.status == "200") {
             alert("Next second screen mode");
         } else {
@@ -1395,8 +1385,7 @@ function display_previous() {
     });
 }
 function screen_saver_next() {
-    var data = {};
-    sendJSON("Fancygotchi/screen_saver_next", data, function(response) {
+    loadJSON("Fancygotchi/screen_saver_next", function(response) {
         if (response.status == "200") {
             alert("Next screen saver");
         } else {
@@ -1405,8 +1394,7 @@ function screen_saver_next() {
     });
 }
 function screen_saver_previous() {
-    var data = {};
-    sendJSON("Fancygotchi/screen_saver_previous", data, function(response) {
+    loadJSON("Fancygotchi/screen_saver_previous", function(response) {
         if (response.status == "200") {
             alert("Previous screen saver");
         } else {
@@ -1415,8 +1403,7 @@ function screen_saver_previous() {
     });
 }
 function stealth() {
-    var data = {};
-    sendJSON("Fancygotchi/stealth", data, function(response) {
+    loadJSON("Fancygotchi/stealth", function(response) {
         if (response.status == "200") {
             alert("Stealth mode");
         } else {
@@ -1425,11 +1412,9 @@ function stealth() {
     });
 }
 function navigate(direction) {
-    var data = {
-        action: direction
-    };
+    var action = direction
 
-    sendJSON("Fancygotchi/navmenu", data, function(response) {
+    loadJSON("Fancygotchi/navmenu?action="+action,  function(response) {
         if (response.status == "200") {
             console.log("Navigation: " + direction);
         } else {
@@ -1721,7 +1706,8 @@ import argparse
 import os
 import json
 import subprocess
-from multiprocessing.connection import Client
+import requests
+import toml
 
 def create_log_directory():
     log_dir = '/var/log/fancytools/'
@@ -1729,6 +1715,79 @@ def create_log_directory():
         result = subprocess.run(['sudo', 'mkdir', '-p', log_dir], check=True, capture_output=True, text=True)
         print("Directory %s created." % log_dir)
     return log_dir
+
+def get_credentials():
+    try:
+        with open('/etc/pwnagotchi/config.toml', 'r') as f:
+            config = toml.load(f)
+            return (config['ui']['web']['username'], config['ui']['web']['password'])
+    except:
+        return ('changeme', 'changeme')
+
+def send_command(command_data):
+    username, password = get_credentials()
+    base_url = 'http://localhost:8080/plugins/Fancygotchi'
+    session = requests.Session()
+
+    try:
+        response = session.get(f"{base_url}/key", auth=(username, password))
+        csrf_token = response.text.strip()
+    except Exception as e:
+        print(f"Error getting CSRF token: {e}")
+        return
+
+    headers = {'X-CSRF-Token': csrf_token}
+
+    endpoint_map = {
+        'stealth_mode': '/stealth',
+        'second_screen': '/second_screen',
+        'switch_screen_mode': '/display_next',
+        'switch_screen_mode_reverse': '/display_previous',
+        'next_screen_saver': '/screen_saver_next',
+        'previous_screen_saver': '/screen_saver_previous',
+        'menu_up': '/navmenu?action=up',
+        'menu_down': '/navmenu?action=down',
+        'menu_left': '/navmenu?action=left',
+        'menu_right': '/navmenu?action=right',
+        'menu_select': '/navmenu?action=select',
+        'menu_toggle': '/navmenu?action=toggle',
+        'theme_select': '/theme_select',
+        'theme_refresh': '/theme_refresh',
+        'plugin': '/plugin',
+        'restart-auto': '/restart',
+        'restart-manu': '/restart',
+        'reboot-auto': '/reboot',
+        'reboot-manu': '/reboot',
+        'shutdown': '/shutdown'
+    }
+
+    action = command_data['action']
+    endpoint = endpoint_map.get(action)
+
+    if endpoint:
+        try:
+            if 'menu_' in action:
+                payload = {'action': action.replace('menu_', '')}
+            elif action == 'theme_select':
+                payload = {'theme': command_data['name'], 'rotation': command_data['rotation']}
+            else:
+                payload = command_data
+
+            response = session.get(
+                f"{base_url}{endpoint}",
+                json=payload,
+                headers=headers,
+                auth=(username, password)
+            )
+            
+            if response.status_code == 200:
+                print(f"Success: {action}")
+            else:
+                print(f"Error: {response.status_code} - {response.text}")
+
+        except Exception as e:
+            print(f"Error sending command: {e}")
+            time.sleep(5)
 
 def main():
     parser = argparse.ArgumentParser(description="Fancytools")
@@ -1743,15 +1802,13 @@ def main():
                         help='Reboot the system (auto or manu)')
     parser.add_argument('-s', '--shutdown', action='store_true', dest='shutdown',
                         help='Shutdown the system')
-    
-
     parser.add_argument('-m', '--menu', choices=['toggle', 'up', 'down', 'left', 'right', 'select'], help='Control the menu')
     parser.add_argument('-pr', '--refresh-plugins', action='store_true', help='Refresh installed plugins list')
     parser.add_argument('-ts', '--theme-select', nargs=2, metavar=('NAME', 'ROTATION'), help='Select theme')
     parser.add_argument('-tr', '--theme-refresh', action='store_true', help='Refresh theme')
     parser.add_argument('-S', '--stealth-mode', action='store_true', help='Toggle stealth mode')
     parser.add_argument('-sw', '--switch-screen-mode', choices=['next', 'previous'], help='Switch screen mode')
-    parser.add_argument('-s2', '--second-screen', choices=['enable', 'disable'], help='Enable or disable second screen')
+    parser.add_argument('-s2', '--second-screen', action='store_true', help='Switch to second screen')
     parser.add_argument('-sc', '--screen-saver', choices=['next', 'previous'], help='Switch screen saver')
     parser.add_argument('-rb', '--run-bash', metavar='SCRIPT', help='Run a bash script')
     parser.add_argument('-rp', '--run-python', metavar='FILE', help='Run a Python script')
@@ -1759,7 +1816,6 @@ def main():
     args = parser.parse_args()
 
     log_dir = create_log_directory()
-    log_output_file = os.path.join(log_dir, 'anonymized_log.txt')
 
     if args.diagnostic_args is not None:
         script_path = os.path.abspath(__file__)
@@ -1775,35 +1831,18 @@ def main():
             'enable': enable_state
         }
         send_command(command_data)
-        print('Success %s.enable=%s' % (args.plugin, enable_state))
 
     if args.restart_mode:
-        command_data = {
-            'action': 'restart-%s' % args.restart_mode
-        }
-        send_command(command_data)
-        print('Success: restart %s' % args.restart_mode)
+        send_command({'action': f'restart-{args.restart_mode}'})
 
     if args.reboot_mode:
-        command_data = {
-            'action': 'reboot-%s' % args.reboot_mode
-        }
-        send_command(command_data)
-        print('Success: reboot %s' % args.reboot_mode)
+        send_command({'action': f'reboot-{args.reboot_mode}'})
 
     if args.shutdown:
-        command_data = {
-            'action': 'shutdown'
-        }
-        send_command(command_data)
-        print('Success: shutdown')
+        send_command({'action': 'shutdown'})
 
     if args.menu:
-        command_data = {
-            'action': 'menu_%s' % args.menu
-        }
-        send_command(command_data)
-        print(f'Success: menu %s' % args.menu)
+        send_command({'action': f'menu_{args.menu}'})
 
     if args.refresh_plugins:
         send_command({'action': 'refresh_plugins'})
@@ -1822,8 +1861,7 @@ def main():
         send_command({'action': action})
 
     if args.second_screen:
-        action = 'enable_second_screen' if args.second_screen == 'enable' else 'disable_second_screen'
-        send_command({'action': action})
+        send_command({'action': 'second_screen'})
 
     if args.screen_saver:
         action = 'next_screen_saver' if args.screen_saver == 'next' else 'previous_screen_saver'
@@ -1834,20 +1872,6 @@ def main():
 
     if args.run_python:
         send_command({'action': 'run_python', 'file': args.run_python})
-
-def send_command(command_data):
-    address = ('localhost', 3699)
-    while True:
-        try:
-            conn = Client(address)
-            conn.send(json.dumps(command_data).encode('utf-8'))
-            conn.close()
-            print('Success: %s' % command_data["action"])
-            break
-        except ConnectionRefusedError as cre:
-            print("Connection refused error: %s" % cre)
-            time.sleep(5)
-            continue
 
 if __name__ == "__main__":
     main()
@@ -2289,10 +2313,10 @@ class FancyDisplay:
                 options = {
                     "shape_type": "text", 
                     "text": "Fancygotchi", 
-                    "font_path": "/usr/local/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 
+                    "font_path": "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 
                     "color": "red", 
                     "speed": 10, 
-                    "font_size": 40,
+                    "font_size": 15,
                 }
             elif sub_mode == 'random_colors':
                 options = {
@@ -2424,20 +2448,20 @@ class FancyDisplay:
             speed = self.screen_data.get('speed')
 
             width, height = self._res
-            font = ImageFont.load_default() if self.screen_data.get(font_path) is None else ImageFont.truetype(font_path, font_size)
-            
+            font = ImageFont.truetype(font_path, font_size)
+
             if shape_type == "text":
-                shape_width, shape_height = font.getsize(text)
+                try:
+                    shape_width, shape_height = font.getsize(text)
+                except:
+                    _, _, shape_width, shape_height = font.getbbox(text)
             else:
                 shape_width = shape_height = shape_size 
-            
             if not hasattr(self, 'shape_position'):
                 self.shape_position = [random.randint(0, width - shape_width), random.randint(0, height - shape_height)]
                 self.shape_velocity = [random.choice([-1, 1]) * speed, random.choice([-1, 1]) * speed] 
-
             x, y = self.shape_position
             vx, vy = self.shape_velocity
-
             if x + shape_width >= width or x <= 0:
                 vx = -vx
             if y + shape_height >= height or y <= 0:
@@ -2456,8 +2480,8 @@ class FancyDisplay:
                 draw.ellipse((x, y, x + shape_width, y + shape_height), fill=color)
             return canvas
         except KeyError as e:
-            logging.debug(f'[FancyDisplay] KeyError while moving shapes: {e}')
-            logging.debug(traceback.format_exc())
+            logging.error(f'[FancyDisplay] KeyError while moving shapes: {e}')
+            logging.error(traceback.format_exc())
 
     def random_colors_screen_saver(self):
         speed = self.screen_data.get('speed')
@@ -2583,141 +2607,7 @@ class FancyDisplay:
             logging.error(traceback.format_exc())
             return None
 
-class FancyServer:
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(FancyServer, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self):
-        if not hasattr(self, 'initialized'):
-            self.initialized = True
-            self.server = None
-            self.thread = None
-            self.loop = None
-            self.is_running_event = threading.Event()
-            self.running = False
-            self.last_command = None
-            self.navi_cmd = [
-                'menu_up', 
-                'menu_down', 
-                'menu_left', 
-                'menu_right', 
-                'menu_toggle', 
-                'menu_select', 
-            ]
-
-    def _start_loop(self):
-        logging.debug("[FancyServer] Starting the asyncio event loop in a new thread.")
-        asyncio.set_event_loop(self.loop)
-        self.is_running_event.set()
-        try:
-            self.loop.run_until_complete(self.start_server())
-        except asyncio.CancelledError:
-            pass
-        finally:
-            self.loop.close()
-            self.is_running_event.clear()
-
-    def start(self):
-        if self.loop is None or self.loop.is_closed():
-            logging.debug("[FancyServer] Starting FancyServer.")
-            self.loop = asyncio.new_event_loop()
-            self.thread = threading.Thread(target=self._start_loop, daemon=True)
-            self.thread.start()
-
-        while not self.is_running_event.is_set():
-            time.sleep(0.1)
-
-    def stop(self):
-        self.running = False
-        if self.loop and not self.loop.is_closed():
-            self.loop.call_soon_threadsafe(self.loop.stop)
-        if self.server:
-            self.server.close()
-            self.server = None
-        if self.thread:
-            self.thread.join()
-        self.loop = None
-        self.thread = None
-        logging.debug("[FancyServer] FancyServer stopped.")
-
-    def restart(self):
-        logging.debug("[FancyServer] Restarting FancyServer.")
-        self.stop()
-        self.start()
-
-    async def handle_client(self, reader, writer):
-        try:
-            logging.debug("[Fancygotchi] Client connected.")
-            data = await reader.read()
-
-            if data:
-                json_match = re.search(b'{.*}', data)
-                if json_match:
-                    json_str = json_match.group(0).decode('utf-8')
-                    command = json.loads(json_str)
-                    await self.process_command(command)
-                else:
-                    logging.warning("[FancyServer] No valid JSON found in the data.")
-            else:
-                logging.warning("[FancyServer] No command received.")
-        except Exception as e:
-            logging.error(f"[FancyServer] An error occurred while handling client: {e}")
-            logging.error(traceback.format_exc())
-        finally:
-            writer.close()
-            await writer.wait_closed()
-
-    async def process_command(self, command):
-        try:
-            logging.debug(f"[FancyServer] Received command: {command}")
-            action = command.get('action')
-            if action == 'plugin':
-                name = command.get('plugin')
-                state = command.get('enable')
-                is_change = toggle_plugin(name, enable=(state == 'True'))
-                logging.debug(f'[FancyServer] {name} {"changed state" if is_change else "did not change state"}')
-            elif action == 'shutdown':
-                pwnagotchi.shutdown()
-            elif action.startswith('restart-'):
-                mode = action.split('-')[1]
-                pwnagotchi.restart(mode)
-            elif action.startswith('reboot-'):
-                mode = action.split('-')[1]
-                pwnagotchi.reboot(mode)
-            elif action in self.navi_cmd:
-                self.last_command = command
-            else:
-                self.last_command = command
-        except Exception as e:
-            logging.error(f"[FancyServer] An error occurred while processing command: {e}")
-            traceback.print_exc()
-
-    async def start_server(self):
-        if self.running:
-            logging.debug('[FancyServer] Already started')
-            return
-
-        self.running = True
-        self.server = await asyncio.start_server(self.handle_client, 'localhost', 3699)
-        addr = self.server.sockets[0].getsockname()
-        logging.debug(f'[FancyServer] Serving on {addr}')
-
-        async with self.server:
-            while self.running:
-                await asyncio.sleep(1) 
-            logging.debug('[FancyServer] loop finished')
-
-    def get_last_command(self):
-        command = self.last_command
-        self.last_command = None
-        return command
-
 class FancyMenu:
-
     def __init__(self, fancygotchi, menu_theme, custom_menus={}):
         
         self._fancygotchi = fancygotchi
@@ -2780,8 +2670,8 @@ class FancyMenu:
             if plugin.lower() != 'fancygotchi':
                 if plugin != 'None' and plugin is not None:
                     menus[plugin] = Menu(plugin, [
-                        ("Enable plugin", {"action": "plugin", "plugin": plugin, "enable": True}),
-                        ("Disable plugin", {"action": "plugin", "plugin": plugin, "enable": False}),
+                        ("Enable plugin", {"action": "plugin", "name": plugin, "enable": True}),
+                        ("Disable plugin", {"action": "plugin", "name": plugin, "enable": False}),
                     ], back_reference='Plugins toggle')
                     menus['Plugins toggle'].items.append((
                         plugin.capitalize(), {"action": "submenu", "name": plugin}
@@ -3393,7 +3283,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.5'
+    __version__ = '2.0.6'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3423,6 +3313,7 @@ class Fancygotchi(plugins.Plugin):
         self.stealth_mode = False
         self.refresh = False
         self.refresh_menu = False
+        self.last_cmd = None
         self.refresh_trigger = -1
         self.star = '*'
         logging.info(f'[Fancygotchi]{20*self.star}[Fancygotchi]{20*self.star}')
@@ -3637,6 +3528,7 @@ class Fancygotchi(plugins.Plugin):
         v_code = [{'replace': False, 
                     'reference': 'lv.draw(self._canvas, drawer)',
                     'paste': """
+                # Start of the Fancygotchi hack
                 if hasattr(self, '_pwncanvas'):
                     rot = pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation']
                     if self._pwncanvas_tmp is not None:
@@ -3649,13 +3541,14 @@ class Fancygotchi(plugins.Plugin):
                     web_tmp = self._canvas
                     hw_tmp = self._canvas
                     if rot in [90,270]: hw_tmp = hw_tmp.rotate(-90, expand=True)
-                    self._canvas = hw_tmp.convert(self._web_mode)"""},
+                    self._canvas = hw_tmp.convert(self._web_mode)# End of the Fancygotchi hack"""},
                     {'replace': False, 'reference': 'web.update_frame(self._canvas)',
-                    'paste':"""                if hasattr(self, '_pwncanvas'):
+                    'paste':"""                # Start of the Fancygotchi hack
+                if hasattr(self, '_pwncanvas'):
                     self._canvas = hw_tmp.convert(self._hw_mode)
                     if rot == 90: self._canvas = self._canvas.rotate(90, expand=True)
                     if rot == 270: self._canvas = self._canvas.rotate(-90, expand=True)
-                    if rot == 180: self._canvas = self._canvas.rotate(180)"""}]
+                    if rot == 180: self._canvas = self._canvas.rotate(180) # End of the Fancygotchi hack"""}]
         s_code = [{'replace': False, 
                     'reference': 'self._listeners[key](prev, value)',
                     'paste': """
@@ -3668,41 +3561,22 @@ class Fancygotchi(plugins.Plugin):
                 return None
     # End of the Fancygotchi hack
     """}]
-        i_code = [{'replace': False, 'reference': 'import logging', 'paste': 'import shutil'},
-                    {'replace': True, 
-                    'reference': """                self._view.on_keys_generation()
-                logging.debug("generating %s ..." % self.priv_path)
-                os.system("pwngrid -generate -keys '%s'" % self.path)""",
-                    'paste': """                if os.path.exists(f'{self.priv_path}.backup') and os.path.exists(f'{self.pub_path}.backup') and os.path.exists(f'{self.fingerprint_path}.backup'):
-                    shutil.copy(f'{self.priv_path}.backup', self.priv_path)
-                    shutil.copy(f'{self.pub_path}.backup', self.pub_path)
-                else:
-                    self._view.on_keys_generation()
-                    logging.debug("generating %s ..." % self.priv_path)
-                    os.system("pwngrid -generate -keys '%s'" % self.path)"""},
-                    {'replace': False, 'reference': 'self._view.on_starting()',
-                    'paste': """                if not os.path.exists(f'{self.priv_path}.backup'):
-                    shutil.copy(self.priv_path, f'{self.priv_path}.backup')
-                if not os.path.exists(f'{self.pub_path}.backup'):
-                    shutil.copy(self.pub_path, f'{self.pub_path}.backup')
-                if not os.path.exists(f'{self.fingerprint_path}.backup'):
-                    shutil.copy(self.fingerprint_path, f'{self.fingerprint_path}.backup')"""}]
         p_code  = [{'replace': False, 
                 'reference': 'source /usr/bin/pwnlib',
                 'paste': f"""
+# Start of the Fancygotchi hack
 if [ -f "/usr/local/bin/boot_animation.py" ]; then
     {self.pyenv} /usr/local/bin/boot_animation.py
-fi"""}]
+fi # End of the Fancygotchi hack"""}]
         v_f = os.path.join(self._pwny_root, 'ui', 'view.py')
         s_f = os.path.join(self._pwny_root, 'ui', 'state.py')
-        i_f = os.path.join(self._pwny_root, 'identity.py')
         p_f = '/usr/bin/pwnagotchi-launcher'
         rst = 0
         if self.adjust_code(v_f, v_code): rst = 1
         if self.adjust_code(s_f, s_code): rst = 1
-        if self.adjust_code(i_f, i_code): rst = 1
         if self.adjust_code(p_f, p_code): rst = 1
         if self.zram_check(): rst = 1
+        if self.fps_check(): rst = 1
         self.check_and_fix_fb()
         if rst:
             self.log('The pwnagotchi need to restart.')
@@ -3809,10 +3683,21 @@ fi"""}]
                     if 'size' in fs_data:
                         size = num_size = int(re.search(r'\d+', fs_data['size']).group())
                         if num_size < 50:
-                            self._config['fs']['memory']['mounts']['data']['size'] = '50M' 
+                            self._config['fs']['memory']['mounts']['data']['size'] = '250M' 
                             save_config(self._config, '/etc/pwnagotchi/config.toml')
                             rst= 1
         return rst
+
+    def fps_check(self):
+        rst = 0
+        if 'ui' in self._config and 'fps' in self._config['ui']:
+            fps_value = int(self._config['ui']['fps'])
+            if fps_value == 0:
+                self._config['ui']['fps'] = 1
+                save_config(self._config, '/etc/pwnagotchi/config.toml')
+                rst = 1
+        return rst
+
 
     def log(self, msg):
         try:
@@ -3860,7 +3745,8 @@ fi"""}]
             ui.init_display()
 
             self.cleanup_display()
-        self.cleanup_fancyserver()
+        if hasattr(self, 'fancy_menu'):
+            del self.fancy_menu
         if hasattr(self, 'listener'):
             self.listener.close()
         if hasattr(ui, '_pwncanvas'):
@@ -3928,27 +3814,13 @@ fi"""}]
             self.display_controller = None
             del self.display_controller
 
-    def cleanup_fancyserver(self):
-        if hasattr(self, 'fancy_server'):
-            if self.fancy_server and self.fancy_server.running:
-                self.fancy_server.stop()
-            
-            self.fancy_server = None
-
-        if hasattr(self, 'fancy_menu'):
-            del self.fancy_menu
-        
-        if hasattr(self, 'fancyserver'):
-            self.fancyserver = False
-
-
     def navigate_fancymenu(self, cmd=None):
         try:
             if hasattr(self, 'fancy_menu'):
                 if cmd:
                     menu_command = cmd
                 else:
-                    menu_command = self.check_menu_command()
+                    return
                 if menu_command:
                     cmd = menu_command['action']
                     self.log(f'menu_command: {cmd}')
@@ -3960,7 +3832,10 @@ fi"""}]
                         self.fancy_menu.navigate(direction)
                         self.log(direction)
                     elif cmd == 'menu_select':
-                        self.fancy_menu.select()
+                        cmd_action = self.fancy_menu.select()
+                        logging.warning(f"cmd_action: {cmd_action}")
+                        self.last_cmd = cmd_action
+                        #im here
                         self.log('select')
         except Exception as e:
             logging.error(f"Error in navigate_fancymenu: {e}")
@@ -4086,13 +3961,13 @@ fi"""}]
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'refresh' in self._theme['theme']['dev']:
                 self.refresh_trigger = self._theme['theme']['dev']['refresh']
 
-            if hasattr(self, 'fancyserver') and self.fancyserver and self.fancyserver and hasattr(self, 'fancy_menu'):
-                menu_command = self.check_menu_command()
+            if hasattr(self, 'fancy_menu'):
+                menu_command = self.last_cmd
                 if menu_command:
                     cmd = menu_command['action']
                     if self.dispHijack:
                         if cmd == 'menu_toggle':
-                                self.dispHijack = False
+                            self.dispHijack = False
                         elif self.display_config['mode'] == 'screen_saver':
                             if cmd == 'menu_up':
                                 self.log('switch screen saver mode')
@@ -4130,6 +4005,7 @@ fi"""}]
                             self.process_actions(menu_command)
                     else:
                         self.process_actions(menu_command)
+                self.last_cmd = None
 
             if self._i == self.refresh_trigger:
                 self.theme_update(ui)
@@ -4187,12 +4063,6 @@ fi"""}]
         logging.debug(f"Default configuration saved to {config_path}")
         return default_config
 
-    def check_menu_command(self):
-        if hasattr(self, 'fancy_server'):
-            command = self.fancy_server.get_last_command()
-            return command
-        return None
-
     def refresh_plugins(self):
         new_plugs = ''
         if 'custom_plugins' in self._agent._config['main']:
@@ -4246,13 +4116,26 @@ fi"""}]
                 self.fancy_menu.navigate("right")
             elif action == 'menu_toggle':
                 self.fancy_menu.toggle()
-            elif action == 'menu_plugin':
+            elif action == 'plugin':
+                # http://10.0.0.2:8080/plugins/Fancygotchi/plugin?name=bt-tether&enable=False
                 name = command.get('name')
                 state = command.get('enable')
-                if name != 'None' and name is not None:
-                    self.log(f'Plugin command: {name}, state: {state}')
-                    is_change = toggle_plugin(name, enable=state)
-                    self.log(f'{name} {"changed state" if is_change else "did not change state"}')
+
+                if name and name != 'None':  # Validate the plugin name
+                    self.log(f'Plugin command received: {name}, state: {state}')
+
+                    # Convert state to a boolean if it's provided as a string
+                    enable_state = state.lower() == 'true' if isinstance(state, str) else bool(state)
+
+                    # Attempt to toggle the plugin
+                    try:
+                        is_change = toggle_plugin(name, enable=enable_state)
+                        self.log(f"Plugin '{name}' {'changed state' if is_change else 'did not change state'} to {'enabled' if enable_state else 'disabled'}.")
+                    except Exception as e:
+                        self.log(f"Error toggling plugin '{name}': {e}")
+                else:
+                    self.log("Invalid plugin name provided for menu_plugin action.")
+
             elif action == 'refresh_plugins':
                 self.refresh_plugins()
             elif action == 'shutdown':
@@ -4388,7 +4271,6 @@ fi"""}]
         self._theme = {} 
         th_path = None
         self._theme_name = 'Default'
-        self.fancyserver = False
         try:
             if not boot: self.log('Theme selector')
             self._theme = copy.deepcopy(self._default)
@@ -4437,6 +4319,7 @@ fi"""}]
 
             else:
                 self._theme = copy.deepcopy(self._default)
+
             if th_path:
                 css_src = os.path.join(th_path, 'style.css')
                 css_dst = os.path.join(self._pwny_root, 'ui/web/static/css/style.css')
@@ -4486,10 +4369,6 @@ fi"""}]
                 self._config['ui']['faces'] = self._theme['theme']['options']['faces']
             faces.load_from_config(self._config['ui']['faces'])
 
-            if 'fancyserver' in fancy_opt:
-                self.fancyserver = self._config.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('fancyserver', False)
-            else:
-                self.fancyserver = False
             if not boot:self.log(f'Theme: {self._theme_name}')
 
         except Exception as e:
@@ -4609,53 +4488,16 @@ fi"""}]
             self._agent._config = merge_config(self._config, pwnagotchi.config)
         save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
 
-    def toggle_fancyserver(self, fancyserver):
-        self._config['main']['plugins']['Fancygotchi']['fancyserver'] = fancyserver
-        self.fancyserver = fancyserver
-        pwnagotchi.config = merge_config(self._config, pwnagotchi.config)
-        if self._agent:
-            self._agent._config = merge_config(self._config, pwnagotchi.config)
-        save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
-
-    def setup_fancyserver(self, th_menu):
+    def setup_menu(self, th_menu):
         if hasattr(self, 'fancy_menu'):
-            
             del self.fancy_menu
         menu_theme = copy.deepcopy(self._default_menu)
         menu_opt = th_menu.get('options', {})
         menu_theme.update(menu_opt)
         custom_menus = {}
         if 'menu' in self._theme.get('theme', {}):
-            custom_menus = self._theme.get("theme", {}).get("menu", {})
+            custom_menus = copy.deepcopy(self._theme.get("theme", {}).get("menu", {}))
             custom_menus.pop('options', None)
-        if self.fancyserver:   
-            if not hasattr(self, 'fancy_server') or (hasattr(self, 'fancy_server') and getattr(self, 'fancy_server', None) is None):
-                self.fancy_server = FancyServer()
-
-                try:
-                    self.fancy_server.start()
-                except OSError as e:
-                    if e.errno == 98: 
-                        logging.warning("[Fancygotchi] Address already in use. FancyServer could not start.")
-                    else:
-                        logging.error(f"[Fancygotchi] Error starting FancyServer: {e}")
-
-        else:
-            if hasattr(self, 'fancy_server'):
-                self.running = False
-                self.log("[Fancygotchi] Stopping FancyServer.")
-                self.cleanup_fancyserver()
-                fancytools_path = "/usr/local/bin/fancytools"
-                diagnostic_path = "/usr/local/bin/diagnostic.sh"
-                if os.path.exists(fancytools_path):
-                    os.remove(fancytools_path)
-                if os.path.exists(diagnostic_path):
-                    os.remove(diagnostic_path)
-
-                logging.debug("[Fancygotchi] FancyServer instance deleted.")
-            else:
-                logging.debug("[Fancygotchi] FancyServer is disabled and no instance exists.")
-        fancygotchi_config = pwnagotchi.config.get('main', {}).get('plugins', {}).get('Fancygotchi', {})
         diagnostic_path = "/usr/local/bin/diagnostic.sh"
         if os.path.exists(diagnostic_path):
             os.remove(diagnostic_path)
@@ -4663,21 +4505,20 @@ fi"""}]
             diagnostic_file.write(DIAGNOSTIC)
         os.system(f'chmod +x {diagnostic_path}')
         self.fancy_menu = FancyMenu(self, menu_theme, custom_menus)
-        if fancygotchi_config.get('fancyserver', False):
-            try:
-                fancytools_content = FANCYTOOLS.replace("{pyenv}", self.pyenv)
-                fancytools_path = "/usr/local/bin/fancytools"
-                logging.debug(f"Writing content to {fancytools_path}")
-                if os.path.exists(fancytools_path):
-                    os.remove(fancytools_path)
+        try:
+            fancytools_content = FANCYTOOLS.replace("{pyenv}", self.pyenv)
+            fancytools_path = "/usr/local/bin/fancytools"
+            logging.debug(f"Writing content to {fancytools_path}")
+            if os.path.exists(fancytools_path):
+                os.remove(fancytools_path)
 
-                with open(fancytools_path, "w") as fancytools_file:
-                    fancytools_file.write(fancytools_content)
+            with open(fancytools_path, "w") as fancytools_file:
+                fancytools_file.write(fancytools_content)
 
-                os.system(f'chmod +x {fancytools_path}')
-                self.running = True
-            except Exception as e:
-                logging.error(f"An unexpected error occurred: {e}")
+            os.system(f'chmod +x {fancytools_path}')
+            self.running = True
+        except Exception as e:
+            logging.error(f"An unexpected error occurred: {e}")
 
     def theme_update(self, ui, boot=False):
         th_opt = copy.deepcopy(self._default['theme']['options'])
@@ -4700,18 +4541,10 @@ fi"""}]
                         self.options['theme'] = ''
                         f_toml['main']['plugins']['Fancygotchi']['theme'] = self.options['theme']
 
-                    try:
-                        self.options['fancyserver'] = f_toml['main']['plugins']['Fancygotchi']['fancyserver']
-                    except:
-                        self.options['fancyserver'] = False
-                        f_toml['main']['plugins']['Fancygotchi']['fancyserver'] = self.options['fancyserver']
-
                 rot = self.options['rotation']
-                th = self.options['theme']
-                fancys = self.options['fancyserver']
+                th_name = self.options['theme']
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation'] = rot
-                pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th
-                pwnagotchi.config['main']['plugins']['Fancygotchi']['fancyserver'] = fancys
+                pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th_name
                 pwnagotchi.config = merge_config(f_toml, pwnagotchi.config)
                 if self._agent:
                     self._agent._config = merge_config(f_toml, pwnagotchi.config)
@@ -4724,12 +4557,33 @@ fi"""}]
                 th_menu = th.get('menu', {})
             else:
                 self.log('Partial update')
+                th = self._theme['theme']
+                rot = self.options['rotation']
                 if 'options' in ui._update['dict_part']:
-                    th_opt = ui._update['dict_part']['options']
-                th = ui._update['dict_part']
-                th_widget = {}
+                    th_options = ui._update['dict_part']['options']
+                    th['options'].update(th_options)
                 if 'widget' in ui._update['dict_part']:
-                    th_widget = th['widget']
+                    th_widget = ui._update['dict_part']['widget']
+                    for widget_name, widget_data in th_widget.items():
+                        if widget_name in th['widget']:
+                            th['widget'][widget_name].update(widget_data)
+                        else:
+                            th['widget'][widget_name] = widget_data
+                th_menu = th.get('menu', {})
+                if 'menu' in ui._update['dict_part']:
+                    th_menu_update = ui._update['dict_part']['menu']
+                    for menu_key, menu_data in th_menu_update.items():
+                        if menu_key in th_menu:
+                            th_menu[menu_key].update(menu_data)
+                        else:
+                            th_menu[menu_key] = menu_data
+                    th['menu'] = th_menu
+                for key, value in ui._update['dict_part'].items():
+                    if key not in ['options', 'widget', 'menu']:
+                        th[key] = value
+                th_opt = th['options']
+                th_widget = th['widget']
+                th_menu = th['menu']
                 
             if th_opt:
                 if 'font' in th_opt and th_opt['font'] != '':
@@ -4860,7 +4714,7 @@ fi"""}]
                     else:
                         if os.path.exists(boot_anim_file):
                             os.remove(boot_anim_file)
-                self.setup_fancyserver(th_menu)
+                self.setup_menu(th_menu)
 
     def theme_list(self):
         themes_path = os.path.join(self._plug_root, 'themes')
@@ -5714,9 +5568,6 @@ fi"""}]
             if not self.ready:
                 return "Plugin not ready"
             if request.method == "GET":
-                fancyS = False 
-                if hasattr(self, '_config') and 'Fancygotchi' in self._config['main']['plugins']:
-                    fancyS = self._config['main']['plugins']['Fancygotchi'].get('fancyserver', False)
 
                 if path == "/" or not path:
                     themes = sorted(self.theme_list(), key=lambda x: x.lower())
@@ -5761,10 +5612,13 @@ fi"""}]
                         cfg_path=cfg_path,
                         name=name,
                         logo=LOGO,
-                        fancyserver=fancyS,
                         webui_fps=self.webui_fps,
                         fancy_repo=FANCY_REPO,
                     )
+
+                elif path == "key":
+                    # curl -X GET "http://changeme:changeme@localhost:8080/plugins/Fancygotchi/key"
+                    return render_template_string("{{ csrf_token() }}"), 200
 
                 elif path == "ui2":
                     return self.ui2()
@@ -5846,23 +5700,150 @@ fi"""}]
                         logging.error(traceback.format_exc())
                         return "Error loading configuration", 500
 
-            elif request.method == "POST":
-                if path == "theme_select":
+                elif path == "display_hijack":
                     try:
-                        jreq = request.get_json()
-                        response = json.loads(json.dumps(jreq))
-                        rot = int(response['rotation'])
-                        theme = response['theme']
-        
-                        self.theme_save_config(response['theme'], response['rotation'])
+                        self.dispHijack = True
+                        return json.dumps({"message": "Hijack display successful!", "status": 200})
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "Display hijacking error", 500
+                
+                elif path == "display_pwny":
+                    try:
+                        self.dispHijack = False
+                        return json.dumps({"message": "Pwny change successful!", "status": 200})
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "Display Pwny error", 500
+
+                elif path == "second_screen":
+                    logging.warning("second_screen")
+                    try:
+                        self.dispHijack = not self.dispHijack
+                        return json.dumps({"message": "Second screen change successful!", "status": 200})
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "Display Pwny error", 500
+
+                elif path == "display_next":
+                    try:
+                        self.process_actions({"action": "switch_screen_mode"})
+                        return json.dumps({"message": "Display change successful!", "status": 200})
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "Display next error", 500
+                elif path == "display_previous":
+                    try:
+                        self.process_actions({"action": "switch_screen_mode_reverse"})
+                        return json.dumps({"message": "Display change successful!", "status": 200})
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "Display previous error", 500
+                elif path == "screen_saver_next":
+                    try:
+                        self.process_actions({"action": "next_screen_saver"})
+                        return json.dumps({"message": "Screen saver change successful!", "status": 200})
+                    except Exception as ex:
+                            logging.error(ex)
+                            logging.error(traceback.format_exc())
+                            return "Next screen saver error", 500
+                elif path == "screen_saver_previous":
+                    try:
+                        self.process_actions({"action": "previous_screen_saver"})
+                        return json.dumps({"message": "Screen saver change successful!", "status": 200})
+                    except Exception as ex:
+                            logging.error(ex)
+                            logging.error(traceback.format_exc())
+                            return "previous screen saver error", 500
+                elif path == "stealth":
+                    try:
+                        self.process_actions({"action": "stealth_mode"})
+                        return json.dumps({"message": "Stealth mode successful!", "status": 200})
+                    except Exception as ex:
+                            logging.error(ex)
+                            logging.error(traceback.format_exc())
+                            return "Stealth mode error", 500
+                elif path == "theme_refresh":
+                    try:
+                        self.process_actions({"action": "theme_refresh"})
+                        return json.dumps({"message": "Theme refresh successful!", "status": 200}), 200
+                    except Exception as ex:
+                            logging.error(ex)
+                            logging.error(traceback.format_exc())
+                            return "Theme refresh error", 500
+                elif path == "theme_select":
+                    try:
+                        theme = request.args.get('theme')
+                        rotation = request.args.get('rotation')
+                        rot = int(rotation)
+                        self.theme_save_config(theme, rot)
                         self.refresh = True
-                        return "success"
+                        return json.dumps({"message": "theme selection successful!", "status": 200})
                     except Exception as ex:
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "theme selection error", 500
+                elif path == "plugin":
+                    try:
+                        # Retrieve 'name' and 'enable' parameters from the query string
+                        name = request.args.get('name')
+                        enable = request.args.get('enable', 'false').lower() == 'true'
 
-                elif path == "version_compare":
+                        if not name:
+                            return json.dumps({"message": "Plugin name is missing.", "status": 400}), 400
+
+                        # Process the toggle action
+                        self.process_actions({"action": "menu_plugin", "name": name, "enable": enable})
+
+                        # Respond with success message
+                        return json.dumps({"message": f"Plugin '{name}' toggled {'enabled' if enable else 'disabled'} successfully!", "status": 200})
+                    except Exception as ex:
+                        logging.error(f"Error toggling plugin: {ex}")
+                        logging.error(traceback.format_exc())
+                        return json.dumps({"message": "Plugin toggle error", "status": 500}), 500
+                elif path == "navmenu":
+                    try:
+                        action = request.args.get('action')
+                        
+                        action_mapping = {
+                            'up': 'menu_up',
+                            'down': 'menu_down',
+                            'left': 'menu_left', 
+                            'right': 'menu_right',
+                            'select': 'menu_select',
+                            'toggle': 'menu_toggle'
+                        }
+                        
+                        menu_action = action_mapping.get(action)
+                        if menu_action:
+                            self.navigate_fancymenu({"action": menu_action})
+                            return json.dumps({"message": f"{menu_action} successful!", "status": 200})
+                        else:
+                            return "Invalid navigation action", 400
+                            
+                    except Exception as ex:
+                        logging.error(ex)
+                        logging.error(traceback.format_exc())
+                        return "Navigation error", 500
+                elif path == "reset_css":
+                    try:
+                        original_css_backup = os.path.join(self._pwny_root, 'ui/web/static/css/style.css.backup')
+                        with open(original_css_backup, 'w+') as f:
+                            f.write(CSS)
+                        return json.dumps({"message": "CSS reset successful!", "status": 200})
+                    except Exception as e:
+                        self.log(f"Error: {e}")
+                        return "Error resetting CSS", 500
+
+            elif request.method == "POST":
+                
+
+                if path == "version_compare":
                     is_newer = None
                     local_version = None
                     try:
@@ -5905,29 +5886,6 @@ fi"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return json.dumps({'error': f"theme download error: {ex}"}) , 500
-
-                elif path == "fancyserver":
-                    try:
-                        jreq = request.get_json()
-                        response = json.loads(json.dumps(jreq))
-                        self.toggle_fancyserver(response['fancyserver'])
-                        self.refresh = True
-                        return "success"
-                    except Exception as ex:
-                        logging.error(ex)
-                        logging.error(traceback.format_exc())
-                        return "theme selection error", 500
-            
-                elif path == "reset_css":
-                    try:
-                        data = request.get_json()
-                        original_css_backup = os.path.join(self._pwny_root, 'ui/web/static/css/style.css.backup')
-                        with open(original_css_backup, 'w+') as f:
-                            f.write(CSS)
-                        return "CSS reset successful!"
-                    except Exception as e:
-                        self.log(f"Error: {e}")
-                        return "Error resetting CSS", 500
 
                 elif path == "save_config":
                     try:
@@ -6124,89 +6082,7 @@ fi"""}]
                         logging.error(traceback.format_exc())
                         return "theme selection error", 500
 
-                elif path == "display_hijack":
-                    try:
-                        self.dispHijack = True
-                        return "success", 200
-                    except Exception as ex:
-                        logging.error(ex)
-                        logging.error(traceback.format_exc())
-                        return "Display hijacking error", 500
-                
-                elif path == "display_pwny":
-                    try:
-                        self.dispHijack = False
-                        return "success", 200
-                    except Exception as ex:
-                            logging.error(ex)
-                            logging.error(traceback.format_exc())
-                            return "Display Pwny error", 500
-                elif path == "display_next":
-                    try:
-                        self.process_actions({"action": "switch_screen_mode"})
-                        return "success", 200
-                    except Exception as ex:
-                            logging.error(ex)
-                            logging.error(traceback.format_exc())
-                            return "Display next error", 500
-                elif path == "display_previous":
-                    try:
-                        self.process_actions({"action": "switch_screen_mode_reverse"})
-                        return "success", 200
-                    except Exception as ex:
-                            logging.error(ex)
-                            logging.error(traceback.format_exc())
-                            return "Display previous error", 500
-                elif path == "screen_saver_next":
-                    try:
-                        self.process_actions({"action": "next_screen_saver"})
-                        return "success", 200
-                    except Exception as ex:
-                            logging.error(ex)
-                            logging.error(traceback.format_exc())
-                            return "Next screen saver error", 500
-                elif path == "screen_saver_previous":
-                    try:
-                        self.process_actions({"action": "previous_screen_saver"})
-                        return "success", 200
-                    except Exception as ex:
-                            logging.error(ex)
-                            logging.error(traceback.format_exc())
-                            return "previous screen saver error", 500
-                elif path == "stealth":
-                    try:
-                        self.process_actions({"action": "stealth_mode"})
-                        return "success", 200
-                    except Exception as ex:
-                            logging.error(ex)
-                            logging.error(traceback.format_exc())
-                            return "Stealth mode error", 500
-                elif path == "navmenu":
-                    try:
-                        jreq = request.get_json()
-                        response = json.loads(json.dumps(jreq))
-                        action = response['action']
-                        
-                        action_mapping = {
-                            'up': 'menu_up',
-                            'down': 'menu_down',
-                            'left': 'menu_left', 
-                            'right': 'menu_right',
-                            'select': 'menu_select',
-                            'toggle': 'menu_toggle'
-                        }
-                        
-                        menu_action = action_mapping.get(action)
-                        if menu_action:
-                            self.navigate_fancymenu({"action": menu_action})
-                            return "success", 200
-                        else:
-                            return "Invalid navigation action", 400
-                            
-                    except Exception as ex:
-                        logging.error(ex)
-                        logging.error(traceback.format_exc())
-                        return "Navigation error", 500
+
 
         except Exception as e:
             self.log(f"Error in webhook: {str(e)}")
