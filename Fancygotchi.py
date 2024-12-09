@@ -3561,45 +3561,6 @@ class Fancygotchi(plugins.Plugin):
                 return None
     # End of the Fancygotchi hack
     """}]
-        i_code = [{'replace': False, 'reference': 'import logging', 'paste': 'import shutil'},
-                    {'replace': True, 
-                    'reference': """                self._view.on_keys_generation()
-                logging.debug("generating %s ..." % self.priv_path)
-                os.system("pwngrid -generate -keys '%s'" % self.path)""",
-                    'paste': """                # Start of the Fancygotchi hack
-                # self._view.on_keys_generation()
-                # logging.debug("generating %s ..." % self.priv_path)
-                # os.system("pwngrid -generate -keys '%s'" % self.path)
-                if os.path.exists(f'{self.priv_path}.backup') and os.path.exists(f'{self.pub_path}.backup') and os.path.exists(f'{self.fingerprint_path}.backup'):
-                    shutil.copy(f'{self.priv_path}.backup', self.priv_path)
-                    shutil.copy(f'{self.pub_path}.backup', self.pub_path)
-                else:
-                    self._view.on_keys_generation()
-                    logging.debug("generating %s ..." % self.priv_path)
-                    os.system("pwngrid -generate -keys '%s'" % self.path) # End of the Fancygotchi hack"""},
-                    {'replace': True, 
-                    'reference': """                self._view.on_keys_generation()
-                logging.info("generating %s ..." % self.priv_path)
-                os.system("pwngrid -generate -keys '%s'" % self.path)""",
-                    'paste': """                # Start of the Fancygotchi hack
-                # self._view.on_keys_generation()
-                # logging.debug("generating %s ..." % self.priv_path)
-                # os.system("pwngrid -generate -keys '%s'" % self.path)
-                if os.path.exists(f'{self.priv_path}.backup') and os.path.exists(f'{self.pub_path}.backup') and os.path.exists(f'{self.fingerprint_path}.backup'):
-                    shutil.copy(f'{self.priv_path}.backup', self.priv_path)
-                    shutil.copy(f'{self.pub_path}.backup', self.pub_path)
-                else:
-                    self._view.on_keys_generation()
-                    logging.debug("generating %s ..." % self.priv_path)
-                    os.system("pwngrid -generate -keys '%s'" % self.path) # End of the Fancygotchi hack"""},
-                    {'replace': False, 'reference': 'self._view.on_starting()',
-                    'paste': """                # Start of the Fancygotchi hack
-                if not os.path.exists(f'{self.priv_path}.backup'):
-                    shutil.copy(self.priv_path, f'{self.priv_path}.backup')
-                if not os.path.exists(f'{self.pub_path}.backup'):
-                    shutil.copy(self.pub_path, f'{self.pub_path}.backup')
-                if not os.path.exists(f'{self.fingerprint_path}.backup'):
-                    shutil.copy(self.fingerprint_path, f'{self.fingerprint_path}.backup') # End of the Fancygotchi hack"""}]
         p_code  = [{'replace': False, 
                 'reference': 'source /usr/bin/pwnlib',
                 'paste': f"""
@@ -3609,12 +3570,10 @@ if [ -f "/usr/local/bin/boot_animation.py" ]; then
 fi # End of the Fancygotchi hack"""}]
         v_f = os.path.join(self._pwny_root, 'ui', 'view.py')
         s_f = os.path.join(self._pwny_root, 'ui', 'state.py')
-        i_f = os.path.join(self._pwny_root, 'identity.py')
         p_f = '/usr/bin/pwnagotchi-launcher'
         rst = 0
         if self.adjust_code(v_f, v_code): rst = 1
         if self.adjust_code(s_f, s_code): rst = 1
-        if self.adjust_code(i_f, i_code): rst = 1
         if self.adjust_code(p_f, p_code): rst = 1
         if self.zram_check(): rst = 1
         if self.fps_check(): rst = 1
