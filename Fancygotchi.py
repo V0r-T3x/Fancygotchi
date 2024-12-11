@@ -589,6 +589,48 @@ window.onload = function() {
     setInterval(updateImage, {{webui_fps}});
 }
 
+function navigate(action) {
+    console.log(`Navigating: ${action}`);
+}
+
+// Example stealth function
+function stealth() {
+    console.log('Stealth mode activated!');
+}
+
+// jQuery script for keyboard navigation
+$(document).ready(function () {
+    $(document).on('keydown', function (e) {
+        switch (e.key) {
+            case "ArrowUp":
+                e.preventDefault(); 
+                $('#up').click();
+                break;
+            case "ArrowDown":
+                e.preventDefault(); 
+                $('#down').click();
+                break;
+            case "ArrowLeft":
+                e.preventDefault(); 
+                $('#left').click();
+                break;
+            case "ArrowRight":
+                e.preventDefault(); 
+                $('#right').click();
+                break;
+            case "Enter": // Example for select button
+                e.preventDefault(); 
+                $('#select').click();
+                break;
+            case "s": // Example for stealth button
+                $('#stealth').click();
+                break;
+            case "t": // Example for toggle button
+                $('#toggle').click();
+                break;
+        }
+    });
+});
 window.onscroll = function() {
     if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
         scrollToTopBtn.classList.add("show");
