@@ -250,26 +250,45 @@ INDEX = """
     }
 
     /* Main container with 3 sections */
-    .container {
-    display: flex;
-    width: 100%;
-    max-width: 1000px; /* adjust as needed */
-    margin: 0 auto;
-    align-items: center;
-    gap: 10px;
+        .container {
+        display: flex;
+        width: 100%;
+        margin: 0 auto;
+        gap: 0px;
     }
 
     /* Left section centered within its area */
     .left-container {
-    display: flex;
-    justify-content: center;
-    width: 33.33%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 33.33%;
+        box-sizing: border-box; /* Ensure padding is included in width */
     }
+
     .left {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 1fr);
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: repeat(5, 1fr);
+        gap: 0px; /* Add spacing between grid items */
+        width: 100%; /* Fit the container */
+        max-width: 100%; /* Ensure no overflow */
+        //border: 1px solid #ccc;
+        box-sizing: border-box; /* Ensure padding is included in width */
     }
+
+    .left div {
+        //border: 1px solid #ccc;
+        box-sizing: border-box; /* Ensure consistent sizing */
+        min-width: 75px;
+        max-width: auto;
+    }
+
+    .left button {
+        width: 100%;
+        max-width: 100%; /* Prevent buttons from exceeding cell width */
+    }
+
 
     /* Center element truly centered */
     .center-container {
@@ -379,17 +398,40 @@ INDEX = """
             <!-- Left Div with 3x3 grid -->
             <div class="left-container">
                 <div class="left">
-                    <div><button id="toggle" onclick="navigate('toggle')">Toggle</button></div>
-                    <div><button id="up" onclick="navigate('up')" class="arrow-button">↑</button></div>
-                    <div><button id="stealth" onclick="stealth()">Stealth</button></div>
-                    <div><button id="left" onclick="navigate('left')" class="arrow-button">←</button></div>
+                    <div><button id="l2" onclick="navigate('l2')"> LEFT 2</button></div>
+                    <div><button id="start" onclick="navigate('start')">Start</button></div>
+                    <div></div>
                     <div><button id="select" onclick="navigate('select')">Select</button></div>
+                    <div><button id="r2" onclick="navigate('r2')">RIGHT 2</button></div>
+                    
+                    <div><button id="l1" onclick="navigate('l1')"> LEFT 1</button></div>
+                    <div><button id="up" onclick="navigate('up')" class="arrow-button">↑</button></div>
+                    <div></div>
+                    <div></div>
+                    <div><button id="r1" onclick="navigate('r1')">RIGHT 1</button></div>
+                    
+                    <div><button id="left" onclick="navigate('left')" class="arrow-button">←</button></div>
+                    <div></div>
                     <div><button id="right" onclick="navigate('right')" class="arrow-button">→</button></div>
+                    <div><button id="y" onclick="navigate('y')" class="arrow-button">Y</button></div>
+                    <div><button id="x" onclick="navigate('x')" class="arrow-button">X</button></div>
+
                     <div></div>
                     <div><button id="down" onclick="navigate('down')" class="arrow-button">↓</button></div>
                     <div></div>
+                    <div><button id="b" onclick="navigate('b')" class="arrow-button">B</button></div>
+                    <div><button id="a" onclick="navigate('a')" class="arrow-button">A</button></div>
+
+                    <div></div>
+                    <div>
+                        <input type="checkbox" style="max-width:40px" data-role="flipswitch" name="Screen 2" id="screen" data-on-text="Screen 2" data-off-text="Screen 1" data-wrapper-class="custom-size-flipswitch">
+                    </div>
+                    <div></div>
+                    <div></div>
+                    <div><button id="stealth" onclick="stealth()">Stealth</button></div>
                 </div>
             </div>
+            
 
             <!-- Center Image -->
             <div class="center-container">
@@ -588,6 +630,67 @@ window.onload = function() {
     }
     setInterval(updateImage, {{webui_fps}});
 }
+
+$(document).ready(function () {
+    $(document).on('keydown', function (e) {
+        switch (e.key) {
+            case "ArrowUp":
+                e.preventDefault(); 
+                $('#up').click();
+                break;
+            case "ArrowDown":
+                e.preventDefault(); 
+                $('#down').click();
+                break;
+            case "ArrowLeft":
+                e.preventDefault(); 
+                $('#left').click();
+                break;
+            case "ArrowRight":
+                e.preventDefault(); 
+                $('#right').click();
+                break;
+            case "Enter":
+                e.preventDefault(); 
+                $('#select').click();
+                break;
+            case "s":
+                $('#stealth').click();
+                break;
+            case "t":
+                $('#start').click();
+                break;
+            case "a":
+                $('#a').click();
+                break;
+            case "b":
+                $('#b').click();
+                break;
+            case "x":
+                $('#x').click();
+                break;
+            case "y":
+                $('#y').click();
+                break;
+            case "Shift":
+                e.preventDefault(); 
+                $('#l1').click();
+                break;
+            case "Alt":
+                e.preventDefault(); 
+                $('#r1').click();
+                break;
+            case "Control":
+                e.preventDefault(); 
+                $('#l2').click();
+                break;
+            case " ":
+                e.preventDefault(); 
+                $('#r2').click();
+                break;
+        }
+    });
+});
 
 window.onscroll = function() {
     if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
@@ -1411,14 +1514,19 @@ function stealth() {
         }
     });
 }
-function navigate(direction) {
-    var action = direction
-
-    loadJSON("Fancygotchi/navmenu?action="+action,  function(response) {
+function navigate(btn) {
+    var action = btn
+    var which_screen = document.getElementById("screen").checked;
+    var screen = 1
+    if (which_screen == true) {
+        screen = 2
+    }
+    console.log("screen: "+screen)
+    loadJSON("Fancygotchi/btn_cmd?action="+action+"&hardware=False&screen="+screen,  function(response) {
         if (response.status == "200") {
-            console.log("Navigation: " + direction);
+            console.log("Navigation: " + "Fancygotchi/btn_cmd?action="+action+"&hardware=False&screen="+screen);
         } else {
-            console.log("Navigation error: " + direction + " (err-code: " + response.status + ")");
+            console.log("Navigation error: " + btn + " (err-code: " + response.status + ")");
         }
     });
 }
@@ -1726,17 +1834,7 @@ def get_credentials():
 
 def send_command(command_data):
     username, password = get_credentials()
-    base_url = 'http://localhost:8080/plugins/Fancygotchi'
-    session = requests.Session()
-
-    try:
-        response = session.get(f"{base_url}/key", auth=(username, password))
-        csrf_token = response.text.strip()
-    except Exception as e:
-        print(f"Error getting CSRF token: {e}")
-        return
-
-    headers = {'X-CSRF-Token': csrf_token}
+    base_url = 'http://%s:%s@localhost:8080/plugins/Fancygotchi' % (username, password)
 
     endpoint_map = {
         'stealth_mode': '/stealth',
@@ -1745,12 +1843,20 @@ def send_command(command_data):
         'switch_screen_mode_reverse': '/display_previous',
         'next_screen_saver': '/screen_saver_next',
         'previous_screen_saver': '/screen_saver_previous',
-        'menu_up': '/navmenu?action=up',
-        'menu_down': '/navmenu?action=down',
-        'menu_left': '/navmenu?action=left',
-        'menu_right': '/navmenu?action=right',
-        'menu_select': '/navmenu?action=select',
-        'menu_toggle': '/navmenu?action=toggle',
+        'up': '/btn_cmd',
+        'down': '/btn_cmd',
+        'left': '/btn_cmd',
+        'right': '/btn_cmd',
+        'select': '/btn_cmd',
+        'start': '/btn_cmd',
+        'a': '/btn_cmd',
+        'b': '/btn_cmd',
+        'x': '/btn_cmd',
+        'y': '/btn_cmd',
+        'l1': '/btn_cmd',
+        'l2': '/btn_cmd',
+        'r1': '/btn_cmd',
+        'r2': '/btn_cmd',
         'theme_select': '/theme_select',
         'theme_refresh': '/theme_refresh',
         'plugin': '/plugin',
@@ -1766,27 +1872,21 @@ def send_command(command_data):
 
     if endpoint:
         try:
-            if 'menu_' in action:
-                payload = {'action': action.replace('menu_', '')}
-            elif action == 'theme_select':
-                payload = {'theme': command_data['name'], 'rotation': command_data['rotation']}
-            else:
-                payload = command_data
+            query_params = ''
+            for key, value in command_data.items():
+                query_params += '%s=%s&' % (key, value)
+            query_params = query_params[:-1]  # remove trailing &
+            url = "%s%s?%s" % (base_url, endpoint, query_params)
+            print(url)
+            response = requests.get(url)
 
-            response = session.get(
-                f"{base_url}{endpoint}",
-                json=payload,
-                headers=headers,
-                auth=(username, password)
-            )
-            
             if response.status_code == 200:
-                print(f"Success: {action}")
+                print("Success: %s" % action)
             else:
-                print(f"Error: {response.status_code} - {response.text}")
+                print("Error: %s - %s" % (response.status_code, response.text))
 
         except Exception as e:
-            print(f"Error sending command: {e}")
+            print("Error sending command: %s" % e)
             time.sleep(5)
 
 def main():
@@ -1802,7 +1902,7 @@ def main():
                         help='Reboot the system (auto or manu)')
     parser.add_argument('-s', '--shutdown', action='store_true', dest='shutdown',
                         help='Shutdown the system')
-    parser.add_argument('-m', '--menu', choices=['toggle', 'up', 'down', 'left', 'right', 'select'], help='Control the menu')
+    parser.add_argument('-B', '--button', choices=['start', 'up', 'down', 'left', 'right', 'select'], help='Control the menu')
     parser.add_argument('-pr', '--refresh-plugins', action='store_true', help='Refresh installed plugins list')
     parser.add_argument('-ts', '--theme-select', nargs=2, metavar=('NAME', 'ROTATION'), help='Select theme')
     parser.add_argument('-tr', '--theme-refresh', action='store_true', help='Refresh theme')
@@ -1827,9 +1927,10 @@ def main():
         enable_state = 'True' if args.enable else 'False'
         command_data = {
             'action': 'plugin',
-            'plugin': args.plugin,
+            'name': args.plugin,
             'enable': enable_state
         }
+        print(command_data)
         send_command(command_data)
 
     if args.restart_mode:
@@ -1841,8 +1942,8 @@ def main():
     if args.shutdown:
         send_command({'action': 'shutdown'})
 
-    if args.menu:
-        send_command({'action': f'menu_{args.menu}'})
+    if args.button:
+        send_command({'action': args.button, 'hardware': True})
 
     if args.refresh_plugins:
         send_command({'action': 'refresh_plugins'})
@@ -3814,24 +3915,64 @@ fi # End of the Fancygotchi hack"""}]
             self.display_controller = None
             del self.display_controller
 
+
+
+    def button_controller(self, cmd=None, screen=1):
+        screen = int(screen)
+        logging.warning(f"Screen {screen} controlled")
+        logging.warning(f"cmd: {cmd}")
+        try:
+            # verify if the button command is valid
+            if cmd:
+                button_command = cmd
+            else:
+                return
+            # if linked to the first screen
+            if button_command:
+                cmd = button_command['action']
+                if screen == 1:
+                    logging.warning("Screen 1 controlled")
+                    if cmd == 'btn_start':
+                        logging.warning("Button start")
+                        self.fancy_menu.toggle()
+                        self.log('button start')
+                    # Verifying if menu exists and is enabled
+                    if hasattr(self, 'fancy_menu') and self.fancy_menu.active:
+                        logging.warning("Fancy menu is active")
+                        self.log(f'button_command: {cmd}')
+                        
+                        if cmd in ['btn_up', 'btn_down', 'btn_left', 'btn_right']:
+                            direction = cmd.split('_')[1]
+                            self.fancy_menu.navigate(direction)
+                            self.log(direction)
+                        elif cmd == 'btn_select':
+                            cmd_action = self.fancy_menu.select()
+                            logging.warning(f"cmd_action: {cmd_action}")
+                            self.last_cmd = cmd_action
+                else:
+                    logging.warning("Screen 2 controlled")
+        except Exception as e:
+            logging.error(f"Error in button_controller: {e}")
+            logging.error(traceback.format_exc())
+
     def navigate_fancymenu(self, cmd=None):
         try:
+            if cmd:
+                menu_command = cmd
+            else:
+                return
             if hasattr(self, 'fancy_menu'):
-                if cmd:
-                    menu_command = cmd
-                else:
-                    return
                 if menu_command:
                     cmd = menu_command['action']
                     self.log(f'menu_command: {cmd}')
-                    if cmd == 'menu_toggle':
+                    if cmd == 'btn_start':
                         self.fancy_menu.toggle()
-                        self.log('toggle menu')
-                    elif cmd in ['menu_up', 'menu_down', 'menu_left', 'menu_right']:
+                        self.log('start button')
+                    elif cmd in ['btn_up', 'btn_down', 'btn_left', 'btn_right']:
                         direction = cmd.split('_')[1]
                         self.fancy_menu.navigate(direction)
                         self.log(direction)
-                    elif cmd == 'menu_select':
+                    elif cmd == 'btn_select':
                         cmd_action = self.fancy_menu.select()
                         logging.warning(f"cmd_action: {cmd_action}")
                         self.last_cmd = cmd_action
@@ -3966,13 +4107,13 @@ fi # End of the Fancygotchi hack"""}]
                 if menu_command:
                     cmd = menu_command['action']
                     if self.dispHijack:
-                        if cmd == 'menu_toggle':
+                        if cmd == 'btn_start':
                             self.dispHijack = False
                         elif self.display_config['mode'] == 'screen_saver':
-                            if cmd == 'menu_up':
+                            if cmd == 'btn_up':
                                 self.log('switch screen saver mode')
                                 self.process_actions({'action': 'next_screen_saver'})
-                            elif cmd == 'menu_down':
+                            elif cmd == 'btn_down':
                                 self.log('switch screen saver mode')
                                 self.process_actions({'action': 'previous_screen_saver'})
                             else:
@@ -3988,13 +4129,13 @@ fi # End of the Fancygotchi hack"""}]
                     elif self.fancy_menu.active:
                         self.log(f'menu_command: {menu_command}')
                         self.log(f'menu_command: {cmd}')
-                        if cmd == 'menu_toggle':
+                        if cmd == 'btn_start':
                             self.process_actions(menu_command)
-                        elif cmd in ['menu_up', 'menu_down', 'menu_left', 'menu_right']:
+                        elif cmd in ['btn_up', 'btn_down', 'btn_left', 'btn_right']:
                             direction = cmd.split('_')[1]
                             self.fancy_menu.navigate(direction)
                             self.log(direction)
-                        elif cmd == 'menu_select':
+                        elif cmd == 'btn_select':
                             menu_cmd = self.fancy_menu.select()
                             self.log(f'menu command:{menu_cmd}')
                             try:
@@ -4114,7 +4255,7 @@ fi # End of the Fancygotchi hack"""}]
 
             if action == 'submenu':
                 self.fancy_menu.navigate("right")
-            elif action == 'menu_toggle':
+            elif action == 'btn_start':
                 self.fancy_menu.toggle()
             elif action == 'plugin':
                 # http://10.0.0.2:8080/plugins/Fancygotchi/plugin?name=bt-tether&enable=False
@@ -4529,17 +4670,9 @@ fi # End of the Fancygotchi hack"""}]
                 self._state = {}
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
-                    try:
-                        self.options['rotation'] = f_toml['main']['plugins']['Fancygotchi']['rotation']
-                    except:
-                        self.options['rotation'] = 0
-                        f_toml['main']['plugins']['Fancygotchi']['rotation'] = self.options.get('rotation', 0)
 
-                    try:
-                        self.options['theme'] = f_toml['main']['plugins']['Fancygotchi']['theme']
-                    except:
-                        self.options['theme'] = ''
-                        f_toml['main']['plugins']['Fancygotchi']['theme'] = self.options['theme']
+                self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
+                self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
 
                 rot = self.options['rotation']
                 th_name = self.options['theme']
@@ -5320,7 +5453,7 @@ fi # End of the Fancygotchi hack"""}]
 
             x, y ,x2 ,y2 = self.pos_convert(x, y, w, h)
 
-    def paste_value(self, value, pos, txt_font_size, color, wrap=None):
+    def paste_value(self, value, pos, text_font, color, wrap=None):
         x, y = pos
 
         if wrap and hasattr(self, 'wrapper') and self.wrapper is not None:
@@ -5331,7 +5464,7 @@ fi # End of the Fancygotchi hack"""}]
         else:
             text = value
 
-        imgtext = self.rgba_text(text, txt_font_size, color, self._res[0], self._res[1])
+        imgtext = self.rgba_text(text, text_font, color, self._res[0], self._res[1])
         self.paste_image(imgtext, x, y)
 
     def drawer(self):
@@ -5365,32 +5498,24 @@ fi # End of the Fancygotchi hack"""}]
                 if len(state['position']) >= 3:
                     x, y, w, h = state['position']
                     x, y, x2, y2 = self.pos_convert(x,y,w,h)
-                else:
-                    if state['widget_type'] == 'LabeledValue':
-                        x, y = state['position']
-                        #logging.warning(f'****************{widget}****************')
-                        #logging.warning(f'label line spacing: {state["label_line_spacing"]}')
-                        #logging.warning(f'label spacing: {state["label_spacing"]}')
-                        #logging.warning(f'x: {x}, y: {y}')
-                        
-                        v_y = y + state['label_line_spacing']
-                        v_x = x + state['label_spacing'] + 5 * len(state['label'])
-                        #logging.warning(f'v_x: {v_x}, v_y: {v_y}')
-                    else:
-                        v_x, v_y = state['position']
-                
+                if len(state['position']) == 2:
+                    x, y = state['position']
                 self.wrapper = TextWrapper(width=state['max_length'], replace_whitespace=False) if wrap else None
 
                 if state['widget_type'] == 'Text' or state['widget_type'] == 'LabeledValue':
                     if state['widget_type'] == 'LabeledValue':
                         try:
-                            label_font_size = eval(f'self.{state["label_font_size"]}')
+                            label_font = getattr(self, state["label_font_size"])
+                            label = state['label']
+
                         except Exception as e:
-                            label_font_size = state["label_font_size"]
+                            label_font = getattr(self, 'Medium')
+
                     try:
-                        txt_font_size = eval(f'self.{state["text_font_size"]}') 
+                        text_font = getattr(self, state["text_font_size"]) 
                     except Exception as e:
-                        txt_font_size = state["text_font_size"]
+                        text_font = getattr(self, 'Medium')
+
                     
                     if 'text_font' in state or 'size_offset' in state:
                         if 'text_font' in state and state['text_font']:
@@ -5402,21 +5527,47 @@ fi # End of the Fancygotchi hack"""}]
                             size_offset = state['size_offset']
                         else:
                             size_offset = th_opt['size_offset']
-                        if txt_font_size is not None:
-                            txt_font_size = self.change_font(txt_font_size, font, size_offset)
+                        if text_font is not None:
+                            text_font = self.change_font(text_font, font, size_offset)
+
+                    if state['widget_type'] == 'LabeledValue':
+                        if label_font is not None and state['label'] is not None:
+                            try:
+                                lw, lh = label_font.getsize(label)
+                            except:
+                                _, _, lw, lh = label_font.getbbox(state['label'])
+                        else:
+                            lw, lh = 0, 0
+                    
+                    if text_font is not None and state['value'] is not None:
+                        try:
+                            vw, vh = text_font.getsize(state['value'])
+                        except:
+                            _, _, vw, vh = text_font.getbbox(state['value'])
+                    else:
+                        vw, vh = 0, 0
+
+                    if state['widget_type'] == 'LabeledValue':
+                        total_height = max(lh,vh)+max(0,state['label_line_spacing'])
+                        total_width = lw + state['label_spacing'] + 5 * len(state['label'])
+                        x, y, l_w, l_h = self.pos_convert(x, y, total_width, total_height)
+                        v_y = y + state['label_line_spacing']
+                        v_x = x + state['label_spacing'] + 5 * len(state['label'])
+                    elif state['widget_type'] == 'Text':
+                        v_x, v_y, v_w, v_h = self.pos_convert(x, y, vw, vh)
 
                     if state['value'] is not None:
                         if not state['icon']:
-                            self.paste_value(state['value'], (v_x,v_y), txt_font_size, color, wrap)
+                            self.paste_value(state['value'], (v_x,v_y), text_font, color, wrap)
                             if state['widget_type'] == 'LabeledValue':
                                 l_text = state['label']
                             if state['widget_type'] == 'LabeledValue':
-                                imgtext = self.rgba_text(l_text, label_font_size, color, self._res[0], self._res[1])
+                                imgtext = self.rgba_text(l_text, label_font, color, self._res[0], self._res[1])
                                 self.paste_image(imgtext, x, y)
                         else:
                             if 'f_awesome' in state and state['f_awesome'] == False:
                                 if widget not in ['face', 'friend_face']:
-                                    self.paste_value(state['value'], (v_x,v_y), txt_font_size, color, wrap)
+                                    self.paste_value(state['value'], (v_x,v_y), text_font, color, wrap)
                                     icon_image = state['icon_image']
                                 else:
                                     if widget == 'face':
@@ -5472,13 +5623,15 @@ fi # End of the Fancygotchi hack"""}]
                                         newData.append(item)
                                 icon_image.putdata(newData)
                                 icon_image = icon_image.convert('RGBA')
-                                self.paste_value(state['value'], (v_x,v_y), txt_font_size, color, wrap)
+                                self.paste_value(state['value'], (v_x,v_y), text_font, color, wrap)
                                 self.paste_image(icon_image, x, y)
 
                 elif state['widget_type'] == 'Bitmap':
                     icon_bmp = state['image']
                     alpha = 0
                     original = icon_bmp
+                    iw, ih = icon_bmp.size
+                    v_x, v_y, v_x2, v_y2 = self.pos_convert(state['position'][0], state['position'][1], iw, ih)
                     if icon_bmp is not None:
                         if icon_bmp.mode in ('RGBA', 'LA') or (icon_bmp.mode == 'P' and 'transparency' in icon_bmp.info):
                             alpha = 1
@@ -5798,7 +5951,7 @@ fi # End of the Fancygotchi hack"""}]
                             return json.dumps({"message": "Plugin name is missing.", "status": 400}), 400
 
                         # Process the toggle action
-                        self.process_actions({"action": "menu_plugin", "name": name, "enable": enable})
+                        self.process_actions({"action": "plugin", "name": name, "enable": enable})
 
                         # Respond with success message
                         return json.dumps({"message": f"Plugin '{name}' toggled {'enabled' if enable else 'disabled'} successfully!", "status": 200})
@@ -5806,23 +5959,46 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(f"Error toggling plugin: {ex}")
                         logging.error(traceback.format_exc())
                         return json.dumps({"message": "Plugin toggle error", "status": 500}), 500
-                elif path == "navmenu":
+                elif path == "btn_cmd":
                     try:
+                        screen = 1
                         action = request.args.get('action')
+                        hardware = request.args.get('hardware')
+                        scr = request.args.get('screen')
+                        logging.warning(f"screen: {screen}")
+                        if scr is None:
+                            if self.dispHijack:
+                                screen = 2
+                        else:
+                            screen = scr
+                        logging.warning(f"btn_cmd: {action}")
+                        logging.warning(f"hardware: {hardware}")
+                        
+                        
                         
                         action_mapping = {
-                            'up': 'menu_up',
-                            'down': 'menu_down',
-                            'left': 'menu_left', 
-                            'right': 'menu_right',
-                            'select': 'menu_select',
-                            'toggle': 'menu_toggle'
+                            'up': 'btn_up',
+                            'down': 'btn_down',
+                            'left': 'btn_left', 
+                            'right': 'btn_right',
+                            'select': 'btn_select',
+                            'start': 'btn_start',
+                             'a': 'btn_a',
+                             'b': 'btn_b',
+                             'x': 'btn_x',
+                             'y': 'btn_y',
+                             'l1': 'btn_l1',
+                             'l2': 'btn_l2',
+                             'r1': 'btn_l1',
+                             'r2': 'btn_l2',
                         }
                         
-                        menu_action = action_mapping.get(action)
-                        if menu_action:
-                            self.navigate_fancymenu({"action": menu_action})
-                            return json.dumps({"message": f"{menu_action} successful!", "status": 200})
+                        btn_action = action_mapping.get(action)
+                        logging.info(f"btn_cmd: {btn_action}")
+                        if btn_action:
+                            self.button_controller({"action": btn_action}, screen=screen)
+                            #self.navigate_fancymenu({"action": btn_action})
+                            return json.dumps({"message": f"{btn_action} successful!", "status": 200})
                         else:
                             return "Invalid navigation action", 400
                             
