@@ -631,6 +631,67 @@ window.onload = function() {
     setInterval(updateImage, {{webui_fps}});
 }
 
+$(document).ready(function () {
+    $(document).on('keydown', function (e) {
+        switch (e.key) {
+            case "ArrowUp":
+                e.preventDefault(); 
+                $('#up').click();
+                break;
+            case "ArrowDown":
+                e.preventDefault(); 
+                $('#down').click();
+                break;
+            case "ArrowLeft":
+                e.preventDefault(); 
+                $('#left').click();
+                break;
+            case "ArrowRight":
+                e.preventDefault(); 
+                $('#right').click();
+                break;
+            case "Enter":
+                e.preventDefault(); 
+                $('#select').click();
+                break;
+            case "s":
+                $('#stealth').click();
+                break;
+            case "t":
+                $('#start').click();
+                break;
+            case "a":
+                $('#a').click();
+                break;
+            case "b":
+                $('#b').click();
+                break;
+            case "x":
+                $('#x').click();
+                break;
+            case "y":
+                $('#y').click();
+                break;
+            case "Shift":
+                e.preventDefault(); 
+                $('#l1').click();
+                break;
+            case "Alt":
+                e.preventDefault(); 
+                $('#r1').click();
+                break;
+            case "Control":
+                e.preventDefault(); 
+                $('#l2').click();
+                break;
+            case " ":
+                e.preventDefault(); 
+                $('#r2').click();
+                break;
+        }
+    });
+});
+
 window.onscroll = function() {
     if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
         scrollToTopBtn.classList.add("show");
