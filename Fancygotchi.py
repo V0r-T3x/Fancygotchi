@@ -288,6 +288,9 @@ INDEX = """
         width: 100%;
         max-width: 100%; /* Prevent buttons from exceeding cell width */
     }
+    .left .custom-size-flipswitch{
+        max-width: 100%;
+    }
 
 
     /* Center element truly centered */
@@ -422,11 +425,15 @@ INDEX = """
                     <div><button id="b" onclick="navigate('b')" class="arrow-button">B</button></div>
                     <div><button id="a" onclick="navigate('a')" class="arrow-button">A</button></div>
 
-                    <div></div>
                     <div>
-                        <input type="checkbox" style="max-width:40px" data-role="flipswitch" name="Screen 2" id="screen" data-on-text="Screen 2" data-off-text="Screen 1" data-wrapper-class="custom-size-flipswitch">
+                        <label for="screen">Screen</label>
+                        <input type="checkbox"data-role="flipswitch" name="2" id="screen" data-on-text="2" data-off-text="1" data-wrapper-class="custom-size-flipswitch">
                     </div>
                     <div></div>
+                    <div>
+                        <label for="keyboard">Keyboard</label>
+                        <input type="checkbox"data-role="flipswitch" name="Enable" id="keyboard" data-on-text="Enable" data-off-text="Disable" data-wrapper-class="custom-size-flipswitch">
+                    </div>
                     <div></div>
                     <div><button id="stealth" onclick="stealth()">Stealth</button></div>
                 </div>
@@ -632,7 +639,17 @@ window.onload = function() {
 }
 
 $(document).ready(function () {
+    // Variable to track the keyboard toggle state
+    let keyboardActive = false;
+
+    // Listen for changes on the keyboard toggle flipswitch
+    $('#keyboard').on('change', function () {
+        keyboardActive = $(this).is(':checked'); // Set true if checked, false otherwise
+    });
+
+    // Keydown event listener
     $(document).on('keydown', function (e) {
+        if (!keyboardActive) return; // Exit if keyboard is toggled off
         switch (e.key) {
             case "ArrowUp":
                 e.preventDefault(); 
@@ -3383,8 +3400,8 @@ def serializer(obj):
 
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
-    __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.6'
+    __github__ = 'https://github.com/V0r-T3x/Fancygotchi'
+    __version__ = '2.0.7'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
