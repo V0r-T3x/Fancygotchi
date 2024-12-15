@@ -250,77 +250,136 @@ INDEX = """
     }
 
     /* Main container with 3 sections */
-        .container {
-        display: flex;
+    .container {
+        display: flex; /* Horizontal alignment */
+        align-items: flex-start; /* Align items to the top */
         width: 100%;
-        margin: 0 auto;
-        gap: 0px;
+        gap: 0px; /* No gap between containers */
+        max-height: 100%;
     }
 
-    /* Left section centered within its area */
+    /* Left section (ensures minimal size) */
     .left-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        display: block; /* Prevent flex stretching */
         width: 33.33%;
-        box-sizing: border-box; /* Ensure padding is included in width */
+        max-width: 100%;
+        min-height: 100%; /* Minimum height is set to 100% of the container */
+        max-height: 100%; /* Maximum height is 100% of the container */
     }
 
+    /* Grid layout inside the left-container */
     .left {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        grid-template-rows: repeat(5, 1fr);
-        gap: 0px; /* Add spacing between grid items */
-        width: 100%; /* Fit the container */
-        max-width: 100%; /* Ensure no overflow */
-        //border: 1px solid #ccc;
-        box-sizing: border-box; /* Ensure padding is included in width */
+        grid-template-columns: repeat(6, minmax(20px, 1fr)); /* Equal column width */
+        grid-template-rows: repeat(6, minmax(35px, auto)); /* Dynamic rows with a minimum height */
+        gap: 0px; /* No spacing between grid items */
+        width: 100%; /* Fit the container width */
+        height: auto; /* Adjusts automatically based on content */
+        min-height: 100%; /* Ensures it doesn’t collapse */
     }
 
-    .left div {
-        //border: 1px solid #ccc;
-        box-sizing: border-box; /* Ensure consistent sizing */
-        min-width: 75px;
-        max-width: auto;
-    }
-
+    /* Flip switch buttons */
     .left button {
-        width: 100%;
-        max-width: 100%; /* Prevent buttons from exceeding cell width */
+        display: block; /* Prevent inline layout issues */
+        width: 100%; /* Fit the parent width */
+        max-width: 100%; /* Prevent overflow */
+        padding: 0; /* Remove extra padding */
+        margin: 0; /* Remove extra margin */
     }
 
+    .left-top {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        width: 100%; /* Fit the parent width */
+        height: auto; /* Adjusts automatically based on content */
+        min-height: 100%; /* Ensures it doesn’t collapse */
+        gap: 30px;
+        align-items: center;
+        padding-top: 0px;
+        margin-top: 0px;
+        justify-content: center;
+    }
+
+    .left-top ui.flipswitch {
+        justify-self: center;
+        align-self: center;
+        margin: auto;
+        width:100%;
+        position: relative;
+        display: inline-block;
+    }
+
+    .left-top div{
+        max-width: 100%;
+        width: 100%;
+    }
 
     /* Center element truly centered */
     .center-container {
-    display: flex;
-    justify-content: center;
-    width: 33.33%;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Ensures vertical centering */
+        width: 33.33%;
+        min-width: 400px;
+        min-height: 100%; /* Allow content to expand with the container */
+        max-height: 100%; /* Ensure no stretching beyond the container */
     }
+
     .center img {
-    max-width: 100%;
-    height: auto;
+        max-width: 100%;
+        height: auto;
     }
 
     /* Right section centered within its area */
     .right-container {
-    display: flex;
-    justify-content: center;
-    width: 33.33%;
+        display: flex;
+        justify-content: center;
+        align-items: center; /* Ensures vertical centering */
+        width: 33.33%;
+        min-width: 400px;
+        min-height: 100%; /* Allow content to expand with the container */
+        max-height: 100%; /* Ensure no stretching beyond the container */
     }
+
     .right img {
-    max-width: 100%;
-    height: auto;
+        max-width: 100%;
+        height: auto;
     }
 
     /* Responsive stacking for small screens */
-    @media (max-width: 600px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
+    @media (max-width: 800px) {
+        .container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .left-container, .center-container, .right-container {
+            width: 100%; /* Full width on smaller screens */
+            margin-bottom: 10px;
+        }
     }
-    .left-container, .center-container, .right-container {
-        width: auto;
-        margin-bottom: 10px;
+
+    .btn_grey {
+        background-color: #f2f2f2;
+    }
+    .btn_red {
+        background-color: #ff0000;
+    }
+    .btn_green {
+        background-color: #00ff00;
+    }
+    .ui-btn .btn_blue {
+        background-color: #0000ff;
+        color: #0000ff;
+    }
+    .btn_yellow {
+        background-color: #ffff00;
+    }
+    .btn_black {
+        background-color: #000000;
+    }
+    .btn_white {
+        background-color: #ffffff;
     }
 
     /* Style individual arrow buttons */
@@ -395,40 +454,55 @@ INDEX = """
             </ul>
         </div>
         <div class="container">
-            <!-- Left Div with 3x3 grid -->
+            <!-- Left Div with 6x5 grid -->
             <div class="left-container">
-                <div class="left">
-                    <div><button id="l2" onclick="navigate('l2')"> LEFT 2</button></div>
-                    <div><button id="start" onclick="navigate('start')">Start</button></div>
-                    <div></div>
-                    <div><button id="select" onclick="navigate('select')">Select</button></div>
-                    <div><button id="r2" onclick="navigate('r2')">RIGHT 2</button></div>
-                    
-                    <div><button id="l1" onclick="navigate('l1')"> LEFT 1</button></div>
-                    <div><button id="up" onclick="navigate('up')" class="arrow-button">↑</button></div>
-                    <div></div>
-                    <div></div>
-                    <div><button id="r1" onclick="navigate('r1')">RIGHT 1</button></div>
-                    
-                    <div><button id="left" onclick="navigate('left')" class="arrow-button">←</button></div>
-                    <div></div>
-                    <div><button id="right" onclick="navigate('right')" class="arrow-button">→</button></div>
-                    <div><button id="y" onclick="navigate('y')" class="arrow-button">Y</button></div>
-                    <div><button id="x" onclick="navigate('x')" class="arrow-button">X</button></div>
-
-                    <div></div>
-                    <div><button id="down" onclick="navigate('down')" class="arrow-button">↓</button></div>
-                    <div></div>
-                    <div><button id="b" onclick="navigate('b')" class="arrow-button">B</button></div>
-                    <div><button id="a" onclick="navigate('a')" class="arrow-button">A</button></div>
-
-                    <div></div>
+                <div class="left-top">
                     <div>
-                        <input type="checkbox" style="max-width:40px" data-role="flipswitch" name="Screen 2" id="screen" data-on-text="Screen 2" data-off-text="Screen 1" data-wrapper-class="custom-size-flipswitch">
+                        <label for="screen">Screen</label>
+                        <input type="checkbox"data-role="flipswitch" name="Screen 2" id="screen" data-on-text="Screen 2" data-off-text="Screen 1" data-wrapper-class="custom-size-flipswitch">
                     </div>
-                    <div></div>
-                    <div></div>
                     <div><button id="stealth" onclick="stealth()">Stealth</button></div>
+                    <div>
+                        <label for="keyboard">Keyboard</label>
+                        <input type="checkbox"data-role="flipswitch" name="Enabled" id="keyboard" data-on-text="Enabled" data-off-text="Disabled" data-wrapper-class="custom-size-flipswitch">
+                    </div>
+                    
+                </div>
+                <div class="left">
+                    <div><button style="background-color: #a3a5a4; color: #222;" id="l2" class="btn_grey" onclick="navigate('l2')">L2</button></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div><button style="background-color: #a3a5a4; color: #222;" id="r2" onclick="navigate('r2')">R2</button></div>
+                    
+                    <div><button style="background-color: #a3a5a4; color: #222;" id="l1" onclick="navigate('l1')">L1</button></div>
+                    <div><button style="background-color: #515151; color: #222;" id="up" onclick="navigate('up')" class="arrow-button">↑</button></div>
+                    <div></div>
+                    <div></div>
+                    <div><button style="background-color: #0749b4; color: #000077;" id="x" onclick="navigate('x')" class="arrow-button">X</button></div>
+                    <div><button style="background-color: #a3a5a4; color: #222;" id="r1" onclick="navigate('r1')">R1</button></div>
+                    
+                    <div><button style="background-color: #515151; color: #222;" id="left" onclick="navigate('left')" class="arrow-button">←</button></div>
+                    <div><button style="background-color: #515151; color: #222;"></div>
+                    <div><button style="background-color: #515151; color: #222;" id="right" onclick="navigate('right')" class="arrow-button">→</button></div>
+                    <div><button style="background-color: #008d45; color: #007700;" id="y" onclick="navigate('y')" class="arrow-button">Y</button></div>
+                    <div></div>
+                    <div><button style="background-color: #eb1a1d; color: #770000;" id="a" onclick="navigate('a')" class="arrow-button">A</button></div>
+
+                    <div></div>
+                    <div><button style="background-color: #515151; color: #222;" id="down" onclick="navigate('down')" class="arrow-button">↓</button></div>
+                    <div><button style="background-color: #4e5955; color: #000;" id="select" onclick="navigate('select')">Select</button></div>
+                    <div><button style="background-color: #4e5955; color: #000;" id="start" class="btn_grey" onclick="navigate('start')">Start</button></div>
+                    <div><button style="background-color: #fece15; color: #777700;" id="b" onclick="navigate('b')" class="arrow-button">B</button></div>
+                    <div></div>
+
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
                 </div>
             </div>
             
@@ -632,7 +706,17 @@ window.onload = function() {
 }
 
 $(document).ready(function () {
+    // Variable to track the keyboard toggle state
+    let keyboardActive = false;
+
+    // Listen for changes on the keyboard toggle flipswitch
+    $('#keyboard').on('change', function () {
+        keyboardActive = $(this).is(':checked'); // Set true if checked, false otherwise
+    });
+
+    // Keydown event listener
     $(document).on('keydown', function (e) {
+        if (!keyboardActive) return; // Exit if keyboard is toggled off
         switch (e.key) {
             case "ArrowUp":
                 e.preventDefault(); 
@@ -2038,7 +2122,6 @@ else
 fi
 echo >> "$output_file"
 
-
 # Service status
 echo "Service status:" >> "$output_file"
 service pwnagotchi status >> "$output_file"
@@ -3349,7 +3432,6 @@ def image_mode(canvas, image, mode):
         canvas.paste(img_resized, (0, 0), img_resized)
     return canvas
 
-
 def verify_font_info(ft):
     font_list = [fonts.Bold, fonts.BoldSmall, fonts.Medium, fonts.Huge, fonts.BoldBig, fonts.Small]
 
@@ -3383,8 +3465,8 @@ def serializer(obj):
 
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
-    __github__ = 'https://github.com/V0r-T3x/fancygotchi'
-    __version__ = '2.0.6'
+    __github__ = 'https://github.com/V0r-T3x/Fancygotchi'
+    __version__ = '2.0.7'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3799,7 +3881,6 @@ fi # End of the Fancygotchi hack"""}]
                 rst = 1
         return rst
 
-
     def log(self, msg):
         try:
             # working state
@@ -3914,8 +3995,6 @@ fi # End of the Fancygotchi hack"""}]
                 self.display_controller.stop()
             self.display_controller = None
             del self.display_controller
-
-
 
     def button_controller(self, cmd=None, screen=1):
         screen = int(screen)
@@ -4217,7 +4296,6 @@ fi # End of the Fancygotchi hack"""}]
                     new_plugs += ",%s" % plugin_name
             if new_plugs != '':
                 self.log("found new:%s" % (new_plugs))
-
 
     def load_and_run_module(self, module_path):
         if module_path.startswith('/'): module_file_path = module_path
@@ -4604,7 +4682,6 @@ fi # End of the Fancygotchi hack"""}]
             if 'temp_dir' in locals():
                 shutil.rmtree(temp_dir)
 
-
     def save_active_config(self, data):
         cfg_path = self.cfg_path
         self.log(f"Saving active config to: {self.cfg_path}")
@@ -4662,17 +4739,32 @@ fi # End of the Fancygotchi hack"""}]
             logging.error(f"An unexpected error occurred: {e}")
 
     def theme_update(self, ui, boot=False):
+        if not self.ready:
+            return
         th_opt = copy.deepcopy(self._default['theme']['options'])
         self._i = 0
         if not boot:self.log('Theme update')
         if hasattr(ui, '_update') and ui.update:
             if not ui._update['partial']:
                 self._state = {}
+
+                
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
+                    try:
+                        self.options['rotation'] = f_toml['main']['plugins']['Fancygotchi']['rotation']
+                    except:
+                        self.options['rotation'] = 0
+                        f_toml['main']['plugins']['Fancygotchi']['rotation'] = self.options['rotation']
 
-                self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
-                self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
+                    try:
+                        self.options['theme'] = f_toml['main']['plugins']['Fancygotchi']['theme']
+                    except:
+                        self.options['theme'] = ''
+                        f_toml['main']['plugins']['Fancygotchi']['theme'] = self.options['theme']
+
+                #self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
+                #self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
 
                 rot = self.options['rotation']
                 th_name = self.options['theme']
@@ -4681,6 +4773,7 @@ fi # End of the Fancygotchi hack"""}]
                 pwnagotchi.config = merge_config(f_toml, pwnagotchi.config)
                 if self._agent:
                     self._agent._config = merge_config(f_toml, pwnagotchi.config)
+                logging.warning(f'theme name: {th_name}, rotation: {rot}')
                 save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
                 self.theme_selector(f_toml, boot)
 
@@ -5288,6 +5381,7 @@ fi # End of the Fancygotchi hack"""}]
                 for key in keys_to_delete:
                     self.log(f'[Fancygotchi] remove widget: {key}')
                     del self._state[key]
+    
     def pwncanvas_creation(self, res):
         try:
             th_opt = self._theme['theme']['options']
@@ -5721,7 +5815,6 @@ fi # End of the Fancygotchi hack"""}]
             if not self.ready:
                 return "Plugin not ready"
             if request.method == "GET":
-
                 if path == "/" or not path:
                     themes = sorted(self.theme_list(), key=lambda x: x.lower())
                     if self._theme_name != 'Default':
@@ -5768,21 +5861,16 @@ fi # End of the Fancygotchi hack"""}]
                         webui_fps=self.webui_fps,
                         fancy_repo=FANCY_REPO,
                     )
-
                 elif path == "key":
                     # curl -X GET "http://changeme:changeme@localhost:8080/plugins/Fancygotchi/key"
                     return render_template_string("{{ csrf_token() }}"), 200
-
                 elif path == "ui2":
                     return self.ui2()
-
                 elif path == "active_theme":
                     return json.dumps({"theme": self._theme_name})
-
                 elif path == "theme_list":
                     themes = self.theme_list()
                     return json.dumps(themes)
-
                 elif path == "theme_download_list":
                     self.log("Theme download list fetching started...")
                     try:
@@ -5797,9 +5885,7 @@ fi # End of the Fancygotchi hack"""}]
                     except Exception as ex:
                         logging.error(ex)
                         logging.error(traceback.format_exc())
-                        return json.dumps({"error": "Theme download list error"}), 500
-
-                    
+                        return json.dumps({"error": "Theme download list error"}), 500           
                 elif str(path).split("/")[0] == "theme_export":
                     try: 
                         theme_name = path.split("/")[-1]
@@ -5808,7 +5894,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "theme selection error", 500
-
                 elif path == "load_config":
                     try:
                         if self.cfg_path is not None:
@@ -5852,7 +5937,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Error loading configuration", 500
-
                 elif path == "display_hijack":
                     try:
                         self.dispHijack = True
@@ -5860,8 +5944,7 @@ fi # End of the Fancygotchi hack"""}]
                     except Exception as ex:
                         logging.error(ex)
                         logging.error(traceback.format_exc())
-                        return "Display hijacking error", 500
-                
+                        return "Display hijacking error", 500           
                 elif path == "display_pwny":
                     try:
                         self.dispHijack = False
@@ -5870,7 +5953,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Display Pwny error", 500
-
                 elif path == "second_screen":
                     logging.warning("second_screen")
                     try:
@@ -5880,7 +5962,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Display Pwny error", 500
-
                 elif path == "display_next":
                     try:
                         self.process_actions({"action": "switch_screen_mode"})
@@ -6017,8 +6098,6 @@ fi # End of the Fancygotchi hack"""}]
                         return "Error resetting CSS", 500
 
             elif request.method == "POST":
-                
-
                 if path == "version_compare":
                     is_newer = None
                     local_version = None
@@ -6049,7 +6128,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(f"Error handling theme version: {ex}")
                         logging.error(traceback.format_exc())
                         return json.dumps({'error': 'Theme version error'}), 500
-
                 if path == "theme_download_select":
                     try:
                         jreq = request.get_json()
@@ -6062,7 +6140,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return json.dumps({'error': f"theme download error: {ex}"}) , 500
-
                 elif path == "save_config":
                     try:
                         data = request.get_json()
@@ -6098,7 +6175,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Error saving configuration", 500
-
                 elif path == "create_theme":
                     try:
                         data = request.get_json()
@@ -6114,7 +6190,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Error creating theme", 500
-
                 elif path == "theme_copy":
                     try:
                         data = request.get_json()
@@ -6137,7 +6212,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Error copying theme", 500
-
                 elif path == "theme_rename":
                     try:
                         data = request.get_json()
@@ -6160,7 +6234,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return "Error renaming theme", 500
-
                 elif path == "theme_upload":
                     try:
                         if 'zipFile' in request.files:
@@ -6204,7 +6277,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(ex)
                         logging.error(traceback.format_exc())
                         return 'Theme upload error', 500
-                
                 elif path == "theme_delete":
                     try:
                         jreq = request.get_json()
@@ -6257,8 +6329,6 @@ fi # End of the Fancygotchi hack"""}]
                         logging.error(f"Error in theme info: {str(ex)}")
                         logging.error(traceback.format_exc())
                         return "theme selection error", 500
-
-
 
         except Exception as e:
             self.log(f"Error in webhook: {str(e)}")
