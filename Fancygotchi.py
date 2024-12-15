@@ -4747,11 +4747,24 @@ fi # End of the Fancygotchi hack"""}]
         if hasattr(ui, '_update') and ui.update:
             if not ui._update['partial']:
                 self._state = {}
+
+                
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
+                    try:
+                        self.options['rotation'] = f_toml['main']['plugins']['Fancygotchi']['rotation']
+                    except:
+                        self.options['rotation'] = 0
+                        f_toml['main']['plugins']['Fancygotchi']['rotation'] = self.options['rotation']
 
-                self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
-                self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
+                    try:
+                        self.options['theme'] = f_toml['main']['plugins']['Fancygotchi']['theme']
+                    except:
+                        self.options['theme'] = ''
+                        f_toml['main']['plugins']['Fancygotchi']['theme'] = self.options['theme']
+
+                #self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
+                #self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
 
                 rot = self.options['rotation']
                 th_name = self.options['theme']
@@ -4761,8 +4774,7 @@ fi # End of the Fancygotchi hack"""}]
                 if self._agent:
                     self._agent._config = merge_config(f_toml, pwnagotchi.config)
                 logging.warning(f'theme name: {th_name}, rotation: {rot}')
-                #if th_name != "" and rot != 0:
-                #    save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
+                save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
                 self.theme_selector(f_toml, boot)
 
                 th = self._theme['theme']
