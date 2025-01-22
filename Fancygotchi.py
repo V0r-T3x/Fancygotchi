@@ -5777,7 +5777,12 @@ fi # End of the Fancygotchi hack"""}]
                 self._icolor += 1  
         
             if self._fg != '':
-                self._pwndata.paste(self._fg, (self._pwndata.size[0], self._pwndata.size[1]), self._fg)
+                target_width = self._pwndata.size[0]
+                target_height = self._pwndata.size[1]
+                
+                # Force resize without maintaining aspect ratio
+                self._fg = self._fg.resize((target_width, target_height), Image.Resampling.LANCZOS)
+                self._pwndata.paste(self._fg, (0, 0), self._fg)
 
             if hasattr(self, 'fancy_menu'):
                 if getattr(self.fancy_menu, 'active', False): 
@@ -5785,8 +5790,9 @@ fi # End of the Fancygotchi hack"""}]
                     self.fancy_menu_img = menu_img
                     if self.fancy_menu_img is not None:
                         self._pwndata.paste(self.fancy_menu_img, (0, 0, self._pwndata.size[0], self._pwndata.size[1]), self.fancy_menu_img.split()[3])
-
-            self._pwncanvas.paste(self._pwndata, (0, 0), self._pwndata)
+            self._pwncanvas = self._pwncanvas.convert("RGB")
+            self._pwncanvas.paste(self._pwndata, (0, 0, self._pwndata.size[0], self._pwndata.size[1]),self._pwndata)
+            self._pwncanvas = self._pwncanvas.convert("RGBA")
 
         except Exception as e:
             logging.error(f"Error in Fancygotchi drawer: {e}")
