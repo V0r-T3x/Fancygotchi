@@ -3485,7 +3485,7 @@ class Fancygotchi(plugins.Plugin):
         self.refacer_thread = None
         self._stop_event = threading.Event()
 
-        self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame')
+        self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame', 'WifiQR')
         self._config = pwnagotchi.config
         self.gittoken = self._config['main']['plugins']['Fancygotchi'].get('github_token', None)
         self.cfg_path = None
