@@ -1,7 +1,11 @@
+# adding api or ui attribute to know the actual theme config and or fancy state
+
 import argparse
 import asyncio
 import copy
+import importlib
 import glob
+import gettext
 import importlib.util
 import json
 import logging
@@ -3466,7 +3470,7 @@ def serializer(obj):
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/Fancygotchi'
-    __version__ = '2.0.7'
+    __version__ = '2.0.8'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3932,6 +3936,20 @@ fi # End of the Fancygotchi hack"""}]
         if hasattr(self, 'listener'):
             self.listener.close()
         if hasattr(ui, '_pwncanvas'):
+            # Start of Fancygotchi unload voice modification
+            try:
+                locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
+                if os.path.islink(locale_path):
+                    os.unlink(locale_path)
+                    logging.info("[Fancygotchi] Removed fancyvoice symlink.")
+                
+                # Reload the voice with the original system language
+                if hasattr(ui, '_config'):
+                    original_lang = ui._config['main']['lang']
+                    self.reload_voice(ui, lang=original_lang)
+            except Exception as e:
+                logging.error(f"[Fancygotchi] Error during unload cleanup: {e}")
+            # End of Fancygotchi unload voice modification
             del ui._pwncanvas
         if hasattr(ui, '_pwncanvas_tmp'):
             del ui._pwncanvas_tmp
@@ -4705,6 +4723,39 @@ fi # End of the Fancygotchi hack"""}]
         if self._agent:
             self._agent._config = merge_config(self._config, pwnagotchi.config)
         save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
+    
+    def reload_voice(self, ui, lang=None):
+        """
+        Reloads the voice module and updates the UI's voice instance
+        without restarting the pwnagotchi service.
+        Accepts an optional 'lang' parameter to specify the voice language.
+        """
+        try:
+            logging.info(f"[Fancygotchi] Reloading voice module for language: '{lang}'")
+            
+            # If no language is specified, use the one from the main config
+            if lang is None:
+                lang = ui._config['main']['lang']
+
+            # Crucial step: Clear the gettext cache to force it to find new .mo files.
+            # gettext.clearcache() was added in Python 3.8. This is a fallback for older versions.
+            if hasattr(gettext, 'clearcache'):
+                gettext.clearcache()
+            elif hasattr(gettext, '_translations'):
+                gettext._translations.clear()
+            
+            logging.debug("[Fancygotchi] gettext cache cleared.")
+
+
+            # Find the voice module in sys.modules
+            if 'pwnagotchi.voice' in sys.modules:
+                # Reload the module to pick up any changes
+                voice_module = importlib.reload(sys.modules['pwnagotchi.voice'])
+                # Create a new instance of the reloaded Voice class
+                ui._voice = voice_module.Voice(lang=lang)
+                logging.info(f"[Fancygotchi] Voice module reloaded successfully for language: '{lang}'")
+        except Exception as e:
+            logging.error(f"[Fancygotchi] Error reloading voice: {e}")
 
     def setup_menu(self, th_menu):
         if hasattr(self, 'fancy_menu'):
@@ -4781,6 +4832,28 @@ fi # End of the Fancygotchi hack"""}]
                 th_opt = th['options']
                 th_widget = th['widget']
                 th_menu = th.get('menu', {})
+
+                # Start of Fancygotchi voice reload modification
+                logging.info("[Fancygotchi] Checking for custom voice in theme...")
+                locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
+                theme_voice_path = os.path.join(self._th_path, 'voice')
+                logging.debug(f"[Fancygotchi] Theme voice path: {theme_voice_path}")
+                logging.debug(f"[Fancygotchi] Target locale path: {locale_path}")
+
+                # Check if the theme has a custom voice
+                if os.path.isdir(theme_voice_path):
+                    logging.info("[Fancygotchi] Custom voice found. Applying 'fancyvoice'.")
+                    if os.path.islink(locale_path) or os.path.exists(locale_path):
+                        os.unlink(locale_path)
+                        logging.debug("[Fancygotchi] Removed existing fancyvoice symlink.")
+                    os.symlink(os.path.abspath(theme_voice_path), locale_path)
+                    self.reload_voice(ui, lang='fancyvoice')
+                else:
+                    logging.info("[Fancygotchi] No custom voice in theme. Reverting to system default voice.")
+                    if os.path.islink(locale_path):
+                        os.unlink(locale_path)
+                    self.reload_voice(ui, lang=ui._config['main']['lang'])
+                # End of Fancygotchi voice reload modification
             else:
                 self.log('Partial update')
                 th = self._theme['theme']
@@ -5775,9 +5848,6 @@ fi # End of the Fancygotchi hack"""}]
                 self._icolor = 0
             else:
                 self._icolor += 1  
-        
-            if self._fg != '':
-                self._pwndata.paste(self._fg, (self._pwndata.size[0], self._pwndata.size[1]), self._fg)
 
             if hasattr(self, 'fancy_menu'):
                 if getattr(self.fancy_menu, 'active', False): 
@@ -5786,7 +5856,14 @@ fi # End of the Fancygotchi hack"""}]
                     if self.fancy_menu_img is not None:
                         self._pwndata.paste(self.fancy_menu_img, (0, 0, self._pwndata.size[0], self._pwndata.size[1]), self.fancy_menu_img.split()[3])
 
-            self._pwncanvas.paste(self._pwndata, (0, 0), self._pwndata)
+            if self._fg != '':
+                target_width = self._pwndata.size[0]
+                target_height = self._pwndata.size[1]
+                self._fg = self._fg.resize((target_width, target_height), Image.Resampling.LANCZOS)
+                self._pwndata.paste(self._fg, (0, 0), self._fg)
+            self._pwncanvas = self._pwncanvas.convert("RGB")
+            self._pwncanvas.paste(self._pwndata, (0, 0, self._pwndata.size[0], self._pwndata.size[1]),self._pwndata)
+            self._pwncanvas = self._pwncanvas.convert("RGBA")
 
         except Exception as e:
             logging.error(f"Error in Fancygotchi drawer: {e}")
