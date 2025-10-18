@@ -611,6 +611,7 @@ INDEX = """
                 <div id="hidden">
                     <button onclick="saveConfig()" id="sticky-button">Save Configuration</button>
                     <h3>Configuration editor</h3>
+                    <input type="text" id="configSearch" onkeyup="searchConfig()" placeholder="Search for options..." title="Type in a name">
                     <h4>Config Path</h4> <!-- Updated dynamically -->
                     <div id="config_content"></div> <!-- Config data inserted here dynamically -->
                     <h3>CSS editor</h3>
@@ -792,6 +793,27 @@ scrollToTopBtn.addEventListener("click", function() {
     window.scrollTo({top: 0, behavior: 'smooth'});
 });
 
+function searchConfig() {
+    var input, filter, table, tr, i, td, txtValue;
+    input = document.getElementById("configSearch");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("tableOptions");
+    if (!table) return;
+    tr = table.getElementsByTagName("tr");
+
+    // Loop through all table rows (except the header and the 'add' row), and hide those who don't match the search query
+    for (i = 1; i < tr.length -1; i++) {
+        td = tr[i].getElementsByTagName("td")[1]; // The second column contains the option name
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
 function active_theme(callback) {
     loadJSON("Fancygotchi/active_theme", function(response) {
         callback(response.theme);
