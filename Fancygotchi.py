@@ -4928,10 +4928,16 @@ fi # End of the Fancygotchi hack"""}]
         if not self.ready:
             return
         th_opt = copy.deepcopy(self._default['theme']['options'])
+        if self.refresh:
+            ui._update['update'] = True
         self._i = 0
         if not boot:self.log('Theme update')
+        if hasattr(ui, '_update'):
+            logging.info(f'Update: {ui._update}')
         if hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('update'):
-            if not ui._update['partial']:
+            logging.info(f'Update: {ui._update}')
+            if not ui._update.get('partial', False):
+                logging.info('Full update')
                 self._state = {}
 
                 
