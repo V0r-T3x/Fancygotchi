@@ -4934,7 +4934,7 @@ fi # End of the Fancygotchi hack"""}]
         if not boot:self.log('Theme update')
         if hasattr(ui, '_update'):
             logging.info(f'Update: {ui._update}')
-        if hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('update'):
+        if (hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('update')) or self.refresh:
             logging.info(f'Update: {ui._update}')
             if not ui._update.get('partial', False):
                 logging.info('Full update')
