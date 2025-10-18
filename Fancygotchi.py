@@ -4111,12 +4111,21 @@ fi # End of the Fancygotchi hack"""}]
         self.log('UI setup finished')
 
     def cleanup_display(self):
-
         if hasattr(self, 'display_controller') and self.display_controller:
             if self.display_controller.is_running():
                 self.display_controller.stop()
             self.display_controller = None
             del self.display_controller
+
+    def _share_state(self, ui):
+        """Shares a read-only copy of the internal state with the ui object."""
+        if not hasattr(ui, 'fancy'):
+            # Create a simple namespace object on ui if it doesn't exist
+            ui.fancy = type('fancy', (object,), {})()
+        
+        # Provide a deep copy to prevent other plugins from modifying the internal state
+        ui.fancy._state = copy.deepcopy(self._state)
+        logging.debug("[Fancygotchi] Shared internal state with ui.fancy._state")
 
     def button_controller(self, cmd=None, screen=1):
         screen = int(screen)
@@ -4218,6 +4227,7 @@ fi # End of the Fancygotchi hack"""}]
                     ui._update['dict_part'] = {}
                 self.refresh = False
             th = self._theme['theme']
+            self._share_state(ui) # Share state after potential theme update
             th_opt = th['options']
             th_widget = th['widget']
             rot = self.options['rotation']
@@ -4353,6 +4363,7 @@ fi # End of the Fancygotchi hack"""}]
                 self.theme_update(ui)
 
             self.drawer()
+            self._share_state(ui) # Share state after drawer update
 
             if rot == 90 or rot == 270:
                 self._pwncanvas = self._pwncanvas.rotate(90, expand=True)
@@ -4919,7 +4930,7 @@ fi # End of the Fancygotchi hack"""}]
         th_opt = copy.deepcopy(self._default['theme']['options'])
         self._i = 0
         if not boot:self.log('Theme update')
-        if hasattr(ui, '_update') and ui.update:
+        if hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('update'):
             if not ui._update['partial']:
                 self._state = {}
 
