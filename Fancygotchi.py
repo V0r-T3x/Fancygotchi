@@ -3467,6 +3467,87 @@ def serializer(obj):
         return list(obj)
     raise TypeError
 
+def _compile_po_to_mo(po_file_path):
+    """
+    Compiles a .po file to a .mo file in memory.
+    This is a lightweight, pure-Python implementation based on the standard
+    `msgfmt.py` tool.
+    """
+    try:
+        with open(po_file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        messages = {}
+        msgid = ""
+        msgstr = ""
+        is_fuzzy = False
+        in_msgid = False
+        in_msgstr = False
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                if msgid and not is_fuzzy:
+                    messages[msgid] = msgstr
+                msgid, msgstr, is_fuzzy = "", "", False
+                in_msgid, in_msgstr = False, False
+            elif line.startswith('#,') and 'fuzzy' in line:
+                is_fuzzy = True
+            elif line.startswith('msgid '):
+                in_msgid, in_msgstr = True, False
+                msgid = line[6:].strip('"')
+            elif line.startswith('msgstr '):
+                in_msgid, in_msgstr = False, True
+                msgstr = line[7:].strip('"')
+            elif line.startswith('"'):
+                if in_msgid:
+                    msgid += line.strip('"')
+                elif in_msgstr:
+                    msgstr += line.strip('"')
+
+        if msgid and not is_fuzzy:
+            messages[msgid] = msgstr
+
+        # Build the .mo file format in memory
+        magic = 0x950412de
+        revision = 0
+        num_strings = len(messages)
+        
+        # Sort by msgid
+        sorted_messages = sorted(messages.items())
+
+        # Create string tables
+        orig_table = b''
+        trans_table = b''
+        for msgid, msgstr in sorted_messages:
+            orig_table += msgid.encode('utf-8') + b'\0'
+            trans_table += msgstr.encode('utf-8') + b'\0'
+
+        # Calculate offsets
+        header_size = 7 * 4
+        orig_offset_table_offset = header_size
+        trans_offset_table_offset = orig_offset_table_offset + num_strings * 8
+        strings_offset = trans_offset_table_offset + num_strings * 8
+
+        output = bytearray(struct.pack('<IIIIIII', magic, revision, num_strings, orig_offset_table_offset, trans_offset_table_offset, 0, 0))
+        
+        orig_addr = strings_offset
+        trans_addr = strings_offset + len(orig_table)
+        for msgid, msgstr in sorted_messages:
+            output.extend(struct.pack('<II', len(msgid), orig_addr))
+            orig_addr += len(msgid) + 1
+        for msgid, msgstr in sorted_messages:
+            output.extend(struct.pack('<II', len(msgstr), trans_addr))
+            trans_addr += len(msgstr) + 1
+
+        output.extend(orig_table)
+        output.extend(trans_table)
+        return bytes(output)
+
+    except Exception as e:
+        logging.error(f"[Fancygotchi] Error compiling .po to .mo: {e}", exc_info=True)
+        return None
+
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/Fancygotchi'
@@ -3929,13 +4010,6 @@ fi # End of the Fancygotchi hack"""}]
         if self._config['ui']['display']['enabled']:
             ui._enabled = True
             ui.init_display()
-
-            self.cleanup_display()
-        if hasattr(self, 'fancy_menu'):
-            del self.fancy_menu
-        if hasattr(self, 'listener'):
-            self.listener.close()
-        if hasattr(ui, '_pwncanvas'):
             # Start of Fancygotchi unload voice modification
             try:
                 locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
@@ -3950,6 +4024,14 @@ fi # End of the Fancygotchi hack"""}]
             except Exception as e:
                 logging.error(f"[Fancygotchi] Error during unload cleanup: {e}")
             # End of Fancygotchi unload voice modification
+
+            self.cleanup_display()
+        if hasattr(self, 'fancy_menu'):
+            del self.fancy_menu
+        if hasattr(self, 'listener'):
+            self.listener.close()
+        if hasattr(ui, '_pwncanvas'):
+            # Start of Fancygotchi unload voice modification
             del ui._pwncanvas
         if hasattr(ui, '_pwncanvas_tmp'):
             del ui._pwncanvas_tmp
@@ -4736,6 +4818,26 @@ fi # End of the Fancygotchi hack"""}]
             # If no language is specified, use the one from the main config
             if lang is None:
                 lang = ui._config['main']['lang']
+
+            # If using fancyvoice, check for .mo and compile from .po if needed
+            if lang == 'fancyvoice':
+                localedir = os.path.join(self._pwny_root, 'locale')
+                mo_path = os.path.join(localedir, lang, 'LC_MESSAGES', 'voice.mo')
+                po_path = os.path.join(localedir, lang, 'LC_MESSAGES', 'voice.po')
+
+                if not os.path.exists(mo_path) and os.path.exists(po_path):
+                    logging.info(f"[Fancygotchi] .mo file not found for '{lang}'. Compiling from .po file.")
+                    mo_data = _compile_po_to_mo(po_path)
+                    if mo_data:
+                        try:
+                            with open(mo_path, 'wb') as f:
+                                f.write(mo_data)
+                            logging.info(f"[Fancygotchi] Successfully compiled {po_path} to {mo_path}")
+                        except IOError as e:
+                            logging.error(f"[Fancygotchi] Could not write .mo file to {mo_path}: {e}")
+                elif not os.path.exists(po_path):
+                     logging.warning(f"[Fancygotchi] voice.po file not found at {po_path}. Cannot compile .mo file.")
+
 
             # Crucial step: Clear the gettext cache to force it to find new .mo files.
             # gettext.clearcache() was added in Python 3.8. This is a fallback for older versions.
