@@ -16,18 +16,22 @@ class Fancyshow(plugins.Plugin):
         self.y = 0
         self.original_name_pos = None
         self.loop_counter = 0
+        self.is_unloading = False
 
     # called when the plugin is loaded
     def on_loaded(self):
         logging.info("fancyshow plugin loaded.")
+        self.is_unloading = False # Reset on load
+        self.original_name_pos = None # Reset on load
 
     # called when the plugin is unloaded
     def on_unload(self, ui):
         logging.info("fancyshow plugin unloaded")
+        self.is_unloading = True
         if self.original_name_pos and hasattr(ui, '_update'):
             # Set the update flag to revert the name position
             ui._update['update'] = True
-            ui._update['partial'] = True
+            ui._update['partial'] = True # It's a partial update
             ui._update['dict_part'] = {
                 'widget': {
                     'name': {
@@ -39,21 +43,17 @@ class Fancyshow(plugins.Plugin):
 
     # called to set up the ui elements
     def on_ui_setup(self, ui):
-        pass
+        # Try to get the original position during setup.
+        self._get_initial_pos(ui)
 
     # called when the ui is updated
     def on_ui_update(self, ui):
-        # If we don't have the original position yet, try to get it. This should only run once.
-        if self.original_name_pos is None:
-            if hasattr(ui, 'fancy') and hasattr(ui.fancy, '_state') and 'name' in ui.fancy._state:
-                # Grab the position directly instead of re-running on_ui_setup
-                self.original_name_pos = ui.fancy._state['name']['position']
-                self.x, self.y = self.original_name_pos
-                logging.info(f"fancyshow: found original name position at {self.original_name_pos}")
+        if self.is_unloading:
+            return
+        self._get_initial_pos(ui)
 
-        # Only update every 2 loops for a more responsive demo
-        self.loop_counter += 1
-        if self.loop_counter % 2 != 0:
+        self.loop_counter = (self.loop_counter + 1) % 8
+        if self.loop_counter != 0:
             return
 
         # Randomly move the 'name' widget's position
@@ -68,7 +68,7 @@ class Fancyshow(plugins.Plugin):
         self.x = max(0, min(self.x, ui.width() - 50))
         self.y = max(0, min(self.y, ui.height() - 10))
 
-        if hasattr(ui, '_update'):
+        if hasattr(ui, '_update') and not ui._update.get('update', False):
             # Set the update flag and data for a partial theme update
             ui._update['update'] = True
             ui._update['partial'] = True
@@ -80,4 +80,26 @@ class Fancyshow(plugins.Plugin):
                     }
                 }
             }
+            
             logging.debug(f"fancyshow: updating name position to {[self.x, self.y]}")
+
+    def _get_initial_pos(self, ui):
+        # If a full theme update is happening, we need to get the new original position.
+        if hasattr(ui, '_update') and ui._update.get('update', False) and not ui._update.get('partial', False):
+            self.original_name_pos = None
+
+        # Always try to get the current position from the UI state to ensure we're not working with stale data.
+        current_pos = None
+        if hasattr(ui, 'fancy') and hasattr(ui.fancy, '_state') and 'name' in ui.fancy._state:
+            current_pos = ui.fancy._state['name']['position']
+        elif hasattr(ui, '_state') and 'name' in ui._state._state:
+            try:
+                current_pos = ui._state.get_attr('name', 'xy')
+            except Exception:
+                logging.warning("fancyshow: could not get 'name' widget position from ui._state.")
+
+        if current_pos is not None:
+            if self.original_name_pos is None:
+                logging.info(f"fancyshow: found original name position from ui.fancy._state at {self.original_name_pos}")
+                self.original_name_pos = current_pos
+            self.x, self.y = current_pos
