@@ -3624,7 +3624,7 @@ class Fancygotchi(plugins.Plugin):
                     'screen_saver': 'show_logo',
                     'second_screen_fps': 1,
                     'webui_fps': 1,
-                    'second_screen_webui': False,
+                    'second_screen_webui': True,
                     'bg_fg_select': 'manu',
                     'bg_mode': 'normal',
                     'fg_mode': 'normal',
@@ -3917,7 +3917,7 @@ fi # End of the Fancygotchi hack"""}]
         wrong_overlay = "dtoverlay=vc4-kms-v3d"
 
         fb_device_exists = any(os.path.exists(f"/dev/fb{i}") for i in range(10))
-        self.log(f"[Fancygotchi] Framebuffer device exists: {fb_device_exists}")
+        self.log(f"Framebuffer device exists: {fb_device_exists}")
         config_file = None
         for path in config_paths:
             if os.path.exists(path):
@@ -3933,13 +3933,13 @@ fi # End of the Fancygotchi hack"""}]
         found_correct_overlay = any(correct_overlay in line for line in lines)
 
         if fb_device_exists:
-            self.log("[Fancygotchi] Framebuffer device exists. No reboot needed.")
+            self.log("Framebuffer device exists. No reboot needed.")
             return
         elif found_correct_overlay:
-            self.log("[Fancygotchi] config.txt already contains the correct overlay. No reboot needed.")
+            self.log("config.txt already contains the correct overlay. No reboot needed.")
             return
         else:
-            self.log("[Fancygotchi] Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
+            self.log("Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
 
         backup_path = config_file + ".bak"
         shutil.copy(config_file, backup_path)
@@ -3996,8 +3996,8 @@ fi # End of the Fancygotchi hack"""}]
             # working state
             # log = False
             # debug = True
-            log = True
-            debug = True
+            log = False
+            debug = False
 
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'log' in self._theme['theme']['dev']:
                 log = self._theme['theme']['dev']['log']
@@ -4031,7 +4031,7 @@ fi # End of the Fancygotchi hack"""}]
                     self.display_controller.stop()
                 if hasattr(ui, '_enabled') and not ui._enabled:
                     ui._enabled = True
-                    self.log("[Fancygotchi] Switched back to the original display.")
+                    self.log("Switched back to the original display.")
         if self._config['ui']['display']['enabled']:
             ui._enabled = True
             ui.init_display()
@@ -4040,7 +4040,7 @@ fi # End of the Fancygotchi hack"""}]
                 locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
                 if os.path.islink(locale_path):
                     os.unlink(locale_path)
-                    logging.info("[Fancygotchi] Removed fancyvoice symlink.")
+                    self.log("Removed fancyvoice symlink.")
                 
                 # Reload the voice with the original system language
                 if hasattr(ui, '_config'):
@@ -4107,20 +4107,18 @@ fi # End of the Fancygotchi hack"""}]
             'partial': False,
             'dict_part': {}
         })
-        logging.info(f"[Fancygotchi] UI attributes created: {ui._update}, {ui._web_mode}, {ui._hw_mode}")
+        self.log(f"UI attributes created: {ui._update}, {ui._web_mode}, {ui._hw_mode}")
         self._res = [ui._width, ui._height]
-        logging.info(f"[Fancygotchi] UI resolution: {self._res}")
+        self.log(f"UI resolution: {self._res}")
         self.theme_update(ui, True)
         self.pwncanvas_creation(self._res)
         self.fps = 1
         if self._th_path is None: self._th_path = ''
-        logging.info(f"[Fancygotchi] FPS: {self.fps}")
-        logging.info(f"[Fancygotchi] Theme path: {self._th_path}")
-        logging.info(self._config['ui']['display']['enabled'])
+        self.log(f"FPS: {self.fps}")
+        self.log(f"Theme path: {self._th_path}")
+        self.log(self._config['ui']['display']['enabled'])
         self.display_controller = FancyDisplay(self._config['ui']['display']['enabled'], self.fps, self._th_path, )
-        logging.info("before self.log")
         self.log('UI setup finished')
-        logging.info("after self.log")
 
     def cleanup_display(self):
 
@@ -4207,42 +4205,47 @@ fi # End of the Fancygotchi hack"""}]
             logging.error(traceback.format_exc())
 
     def on_ui_update(self, ui):
-        try:
-            
-            if not self.dispHijack:
-                if hasattr(self, 'display_controller') and self.display_controller:
-                    self.display_controller.stop()
-                    self.display_controller = None
-                if self._config['ui']['display']['enabled']:
-                    if hasattr(ui, '_enabled') and not ui._enabled:
-                        ui._enabled = True
-                        ui.init_display()
-                        logging.debug("[Fancygotchi] Switched back to the original display.")
-            else:
-                ui._enabled = False
-                if hasattr(self, 'display_controller') and not self.display_controller:
+        try:            
+            if self.dispHijack:
+                if not (hasattr(self, 'display_controller') and self.display_controller and self.display_controller.is_running()):
                     logging.debug("[Fancygotchi] Starting display hijack.")
                     self.display_controller = FancyDisplay(self._config['ui']['display']['enabled'], self.fps, self._th_path)
                     self.display_controller.start(self._res, self.options.get('rotation', 0), self._color_mode[1])
-                    mode = self.display_config.get('mode', 'screen_saver')
-                    submode = self.display_config.get('sub_mode', 'show_logo')
-                    config = self.display_config.get('config', {})
+                    mode, submode, config = self.display_config.get('mode', 'screen_saver'), self.display_config.get('sub_mode', 'show_logo'), self.display_config.get('config', {})
                     self.display_controller.set_mode(mode, submode, config)
-                else:
-                    logging.debug("[Fancygotchi] Display controller is already running.")
+                if hasattr(ui, '_enabled') and ui._enabled:
+                    ui._enabled = False
+            #elif not self.dispHijack:
+            elif not self.dispHijack and self._config['ui']['display']['enabled']:
+                if hasattr(self, 'display_controller') and self.display_controller and self.display_controller.is_running():
+                    self.display_controller.stop()
+                #if hasattr(ui, '_enabled') and not ui._enabled and self._config['ui']['display']['enabled'] and not ui.is_rebooting():
+                if hasattr(ui, '_enabled') and not ui._enabled:
+                    ui._enabled = True
+                    ui.init_display()
+
 
             # Check for theme updates
             if (hasattr(ui, '_update') and ui._update.get('update')) or self.refresh:
+                is_partial = hasattr(ui, '_update') and ui._update.get('partial', False)
+                self.log(f"Theme update triggered. Partial: {is_partial}, Refresh: {self.refresh}")
+                
+                 # Always process the update, regardless of the theme.
                 self.theme_update(ui)
-                #if hasattr(ui, '_update') and not ui._update.get('partial', False):
+                
+                # Crucially, always reset the flags after processing to prevent loops.
                 if hasattr(ui, '_update'):
                     ui._update['update'] = False
-                    ui._update['partial'] = False
+                    #ui._update['partial'] = False
+                    ui._update['partial'] = False # Reset partial flag
                     ui._update['dict_part'] = {}
+                    self.log("UI update flags reset.")
                 self.refresh = False
+               
 
             self._res = [ui._width, ui._height]
             self.second_screen = Image.new('RGBA', self._res, 'black')
+            
             
             th = self._theme['theme']
             self._share_state(ui)
@@ -4642,10 +4645,10 @@ fi # End of the Fancygotchi hack"""}]
         self._theme_name = 'Default'
         try:
             if not boot: self.log('Theme selector')
-            self._theme = copy.deepcopy(self._default)
             fancy_opt = config['main']['plugins']['Fancygotchi']
             self.options['rotation'] = fancy_opt.get('rotation', 0)
 
+            self._theme = copy.deepcopy(self._default)
             size = f'{self._res[0]}x{self._res[1]}'
             if 'theme' in fancy_opt and fancy_opt['theme'] != '':
                 theme = fancy_opt['theme']
@@ -4685,9 +4688,6 @@ fi # End of the Fancygotchi hack"""}]
                         self._theme = toml.load(f)
                 else:
                     self._theme = copy.deepcopy(self._default)
-
-            else:
-                self._theme = copy.deepcopy(self._default)
 
             if th_path:
                 css_src = os.path.join(th_path, 'style.css')
@@ -4863,7 +4863,7 @@ fi # End of the Fancygotchi hack"""}]
         Accepts an optional 'lang' parameter to specify the voice language.
         """
         try:
-            logging.info(f"[Fancygotchi] Reloading voice module for language: '{lang}'")
+            self.log(f"Reloading voice module for language: '{lang}'")
             
             # If no language is specified, use the one from the main config
             if lang is None:
@@ -4876,13 +4876,13 @@ fi # End of the Fancygotchi hack"""}]
                 po_path = os.path.join(localedir, lang, 'LC_MESSAGES', 'voice.po')
 
                 if not os.path.exists(mo_path) and os.path.exists(po_path):
-                    logging.info(f"[Fancygotchi] .mo file not found for '{lang}'. Compiling from .po file.")
+                    self.log(f".mo file not found for '{lang}'. Compiling from .po file.")
                     mo_data = _compile_po_to_mo(po_path)
                     if mo_data:
                         try:
                             with open(mo_path, 'wb') as f:
                                 f.write(mo_data)
-                            logging.info(f"[Fancygotchi] Successfully compiled {po_path} to {mo_path}")
+                            self.log(f"Successfully compiled {po_path} to {mo_path}")
                         except IOError as e:
                             logging.error(f"[Fancygotchi] Could not write .mo file to {mo_path}: {e}")
                 elif not os.path.exists(po_path):
@@ -4905,7 +4905,7 @@ fi # End of the Fancygotchi hack"""}]
                 voice_module = importlib.reload(sys.modules['pwnagotchi.voice'])
                 # Create a new instance of the reloaded Voice class
                 ui._voice = voice_module.Voice(lang=lang)
-                logging.info(f"[Fancygotchi] Voice module reloaded successfully for language: '{lang}'")
+                self.log(f"Voice module reloaded successfully for language: '{lang}'")
         except Exception as e:
             logging.error(f"[Fancygotchi] Error reloading voice: {e}")
 
@@ -4945,14 +4945,10 @@ fi # End of the Fancygotchi hack"""}]
         if not self.ready:
             return
         th_opt = copy.deepcopy(self._default['theme']['options'])
-        self._i = 0
-        if not boot:self.log('Theme update')
-        #if hasattr(ui, '_update') and ui.update:
+        if not boot: self.log('Theme update')
         if hasattr(ui, '_update') or self.refresh:
-        #if (hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('partial', False) and ui._update.get('update', False)) or self.refresh:
             if not ui._update['partial']:
                 self._state = {}
-
                 
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
@@ -4972,13 +4968,16 @@ fi # End of the Fancygotchi hack"""}]
                 #self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
 
                 rot = self.options['rotation']
-                th_name = self.options['theme']
+                if self.options['theme'] == '':
+                    th_name = 'Default'
+                else:
+                    th_name = self.options['theme']
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation'] = rot
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th_name
                 pwnagotchi.config = merge_config(f_toml, pwnagotchi.config)
                 if self._agent:
                     self._agent._config = merge_config(f_toml, pwnagotchi.config)
-                logging.warning(f'theme name: {th_name}, rotation: {rot}')
+                self.log(f'theme name: {th_name}, rotation: {rot}')
                 save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
                 self.theme_selector(f_toml, boot)
 
@@ -4988,30 +4987,31 @@ fi # End of the Fancygotchi hack"""}]
                 th_menu = th.get('menu', {})
 
                 # Start of Fancygotchi voice reload modification
-                logging.info("[Fancygotchi] Checking for custom voice in theme...")
+                self.log("Checking for custom voice in theme...")
                 locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
-                logging.info(f"[Fancygotchi] Locale path: {locale_path}")
-                logging.info(self._th_path)
-                logging.info(f"[Fancygotchi] Target locale path: {locale_path}")
+                self.log(f"Locale path: {locale_path}")
+                self.log(self._th_path)
+                self.log(f"Target locale path: {locale_path}")
 
                 # Check if the theme has a custom voice
-                if self._th_path and os.path.isdir(os.path.join(self._th_path, 'voice')) and th_name != '':
+                if self._th_path and os.path.isdir(os.path.join(self._th_path, 'voice')) and th_name != 'Default':
                     theme_voice_path = os.path.join(self._th_path, 'voice')
-                    logging.info("[Fancygotchi] Custom voice found. Applying 'fancyvoice'.")
+                    self.log("Custom voice found. Applying 'fancyvoice'.")
                     if os.path.islink(locale_path) or os.path.exists(locale_path):
                         os.unlink(locale_path)
                         logging.debug("[Fancygotchi] Removed existing fancyvoice symlink.")
                     os.symlink(os.path.abspath(theme_voice_path), locale_path)
                     self.reload_voice(ui, lang='fancyvoice')
                 else:
-                    logging.info("[Fancygotchi] No custom voice in theme. Reverting to system default voice.")
+                    self.log("No custom voice in theme. Reverting to system default voice.")
                     if os.path.islink(locale_path):
                         os.unlink(locale_path)
                     self.reload_voice(ui, lang=ui._config['main']['lang'])
                 # End of Fancygotchi voice reload modification
             else:
-                self.log('Partial update')
+                self.log('Partial update received.')                
                 th = self._theme['theme']
+                
                 rot = self.options['rotation']
                 if 'options' in ui._update['dict_part']:
                     th_options = ui._update['dict_part']['options']
@@ -5027,17 +5027,16 @@ fi # End of the Fancygotchi hack"""}]
                 if 'menu' in ui._update['dict_part']:
                     th_menu_update = ui._update['dict_part']['menu']
                     for menu_key, menu_data in th_menu_update.items():
-                        if menu_key in th_menu:
-                            th_menu[menu_key].update(menu_data)
+                        if menu_key in th.get('menu', {}):
+                            th['menu'][menu_key].update(menu_data)
                         else:
-                            th_menu[menu_key] = menu_data
-                    th['menu'] = th_menu
+                            th.setdefault('menu', {})[menu_key] = menu_data
                 for key, value in ui._update['dict_part'].items():
                     if key not in ['options', 'widget', 'menu']:
                         th[key] = value
                 th_opt = th['options']
                 th_widget = th['widget']
-                th_menu = th['menu']
+                th_menu = th.get('menu', {})
                 
             if th_opt:
                 if 'font' in th_opt and th_opt['font'] != '':
@@ -5607,7 +5606,7 @@ fi # End of the Fancygotchi hack"""}]
                     if tag == 0:
                         keys_to_delete.append(key)
                 for key in keys_to_delete:
-                    self.log(f'[Fancygotchi] remove widget: {key}')
+                    self.log(f'remove widget: {key}')
                     del self._state[key]
     
     def pwncanvas_creation(self, res):
@@ -6028,7 +6027,7 @@ fi # End of the Fancygotchi hack"""}]
     def ui2(self):
         try:
             image = self.second_screen
-            if hasattr(self, 'display_controller') and self.display_config['second_screen_webui']:
+            if hasattr(self, 'display_controller') and self.display_config['second_screen_webui'] and self.dispHijack:
                 image = self.display_controller.screen()
             img_io = BytesIO()
             image.save(img_io, 'PNG')
@@ -6278,14 +6277,14 @@ fi # End of the Fancygotchi hack"""}]
                         action = request.args.get('action')
                         hardware = request.args.get('hardware')
                         scr = request.args.get('screen')
-                        logging.warning(f"screen: {screen}")
+                        self.log(f"screen: {screen}")
                         if scr is None:
                             if self.dispHijack:
                                 screen = 2
                         else:
                             screen = scr
-                        logging.warning(f"btn_cmd: {action}")
-                        logging.warning(f"hardware: {hardware}")
+                        self.log(f"btn_cmd: {action}")
+                        self.log(f"hardware: {hardware}")
                         
                         
                         
@@ -6307,7 +6306,7 @@ fi # End of the Fancygotchi hack"""}]
                         }
                         
                         btn_action = action_mapping.get(action)
-                        logging.info(f"btn_cmd: {btn_action}")
+                        self.log(f"btn_cmd: {btn_action}")
                         if btn_action:
                             self.button_controller({"action": btn_action}, screen=screen)
                             #self.navigate_fancymenu({"action": btn_action})
