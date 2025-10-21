@@ -3997,7 +3997,7 @@ fi # End of the Fancygotchi hack"""}]
             # log = False
             # debug = True
             log = False
-            debug = False
+            debug = True
 
             if 'theme' in self._theme and 'dev' in self._theme['theme'] and 'log' in self._theme['theme']['dev']:
                 log = self._theme['theme']['dev']['log']
