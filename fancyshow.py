@@ -13,10 +13,8 @@ class Fancyshow(plugins.Plugin):
     def __init__(self):
         logging.debug("fancyshow plugin created")
         self.options = dict()
-        self.x = 0
-        self.y = 0
         self.original_name_pos = None
-        self.loop_counter = 0
+        self.position_set = False
         self.unloaded = False
         self.reverting = False
 
@@ -27,7 +25,7 @@ class Fancyshow(plugins.Plugin):
 
     # called when the plugin is unloaded
     def on_unload(self, ui):
-        logging.info("fancyshow plugin unloading.")
+        logging.info("fancyshow plugin unloading...")
         self.reverting = True
         if self.original_name_pos and hasattr(ui, '_update'):
             ui._update['update'] = True
@@ -59,6 +57,7 @@ class Fancyshow(plugins.Plugin):
  
         self.unloaded = True
         self.original_name_pos = None
+        self.position_set = False
 
     # called to set up the ui elements
     def on_ui_setup(self, ui):
@@ -66,40 +65,35 @@ class Fancyshow(plugins.Plugin):
 
     # called when the ui is updated
     def on_ui_update(self, ui):
-        self.loop_counter = (self.loop_counter + 1) % 8 # Update every 8 cycles
-        if self.loop_counter != 0:
+        if self.unloaded or self.reverting:
             return
 
-        # Randomly move the 'name' widget's position
-        self.x += random.randint(-2, 2)
-        self.y += random.randint(-2, 2)
-
-        # Ensure we have the original position before we start moving things.
+        # Get original position if we haven't already
         if self.original_name_pos is None:
             self._get_initial_pos(ui)
+            # If we still don't have it, we can't do anything yet.
+            if self.original_name_pos is None:
+                return
 
-        # If we still don't have it, we can't proceed.
-        if self.original_name_pos is None:
-            return
-
-        # Keep the widget on screen
-        self.x = max(0, min(self.x, ui.width() - 50))
-        self.y = max(0, min(self.y, ui.height() - 10))
-
-        if hasattr(ui, '_update') and not ui._update.get('update', False):
-            # Set the update flag and data for a partial theme update
+        # Set the position to [0, 0] once
+        if not self.position_set and hasattr(ui, '_update') and not ui._update.get('update', False):
             ui._update['update'] = True
             ui._update['partial'] = True
-            # Define the widget and property to change
             ui._update['dict_part'] = {
                 'widget': {
                     'name': {
-                        'position': [self.x, self.y],
+                        'position': [0, 0],
                     }
                 }
             }
-            
-            logging.debug(f"fancyshow: updating 'name' position to {[self.x, self.y]}")
+            self.position_set = True
+            logging.info("fancyshow: setting 'name' position to [0, 0]")
+
+        # After setting, we can verify its position on subsequent updates
+        if self.position_set and hasattr(ui, 'fancy') and hasattr(ui.fancy, '_state') and 'name' in ui.fancy._state:
+            current_pos = ui.fancy._state['name'].get('position')
+            if tuple(current_pos) != (0, 0):
+                logging.warning(f"fancyshow: 'name' position is {current_pos}, not [0, 0] as expected.")
 
     def _get_initial_pos(self, ui):
         # Only try to get the position if we don't have it yet.
@@ -110,7 +104,6 @@ class Fancyshow(plugins.Plugin):
             pos = ui.fancy._state['name'].get('position') # Use .get for safety
             if pos:
                 self.original_name_pos = list(pos) # Make a copy
-                self.x, self.y = self.original_name_pos
                 logging.info(f"fancyshow: found original name position at {self.original_name_pos}")
             else:
                 logging.warning("fancyshow: 'name' widget found in fancy._state, but has no 'position'.")
