@@ -4945,11 +4945,12 @@ fi # End of the Fancygotchi hack"""}]
         if not self.ready:
             return
         th_opt = copy.deepcopy(self._default['theme']['options'])
-        if not boot: self.log('Theme update')
-        if hasattr(ui, '_update') or self.refresh:
-            if not ui._update['partial']:
+        if not boot:
+            self.log('Theme update')
+        if (hasattr(ui, '_update') and ui._update.get('update')) or self.refresh:
+            if not (hasattr(ui, '_update') and ui._update.get('partial', False)):
                 self._state = {}
-                
+
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
                     try:
@@ -4964,9 +4965,6 @@ fi # End of the Fancygotchi hack"""}]
                         self.options['theme'] = ''
                         f_toml['main']['plugins']['Fancygotchi']['theme'] = self.options['theme']
 
-                #self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
-                #self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
-
                 rot = self.options['rotation']
                 if self.options['theme'] == '':
                     th_name = 'Default'
@@ -4980,7 +4978,7 @@ fi # End of the Fancygotchi hack"""}]
                 self.log(f'theme name: {th_name}, rotation: {rot}')
                 save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
                 self.theme_selector(f_toml, boot)
-
+    
                 th = self._theme['theme']
                 th_opt = th['options']
                 th_widget = th['widget']
@@ -5007,36 +5005,41 @@ fi # End of the Fancygotchi hack"""}]
                     if os.path.islink(locale_path):
                         os.unlink(locale_path)
                     self.reload_voice(ui, lang=ui._config['main']['lang'])
-                # End of Fancygotchi voice reload modification
+                
+                self.setup_menu(th_menu)
             else:
                 self.log('Partial update received.')                
                 th = self._theme['theme']
-                
+                menu_updated = False
+    
                 rot = self.options['rotation']
                 if 'options' in ui._update['dict_part']:
+                    self.log("Partial update: Applying options changes.")
                     th_options = ui._update['dict_part']['options']
                     th['options'].update(th_options)
                 if 'widget' in ui._update['dict_part']:
+                    self.log("Partial update: Applying widget changes.")
                     th_widget = ui._update['dict_part']['widget']
                     for widget_name, widget_data in th_widget.items():
                         if widget_name in th['widget']:
                             th['widget'][widget_name].update(widget_data)
                         else:
                             th['widget'][widget_name] = widget_data
-                th_menu = th.get('menu', {})
                 if 'menu' in ui._update['dict_part']:
+                    self.log("Partial update: Applying menu changes.")
+                    menu_updated = True
                     th_menu_update = ui._update['dict_part']['menu']
                     for menu_key, menu_data in th_menu_update.items():
                         if menu_key in th.get('menu', {}):
                             th['menu'][menu_key].update(menu_data)
                         else:
                             th.setdefault('menu', {})[menu_key] = menu_data
-                for key, value in ui._update['dict_part'].items():
-                    if key not in ['options', 'widget', 'menu']:
-                        th[key] = value
+                
+                if menu_updated:
+                    th_menu = th.get('menu', {})
+                    self.setup_menu(th_menu)
+
                 th_opt = th['options']
-                th_widget = th['widget']
-                th_menu = th.get('menu', {})
                 
             if th_opt:
                 if 'font' in th_opt and th_opt['font'] != '':
@@ -5167,7 +5170,6 @@ fi # End of the Fancygotchi hack"""}]
                     else:
                         if os.path.exists(boot_anim_file):
                             os.remove(boot_anim_file)
-                self.setup_menu(th_menu)
 
     def theme_list(self):
         themes_path = os.path.join(self._plug_root, 'themes')
