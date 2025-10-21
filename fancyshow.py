@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 import pwnagotchi.plugins as plugins
 
 
@@ -16,15 +17,18 @@ class Fancyshow(plugins.Plugin):
         self.y = 0
         self.original_name_pos = None
         self.loop_counter = 0
+        self.unloaded = False
+        self.reverting = False
 
     # called when the plugin is loaded
-    def on_loaded(self);
-        logging.info("fancyshow plugin loaded")
+    def on_loaded(self):
+        logging.info("fancyshow plugin loaded.")
+        self.unloaded = False
 
     # called when the plugin is unloaded
     def on_unload(self, ui):
-        logging.info("fancyshow plugin unloaded.")
-        # If we have the original position, trigger a partial update to restore it.
+        logging.info("fancyshow plugin unloading.")
+        self.reverting = True
         if self.original_name_pos and hasattr(ui, '_update'):
             ui._update['update'] = True
             ui._update['partial'] = True
@@ -35,20 +39,34 @@ class Fancyshow(plugins.Plugin):
                     }
                 }
             }
-            logging.info(f"fancyshow: reverting 'name' position to {self.original_name_pos}")
+            logging.info(f"fancyshow: attempting to revert 'name' position to {self.original_name_pos}")
 
-        # Reset internal state
+            # Wait for the UI to confirm the change, with a timeout.
+            timeout = 10  # seconds
+            start_time = time.time()
+            reverted = False
+            while time.time() - start_time < timeout:
+                if hasattr(ui, 'fancy') and hasattr(ui.fancy, '_state') and 'name' in ui.fancy._state:
+                    current_pos = ui.fancy._state['name'].get('position')
+                    if tuple(current_pos) == tuple(self.original_name_pos):
+                        logging.info("fancyshow: successfully reverted 'name' position.")
+                        reverted = True
+                        break
+                time.sleep(0.5)  # Check every half-second
+
+            if not reverted:
+                logging.warning(f"fancyshow: could not verify 'name' position was reverted within {timeout} seconds.")
+ 
+        self.unloaded = True
         self.original_name_pos = None
 
     # called to set up the ui elements
     def on_ui_setup(self, ui):
-        # Try to get the original position during setup.
         self._get_initial_pos(ui)
 
     # called when the ui is updated
     def on_ui_update(self, ui):
-
-        self.loop_counter = (self.loop_counter + 1) % 8
+        self.loop_counter = (self.loop_counter + 1) % 8 # Update every 8 cycles
         if self.loop_counter != 0:
             return
 
@@ -56,8 +74,11 @@ class Fancyshow(plugins.Plugin):
         self.x += random.randint(-2, 2)
         self.y += random.randint(-2, 2)
 
-        # Don't start moving the widget until its original position has been loaded.
-        self._get_initial_pos(ui)
+        # Ensure we have the original position before we start moving things.
+        if self.original_name_pos is None:
+            self._get_initial_pos(ui)
+
+        # If we still don't have it, we can't proceed.
         if self.original_name_pos is None:
             return
 
@@ -78,7 +99,7 @@ class Fancyshow(plugins.Plugin):
                 }
             }
             
-            logging.debug(f"fancyshow: updating name position to {[self.x, self.y]}")
+            logging.debug(f"fancyshow: updating 'name' position to {[self.x, self.y]}")
 
     def _get_initial_pos(self, ui):
         # Only try to get the position if we don't have it yet.
@@ -86,10 +107,10 @@ class Fancyshow(plugins.Plugin):
             return
 
         if hasattr(ui, 'fancy') and hasattr(ui.fancy, '_state') and 'name' in ui.fancy._state:
-            pos = ui.fancy._state['name'].get('position')
+            pos = ui.fancy._state['name'].get('position') # Use .get for safety
             if pos:
                 self.original_name_pos = list(pos) # Make a copy
                 self.x, self.y = self.original_name_pos
                 logging.info(f"fancyshow: found original name position at {self.original_name_pos}")
             else:
-                logging.warning("fancyshow: 'name' widget found in fancy state, but has no position.")
+                logging.warning("fancyshow: 'name' widget found in fancy._state, but has no 'position'.")
