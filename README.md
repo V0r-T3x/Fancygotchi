@@ -1,6 +1,12 @@
 # <p align="center">🪄FANCYGOTCHI 2.0🖌️</p>
 
-# 🎉 🚀 Fancygotchi 2.0 is now available, it's a great day for the community! Happy theming! Join us on [discord](https://discord.gg/78dGjukKU9)🚀 🎉
+<div align="center">
+  <h1> 🎉 🚀Join us on <a href="https://discord.gg/78dGjukKU9">discord</a>🚀 🎉 </h1>
+</div>
+
+<div align="center">
+  <h2> 🎵 Listen to the AI song: <a href="https://www.youtube.com/watch?v=vYnJTlbz79U" target="_blank">Symbiote Skin (I 💜 Fancygotchi) by Kari] </a> 🎵 </h2>
+</div>
 
 <p align="center">
 <img src='https://github.com/V0r-T3x/fancygotchi/blob/main/.assets/fancygotchi2.0.png' width='500px'></img>
@@ -22,3 +28,5 @@
 
 # :books: The documentation is available in the [FANCYGOTCHI WIKI](https://github.com/V0r-T3x/fancygotchi/wiki)
 # :art: The theme v2.0 are available [FANCYGOTCHI 2.0 THEMES](https://github.com/V0r-T3x/Fancygotchi_themes/tree/main/fancygotchi_2.0)
+
+
