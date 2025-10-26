@@ -1,7 +1,11 @@
+# adding api or ui attribute to know the actual theme config and or fancy state
+
 import argparse
 import asyncio
 import copy
+import importlib
 import glob
+import gettext
 import importlib.util
 import json
 import logging
@@ -607,6 +611,7 @@ INDEX = """
                 <div id="hidden">
                     <button onclick="saveConfig()" id="sticky-button">Save Configuration</button>
                     <h3>Configuration editor</h3>
+                    <input type="text" id="configSearch" onkeyup="searchConfig()" placeholder="Search for options..." title="Type in a name">
                     <h4>Config Path</h4> <!-- Updated dynamically -->
                     <div id="config_content"></div> <!-- Config data inserted here dynamically -->
                     <h3>CSS editor</h3>
@@ -788,6 +793,27 @@ scrollToTopBtn.addEventListener("click", function() {
     window.scrollTo({top: 0, behavior: 'smooth'});
 });
 
+function searchConfig() {
+    var input, filter, table, tr, i, td, txtValue;
+    input = document.getElementById("configSearch");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("tableOptions");
+    if (!table) return;
+    tr = table.getElementsByTagName("tr");
+
+    // Loop through all table rows (except the header and the 'add' row), and hide those who don't match the search query
+    for (i = 1; i < tr.length -1; i++) {
+        td = tr[i].getElementsByTagName("td")[1]; // The second column contains the option name
+        if (td) {
+            txtValue = td.textContent || td.innerText;
+            if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+            } else {
+                tr[i].style.display = "none";
+            }
+        }
+    }
+}
 function active_theme(callback) {
     loadJSON("Fancygotchi/active_theme", function(response) {
         callback(response.theme);
@@ -2243,6 +2269,7 @@ class FancyDisplay:
         if config: self.screen_data = config
         else: self.screen_data = {}
         self.set_mode(mode, sub_mode)
+        logging.info("[FancyDisplay] FancyDisplay initialized.")
 
     def _start_loop(self):
         logging.info("[FancyDisplay] Starting the asyncio event loop in a new thread.")
@@ -2521,12 +2548,14 @@ class FancyDisplay:
                     'speed': 1.0 
                 }
             elif sub_mode == 'show_animation':
+                frames_path = os.path.join(self.th_path, 'img', 'boot') if self.th_path else ''
                 options = {
-                    'frames_path': os.path.join(self.th_path, 'img', 'boot'),
+                    'frames_path': frames_path,
                     'max_loops': 1,
                     'total_duration': 10,
                 }
             self.screen_data.update(options)
+            logging.info(f"[FancyDisplay] Screen saver options: {self.screen_data}")
         else:
             logging.warning(f"[FancyDisplay] Invalid screen_saver sub-mode: {sub_mode}. Available sub-modes are: {self.screen_saver_modes}")
 
@@ -2734,7 +2763,7 @@ class FancyDisplay:
             target_fps = 24
             frame_duration = 0.2
 
-            if not os.path.exists(frames_path):
+            if not frames_path or not os.path.exists(frames_path):
                 image = self.show_logo()
                 return image
 
@@ -3463,10 +3492,91 @@ def serializer(obj):
         return list(obj)
     raise TypeError
 
+def _compile_po_to_mo(po_file_path):
+    """
+    Compiles a .po file to a .mo file in memory.
+    This is a lightweight, pure-Python implementation based on the standard
+    `msgfmt.py` tool.
+    """
+    try:
+        with open(po_file_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+
+        messages = {}
+        msgid = ""
+        msgstr = ""
+        is_fuzzy = False
+        in_msgid = False
+        in_msgstr = False
+
+        for line in lines:
+            line = line.strip()
+            if not line:
+                if msgid and not is_fuzzy:
+                    messages[msgid] = msgstr
+                msgid, msgstr, is_fuzzy = "", "", False
+                in_msgid, in_msgstr = False, False
+            elif line.startswith('#,') and 'fuzzy' in line:
+                is_fuzzy = True
+            elif line.startswith('msgid '):
+                in_msgid, in_msgstr = True, False
+                msgid = line[6:].strip('"')
+            elif line.startswith('msgstr '):
+                in_msgid, in_msgstr = False, True
+                msgstr = line[7:].strip('"')
+            elif line.startswith('"'):
+                if in_msgid:
+                    msgid += line.strip('"')
+                elif in_msgstr:
+                    msgstr += line.strip('"')
+
+        if msgid and not is_fuzzy:
+            messages[msgid] = msgstr
+
+        # Build the .mo file format in memory
+        magic = 0x950412de
+        revision = 0
+        num_strings = len(messages)
+        
+        # Sort by msgid
+        sorted_messages = sorted(messages.items())
+
+        # Create string tables
+        orig_table = b''
+        trans_table = b''
+        for msgid, msgstr in sorted_messages:
+            orig_table += msgid.encode('utf-8') + b'\0'
+            trans_table += msgstr.encode('utf-8') + b'\0'
+
+        # Calculate offsets
+        header_size = 7 * 4
+        orig_offset_table_offset = header_size
+        trans_offset_table_offset = orig_offset_table_offset + num_strings * 8
+        strings_offset = trans_offset_table_offset + num_strings * 8
+
+        output = bytearray(struct.pack('<IIIIIII', magic, revision, num_strings, orig_offset_table_offset, trans_offset_table_offset, 0, 0))
+        
+        orig_addr = strings_offset
+        trans_addr = strings_offset + len(orig_table)
+        for msgid, msgstr in sorted_messages:
+            output.extend(struct.pack('<II', len(msgid), orig_addr))
+            orig_addr += len(msgid) + 1
+        for msgid, msgstr in sorted_messages:
+            output.extend(struct.pack('<II', len(msgstr), trans_addr))
+            trans_addr += len(msgstr) + 1
+
+        output.extend(orig_table)
+        output.extend(trans_table)
+        return bytes(output)
+
+    except Exception as e:
+        logging.error(f"[Fancygotchi] Error compiling .po to .mo: {e}", exc_info=True)
+        return None
+
 class Fancygotchi(plugins.Plugin):
     __author__ = 'V0rT3x'
     __github__ = 'https://github.com/V0r-T3x/Fancygotchi'
-    __version__ = '2.0.7'
+    __version__ = '2.0.8'
     __license__ = 'GPL3'
     __description__ = 'The Ultimate theme manager for pwnagotchi'
 
@@ -3485,7 +3595,7 @@ class Fancygotchi(plugins.Plugin):
         self.refacer_thread = None
         self._stop_event = threading.Event()
 
-        self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame')
+        self.bitmap_widget = ('Bitmap', 'WardriverIcon', 'InetIcon', 'Frame', 'WifiQR')
         self._config = pwnagotchi.config
         self.gittoken = self._config['main']['plugins']['Fancygotchi'].get('github_token', None)
         self.cfg_path = None
@@ -3514,7 +3624,7 @@ class Fancygotchi(plugins.Plugin):
                     'screen_saver': 'show_logo',
                     'second_screen_fps': 1,
                     'webui_fps': 1,
-                    'second_screen_webui': False,
+                    'second_screen_webui': True,
                     'bg_fg_select': 'manu',
                     'bg_mode': 'normal',
                     'fg_mode': 'normal',
@@ -3807,7 +3917,7 @@ fi # End of the Fancygotchi hack"""}]
         wrong_overlay = "dtoverlay=vc4-kms-v3d"
 
         fb_device_exists = any(os.path.exists(f"/dev/fb{i}") for i in range(10))
-        self.log(f"[Fancygotchi] Framebuffer device exists: {fb_device_exists}")
+        self.log(f"Framebuffer device exists: {fb_device_exists}")
         config_file = None
         for path in config_paths:
             if os.path.exists(path):
@@ -3823,13 +3933,13 @@ fi # End of the Fancygotchi hack"""}]
         found_correct_overlay = any(correct_overlay in line for line in lines)
 
         if fb_device_exists:
-            self.log("[Fancygotchi] Framebuffer device exists. No reboot needed.")
+            self.log("Framebuffer device exists. No reboot needed.")
             return
         elif found_correct_overlay:
-            self.log("[Fancygotchi] config.txt already contains the correct overlay. No reboot needed.")
+            self.log("config.txt already contains the correct overlay. No reboot needed.")
             return
         else:
-            self.log("[Fancygotchi] Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
+            self.log("Framebuffer device does not exist config.txt already don't contain the correct overlay. Rebooting system to apply changes...")
 
         backup_path = config_file + ".bak"
         shutil.copy(config_file, backup_path)
@@ -3921,10 +4031,24 @@ fi # End of the Fancygotchi hack"""}]
                     self.display_controller.stop()
                 if hasattr(ui, '_enabled') and not ui._enabled:
                     ui._enabled = True
-                    self.log("[Fancygotchi] Switched back to the original display.")
+                    self.log("Switched back to the original display.")
         if self._config['ui']['display']['enabled']:
             ui._enabled = True
             ui.init_display()
+            # Start of Fancygotchi unload voice modification
+            try:
+                locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
+                if os.path.islink(locale_path):
+                    os.unlink(locale_path)
+                    self.log("Removed fancyvoice symlink.")
+                
+                # Reload the voice with the original system language
+                if hasattr(ui, '_config'):
+                    original_lang = ui._config['main']['lang']
+                    self.reload_voice(ui, lang=original_lang)
+            except Exception as e:
+                logging.error(f"[Fancygotchi] Error during unload cleanup: {e}")
+            # End of Fancygotchi unload voice modification
 
             self.cleanup_display()
         if hasattr(self, 'fancy_menu'):
@@ -3932,6 +4056,7 @@ fi # End of the Fancygotchi hack"""}]
         if hasattr(self, 'listener'):
             self.listener.close()
         if hasattr(ui, '_pwncanvas'):
+            # Start of Fancygotchi unload voice modification
             del ui._pwncanvas
         if hasattr(ui, '_pwncanvas_tmp'):
             del ui._pwncanvas_tmp
@@ -3982,9 +4107,16 @@ fi # End of the Fancygotchi hack"""}]
             'partial': False,
             'dict_part': {}
         })
+        self.log(f"UI attributes created: {ui._update}, {ui._web_mode}, {ui._hw_mode}")
         self._res = [ui._width, ui._height]
+        self.log(f"UI resolution: {self._res}")
         self.theme_update(ui, True)
         self.pwncanvas_creation(self._res)
+        self.fps = 1
+        if self._th_path is None: self._th_path = ''
+        self.log(f"FPS: {self.fps}")
+        self.log(f"Theme path: {self._th_path}")
+        self.log(self._config['ui']['display']['enabled'])
         self.display_controller = FancyDisplay(self._config['ui']['display']['enabled'], self.fps, self._th_path, )
         self.log('UI setup finished')
 
@@ -3995,6 +4127,17 @@ fi # End of the Fancygotchi hack"""}]
                 self.display_controller.stop()
             self.display_controller = None
             del self.display_controller
+
+    def _share_state(self, ui):
+        """Shares a read-only copy of the internal state with the ui object."""
+        if not hasattr(ui, 'fancy'):
+            # Create a simple namespace object on ui if it doesn't exist
+            ui.fancy = type('fancy', (object,), {})()
+        
+        # Provide a deep copy to prevent other plugins from modifying the internal state
+        ui.fancy._state = copy.deepcopy(self._state)
+        logging.debug("[Fancygotchi] Shared internal state with ui.fancy._state")
+
 
     def button_controller(self, cmd=None, screen=1):
         screen = int(screen)
@@ -4062,40 +4205,50 @@ fi # End of the Fancygotchi hack"""}]
             logging.error(traceback.format_exc())
 
     def on_ui_update(self, ui):
-        try:
-            if not self.dispHijack:
-                if hasattr(self, 'display_controller') and self.display_controller:
-                    self.display_controller.stop()
-                    self.display_controller = None
-                if self._config['ui']['display']['enabled']:
-                    if hasattr(ui, '_enabled') and not ui._enabled:
-                        ui._enabled = True
-                        ui.init_display()
-                        logging.debug("[Fancygotchi] Switched back to the original display.")
-            else:
-                ui._enabled = False
-                if hasattr(self, 'display_controller') and not self.display_controller:
+        try:            
+            if self.dispHijack:
+                if not (hasattr(self, 'display_controller') and self.display_controller and self.display_controller.is_running()):
                     logging.debug("[Fancygotchi] Starting display hijack.")
                     self.display_controller = FancyDisplay(self._config['ui']['display']['enabled'], self.fps, self._th_path)
                     self.display_controller.start(self._res, self.options.get('rotation', 0), self._color_mode[1])
-                    mode = self.display_config.get('mode', 'screen_saver')
-                    submode = self.display_config.get('sub_mode', 'show_logo')
-                    config = self.display_config.get('config', {})
+                    mode, submode, config = self.display_config.get('mode', 'screen_saver'), self.display_config.get('sub_mode', 'show_logo'), self.display_config.get('config', {})
                     self.display_controller.set_mode(mode, submode, config)
-                else:
-                    logging.debug("[Fancygotchi] Display controller is already running.")
- 
+                if hasattr(ui, '_enabled') and ui._enabled:
+                    ui._enabled = False
+            #elif not self.dispHijack:
+            elif not self.dispHijack and self._config['ui']['display']['enabled']:
+                if hasattr(self, 'display_controller') and self.display_controller and self.display_controller.is_running():
+                    self.display_controller.stop()
+                #if hasattr(ui, '_enabled') and not ui._enabled and self._config['ui']['display']['enabled'] and not ui.is_rebooting():
+                if hasattr(ui, '_enabled') and not ui._enabled:
+                    ui._enabled = True
+                    ui.init_display()
+
+
+            # Check for theme updates
+            if (hasattr(ui, '_update') and ui._update.get('update')) or self.refresh:
+                is_partial = hasattr(ui, '_update') and ui._update.get('partial', False)
+                self.log(f"Theme update triggered. Partial: {is_partial}, Refresh: {self.refresh}")
+                
+                 # Always process the update, regardless of the theme.
+                self.theme_update(ui)
+                
+                # Crucially, always reset the flags after processing to prevent loops.
+                if hasattr(ui, '_update'):
+                    ui._update['update'] = False
+                    #ui._update['partial'] = False
+                    ui._update['partial'] = False # Reset partial flag
+                    ui._update['dict_part'] = {}
+                    self.log("UI update flags reset.")
+                self.refresh = False
+               
 
             self._res = [ui._width, ui._height]
             self.second_screen = Image.new('RGBA', self._res, 'black')
-            if hasattr(ui, '_update') and isinstance(ui._update, dict) and ui._update.get('update', {'update': False, 'partial': False, 'dict_part':[]}) or self.refresh:
-                self.theme_update(ui)
-                if hasattr(ui, '_update'):
-                    ui._update['update'] = False
-                    ui._update['partial'] = False
-                    ui._update['dict_part'] = {}
-                self.refresh = False
+            
+            
             th = self._theme['theme']
+            self._share_state(ui)
             th_opt = th['options']
             th_widget = th['widget']
             rot = self.options['rotation']
@@ -4492,10 +4645,10 @@ fi # End of the Fancygotchi hack"""}]
         self._theme_name = 'Default'
         try:
             if not boot: self.log('Theme selector')
-            self._theme = copy.deepcopy(self._default)
             fancy_opt = config['main']['plugins']['Fancygotchi']
             self.options['rotation'] = fancy_opt.get('rotation', 0)
 
+            self._theme = copy.deepcopy(self._default)
             size = f'{self._res[0]}x{self._res[1]}'
             if 'theme' in fancy_opt and fancy_opt['theme'] != '':
                 theme = fancy_opt['theme']
@@ -4535,9 +4688,6 @@ fi # End of the Fancygotchi hack"""}]
                         self._theme = toml.load(f)
                 else:
                     self._theme = copy.deepcopy(self._default)
-
-            else:
-                self._theme = copy.deepcopy(self._default)
 
             if th_path:
                 css_src = os.path.join(th_path, 'style.css')
@@ -4705,6 +4855,59 @@ fi # End of the Fancygotchi hack"""}]
         if self._agent:
             self._agent._config = merge_config(self._config, pwnagotchi.config)
         save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
+    
+    def reload_voice(self, ui, lang=None):
+        """
+        Reloads the voice module and updates the UI's voice instance
+        without restarting the pwnagotchi service.
+        Accepts an optional 'lang' parameter to specify the voice language.
+        """
+        try:
+            self.log(f"Reloading voice module for language: '{lang}'")
+            
+            # If no language is specified, use the one from the main config
+            if lang is None:
+                lang = ui._config['main']['lang']
+
+            # If using fancyvoice, check for .mo and compile from .po if needed
+            if lang == 'fancyvoice':
+                localedir = os.path.join(self._pwny_root, 'locale')
+                mo_path = os.path.join(localedir, lang, 'LC_MESSAGES', 'voice.mo')
+                po_path = os.path.join(localedir, lang, 'LC_MESSAGES', 'voice.po')
+
+                if not os.path.exists(mo_path) and os.path.exists(po_path):
+                    self.log(f".mo file not found for '{lang}'. Compiling from .po file.")
+                    mo_data = _compile_po_to_mo(po_path)
+                    if mo_data:
+                        try:
+                            with open(mo_path, 'wb') as f:
+                                f.write(mo_data)
+                            self.log(f"Successfully compiled {po_path} to {mo_path}")
+                        except IOError as e:
+                            logging.error(f"[Fancygotchi] Could not write .mo file to {mo_path}: {e}")
+                elif not os.path.exists(po_path):
+                     logging.warning(f"[Fancygotchi] voice.po file not found at {po_path}. Cannot compile .mo file.")
+
+
+            # Crucial step: Clear the gettext cache to force it to find new .mo files.
+            # gettext.clearcache() was added in Python 3.8. This is a fallback for older versions.
+            if hasattr(gettext, 'clearcache'):
+                gettext.clearcache()
+            elif hasattr(gettext, '_translations'):
+                gettext._translations.clear()
+            
+            logging.debug("[Fancygotchi] gettext cache cleared.")
+
+
+            # Find the voice module in sys.modules
+            if 'pwnagotchi.voice' in sys.modules:
+                # Reload the module to pick up any changes
+                voice_module = importlib.reload(sys.modules['pwnagotchi.voice'])
+                # Create a new instance of the reloaded Voice class
+                ui._voice = voice_module.Voice(lang=lang)
+                self.log(f"Voice module reloaded successfully for language: '{lang}'")
+        except Exception as e:
+            logging.error(f"[Fancygotchi] Error reloading voice: {e}")
 
     def setup_menu(self, th_menu):
         if hasattr(self, 'fancy_menu'):
@@ -4742,13 +4945,12 @@ fi # End of the Fancygotchi hack"""}]
         if not self.ready:
             return
         th_opt = copy.deepcopy(self._default['theme']['options'])
-        self._i = 0
-        if not boot:self.log('Theme update')
-        if hasattr(ui, '_update') and ui.update:
-            if not ui._update['partial']:
+        if not boot:
+            self.log('Theme update')
+        if (hasattr(ui, '_update') and ui._update.get('update')) or self.refresh:
+            if not (hasattr(ui, '_update') and ui._update.get('partial', False)):
                 self._state = {}
 
-                
                 with open('/etc/pwnagotchi/config.toml', 'r') as f:
                     f_toml = toml.load(f)
                     try:
@@ -4763,53 +4965,81 @@ fi # End of the Fancygotchi hack"""}]
                         self.options['theme'] = ''
                         f_toml['main']['plugins']['Fancygotchi']['theme'] = self.options['theme']
 
-                #self.options['rotation'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('rotation', 0)
-                #self.options['theme'] = f_toml.get('main', {}).get('plugins', {}).get('Fancygotchi', {}).get('theme', '')
-
                 rot = self.options['rotation']
-                th_name = self.options['theme']
+                if self.options['theme'] == '':
+                    th_name = 'Default'
+                else:
+                    th_name = self.options['theme']
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['rotation'] = rot
                 pwnagotchi.config['main']['plugins']['Fancygotchi']['theme'] = th_name
                 pwnagotchi.config = merge_config(f_toml, pwnagotchi.config)
                 if self._agent:
                     self._agent._config = merge_config(f_toml, pwnagotchi.config)
-                logging.warning(f'theme name: {th_name}, rotation: {rot}')
+                self.log(f'theme name: {th_name}, rotation: {rot}')
                 save_config(pwnagotchi.config, '/etc/pwnagotchi/config.toml')
                 self.theme_selector(f_toml, boot)
-
+    
                 th = self._theme['theme']
                 th_opt = th['options']
                 th_widget = th['widget']
                 th_menu = th.get('menu', {})
+
+                # Start of Fancygotchi voice reload modification
+                self.log("Checking for custom voice in theme...")
+                locale_path = os.path.join(self._pwny_root, 'locale', 'fancyvoice')
+                self.log(f"Locale path: {locale_path}")
+                self.log(self._th_path)
+                self.log(f"Target locale path: {locale_path}")
+
+                # Check if the theme has a custom voice
+                if self._th_path and os.path.isdir(os.path.join(self._th_path, 'voice')) and th_name != 'Default':
+                    theme_voice_path = os.path.join(self._th_path, 'voice')
+                    self.log("Custom voice found. Applying 'fancyvoice'.")
+                    if os.path.islink(locale_path) or os.path.exists(locale_path):
+                        os.unlink(locale_path)
+                        logging.debug("[Fancygotchi] Removed existing fancyvoice symlink.")
+                    os.symlink(os.path.abspath(theme_voice_path), locale_path)
+                    self.reload_voice(ui, lang='fancyvoice')
+                else:
+                    self.log("No custom voice in theme. Reverting to system default voice.")
+                    if os.path.islink(locale_path):
+                        os.unlink(locale_path)
+                    self.reload_voice(ui, lang=ui._config['main']['lang'])
+                
+                self.setup_menu(th_menu)
             else:
-                self.log('Partial update')
+                self.log('Partial update received.')                
                 th = self._theme['theme']
+                menu_updated = False
+    
                 rot = self.options['rotation']
                 if 'options' in ui._update['dict_part']:
+                    self.log("Partial update: Applying options changes.")
                     th_options = ui._update['dict_part']['options']
                     th['options'].update(th_options)
                 if 'widget' in ui._update['dict_part']:
+                    self.log("Partial update: Applying widget changes.")
                     th_widget = ui._update['dict_part']['widget']
                     for widget_name, widget_data in th_widget.items():
                         if widget_name in th['widget']:
                             th['widget'][widget_name].update(widget_data)
                         else:
                             th['widget'][widget_name] = widget_data
-                th_menu = th.get('menu', {})
                 if 'menu' in ui._update['dict_part']:
+                    self.log("Partial update: Applying menu changes.")
+                    menu_updated = True
                     th_menu_update = ui._update['dict_part']['menu']
                     for menu_key, menu_data in th_menu_update.items():
-                        if menu_key in th_menu:
-                            th_menu[menu_key].update(menu_data)
+                        if menu_key in th.get('menu', {}):
+                            th['menu'][menu_key].update(menu_data)
                         else:
-                            th_menu[menu_key] = menu_data
-                    th['menu'] = th_menu
-                for key, value in ui._update['dict_part'].items():
-                    if key not in ['options', 'widget', 'menu']:
-                        th[key] = value
+                            th.setdefault('menu', {})[menu_key] = menu_data
+                
+                if menu_updated:
+                    th_menu = th.get('menu', {})
+                    self.setup_menu(th_menu)
+
                 th_opt = th['options']
-                th_widget = th['widget']
-                th_menu = th['menu']
                 
             if th_opt:
                 if 'font' in th_opt and th_opt['font'] != '':
@@ -4940,7 +5170,6 @@ fi # End of the Fancygotchi hack"""}]
                     else:
                         if os.path.exists(boot_anim_file):
                             os.remove(boot_anim_file)
-                self.setup_menu(th_menu)
 
     def theme_list(self):
         themes_path = os.path.join(self._plug_root, 'themes')
@@ -5379,7 +5608,7 @@ fi # End of the Fancygotchi hack"""}]
                     if tag == 0:
                         keys_to_delete.append(key)
                 for key in keys_to_delete:
-                    self.log(f'[Fancygotchi] remove widget: {key}')
+                    self.log(f'remove widget: {key}')
                     del self._state[key]
     
     def pwncanvas_creation(self, res):
@@ -5775,14 +6004,6 @@ fi # End of the Fancygotchi hack"""}]
                 self._icolor = 0
             else:
                 self._icolor += 1  
-        
-            if self._fg != '':
-                target_width = self._pwndata.size[0]
-                target_height = self._pwndata.size[1]
-                
-                # Force resize without maintaining aspect ratio
-                self._fg = self._fg.resize((target_width, target_height), Image.Resampling.LANCZOS)
-                self._pwndata.paste(self._fg, (0, 0), self._fg)
 
             if hasattr(self, 'fancy_menu'):
                 if getattr(self.fancy_menu, 'active', False): 
@@ -5790,6 +6011,12 @@ fi # End of the Fancygotchi hack"""}]
                     self.fancy_menu_img = menu_img
                     if self.fancy_menu_img is not None:
                         self._pwndata.paste(self.fancy_menu_img, (0, 0, self._pwndata.size[0], self._pwndata.size[1]), self.fancy_menu_img.split()[3])
+
+            if self._fg != '':
+                target_width = self._pwndata.size[0]
+                target_height = self._pwndata.size[1]
+                self._fg = self._fg.resize((target_width, target_height), Image.Resampling.LANCZOS)
+                self._pwndata.paste(self._fg, (0, 0), self._fg)
             self._pwncanvas = self._pwncanvas.convert("RGB")
             self._pwncanvas.paste(self._pwndata, (0, 0, self._pwndata.size[0], self._pwndata.size[1]),self._pwndata)
             self._pwncanvas = self._pwncanvas.convert("RGBA")
@@ -5802,7 +6029,7 @@ fi # End of the Fancygotchi hack"""}]
     def ui2(self):
         try:
             image = self.second_screen
-            if hasattr(self, 'display_controller') and self.display_config['second_screen_webui']:
+            if hasattr(self, 'display_controller') and self.display_config['second_screen_webui'] and self.dispHijack:
                 image = self.display_controller.screen()
             img_io = BytesIO()
             image.save(img_io, 'PNG')
@@ -6052,14 +6279,14 @@ fi # End of the Fancygotchi hack"""}]
                         action = request.args.get('action')
                         hardware = request.args.get('hardware')
                         scr = request.args.get('screen')
-                        logging.warning(f"screen: {screen}")
+                        self.log(f"screen: {screen}")
                         if scr is None:
                             if self.dispHijack:
                                 screen = 2
                         else:
                             screen = scr
-                        logging.warning(f"btn_cmd: {action}")
-                        logging.warning(f"hardware: {hardware}")
+                        self.log(f"btn_cmd: {action}")
+                        self.log(f"hardware: {hardware}")
                         
                         
                         
@@ -6081,7 +6308,7 @@ fi # End of the Fancygotchi hack"""}]
                         }
                         
                         btn_action = action_mapping.get(action)
-                        logging.info(f"btn_cmd: {btn_action}")
+                        self.log(f"btn_cmd: {btn_action}")
                         if btn_action:
                             self.button_controller({"action": btn_action}, screen=screen)
                             #self.navigate_fancymenu({"action": btn_action})
